@@ -54,6 +54,7 @@ Implementations out of the box:
 - ```BreakTemplateBlock```
 - ```CallTemplateBlock```
 - ```ContinueTemplateBlock```
+- ```CycleTemplateBlock```
 - ```ElseIfTemplateBlock```
 - ```ElseTemplateBlock```
 - ```ExtendsTemplateBlock```
@@ -70,6 +71,7 @@ The ```TemplateFunction``` interface is used to implement custom template functi
 Template functions can also be used as a modifier.
 
 Implementations out of the box:
+- ```CapitalizeTemplateFunction```
 - ```ConcatTemplateFunction```
 - ```EscapeTemplateFunction```
 - ```ReplaceTemplateFunction```

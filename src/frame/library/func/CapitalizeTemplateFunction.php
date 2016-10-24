@@ -9,11 +9,10 @@ use frame\library\TemplateContext;
 /**
  * String capitalze function
  *
- * Syntax: capitalize([<string>, [<length>, [<etc>, [<breakwords>]]]])
+ * Syntax: capitalize(<string>)
  *
- * {$result = truncate($string)}
- * {$result = truncate($string, 80, "...", false)}
- * {$result = $string|replace:50:"..."}
+ * {$result = capitalize($string)}
+ * {$result = $string|capitalize}
  */
 class CapitalizeTemplateFunction implements TemplateFunction {
 
@@ -25,9 +24,7 @@ class CapitalizeTemplateFunction implements TemplateFunction {
      */
     public function call(TemplateContext $context, array $arguments) {
         $string = '';
-        $length = 80;
-        $etc = '...';
-        $breakWords = false;
+        $type = 'all';
 
         foreach ($arguments as $index => $argument) {
             switch ($index) {
@@ -36,23 +33,22 @@ class CapitalizeTemplateFunction implements TemplateFunction {
 
                     break;
                 case 1:
-                    $length = $argument;
-
-                    break;
-                case 2:
-                    $etc = $argument;
-
-                    break;
-                case 3:
-                    $breakWords = $argument;
+                    $type = $argument;
 
                     break;
                 default:
-                    throw new RuntimeTemplateException('Could not call truncate: invalid argument count');
+                    throw new RuntimeTemplateException('Could not call capitalize: invalid argument count');
             }
         }
 
-        return StringHelper::truncate($string, $length, $etc, $breakWords);
+        switch ($type) {
+            case 'all':
+                return ucwords($string);
+            case 'first':
+                return ucfirst($string);
+            default:
+                throw new RuntimeTemplateException('Could not call capitalize: ' . $type . ' is not a valid capitalize type (all, first)');
+        }
     }
 
 }

@@ -10,7 +10,6 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
 
     public function providerRender() {
         return array(
-            // 0
             array(
                 array(
                     'index' => 'Hello, my name is {$name}',
@@ -20,8 +19,16 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                 ),
                 'Hello, my name is Joe',
             ),
+            array(
+                array(
+                    'index' => '<h1>{$title|capitalize}</h1><h2>{$title|capitalize:"first"}</h2>',
+                ),
+                array(
+                    'title' => 'my cool title',
+                ),
+                '<h1>My Cool Title</h1><h2>My cool title</h2>',
+            ),
             // if test
-            // 1
             array(
                 array(
                     'index' => '{if $value == 1}{$value = $value + 1}{else}{$value = $value - 1}{/if}{$value}',
@@ -31,7 +38,6 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                 ),
                 '2'
             ),
-            // 2
             array(
                 array(
                     'index' => '{if $value == 1}{$value = $value + 1}{else}{$value = $value - 1}{/if}{$value}',
@@ -42,7 +48,6 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                 '1'
             ),
             // foreach test
-            // 3
             array(
                 array(
                     'index' => '<ul>{foreach $names as $name loop $loop}<li>{$loop.index + 1} / {$loop.length}: {$name} {if $loop.first}[F]{elseif $loop.last}[L]{/if}</li>{/foreach}</ul>',
@@ -51,6 +56,16 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                     'names' => array('John', 'Jane', 'Mike'),
                 ),
                 '<ul><li>1 / 3: John [F]</li><li>2 / 3: Jane </li><li>3 / 3: Mike [L]</li></ul>'
+            ),
+            // cycle tests
+            array(
+                array(
+                    'index' => '<table>{foreach $names as $name}<tr class="{cycle ["light", "dark"]}"><td>{$name}</td></tr>{/foreach}</table>',
+                ),
+                array(
+                    'names' => array('John', 'Jane', 'Mike'),
+                ),
+                '<table><tr class="light"><td>John</td></tr><tr class="dark"><td>Jane</td></tr><tr class="light"><td>Mike</td></tr></table>'
             ),
             // macro tests
             array(

@@ -61,7 +61,7 @@ class EscapeTemplateFunction implements TemplateFunction {
 
                 break;
             default:
-                throw new RuntimeTemplateException('Could not call escape: ' . $type . ' is not a valid escape type');
+                throw new RuntimeTemplateException('Could not call escape: ' . $type . ' is not a valid escape type (html, url, safe)');
         }
 
         return $result;

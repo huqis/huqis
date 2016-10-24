@@ -5,12 +5,14 @@ namespace frame\library;
 use frame\library\block\AssignTemplateBlock;
 use frame\library\block\BlockTemplateBlock;
 use frame\library\block\CallTemplateBlock;
+use frame\library\block\CycleTemplateBlock;
 use frame\library\block\ExtendsTemplateBlock;
 use frame\library\block\ForeachTemplateBlock;
 use frame\library\block\IfTemplateBlock;
 use frame\library\block\IncludeTemplateBlock;
 use frame\library\block\LiteralTemplateBlock;
 use frame\library\block\MacroTemplateBlock;
+use frame\library\func\CapitalizeTemplateFunction;
 use frame\library\func\ConcatTemplateFunction;
 use frame\library\func\EscapeTemplateFunction;
 use frame\library\func\ExtendTemplateFunction;
@@ -74,6 +76,7 @@ class DefaultTemplateContext extends TemplateContext {
         $this->setExpressionOperator('<', new GenericExpressionOperator('<'));
         $this->setExpressionOperator('~=', new RegexExpressionOperator());
 
+        $this->setFunction('capitalize', new CapitalizeTemplateFunction());
         $this->setFunction('concat', new ConcatTemplateFunction());
         $this->setFunction('escape', new EscapeTemplateFunction());
         $this->setFunction('_extends', new ExtendTemplateFunction());
@@ -84,6 +87,7 @@ class DefaultTemplateContext extends TemplateContext {
         $this->setBlock('assign', new AssignTemplateBlock());
         $this->setBlock('block', new BlockTemplateBlock());
         $this->setBlock('call', new CallTemplateBlock());
+        $this->setBlock('cycle', new CycleTemplateBlock());
         $this->setBlock('extends', new ExtendsTemplateBlock());
         $this->setBlock('foreach', new ForeachTemplateBlock());
         $this->setBlock('if', new IfTemplateBlock());
