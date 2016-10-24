@@ -1,0 +1,23 @@
+{
+    "name": "frame/frame",
+    "description": "Frame template engine",
+    "type": "library",
+    "keywords": "templating",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Joris Vandeweerd",
+            "email": "kayalion@kayalion.net"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "frame\\library\\": ["src/"]
+        }
+    },
+    "autoload-dev": {
+        "psr-0": {
+            "frame\\library\\": ["test/src/"]
+        }
+    }
+}
