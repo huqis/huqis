@@ -102,7 +102,7 @@ class MacroTemplateBlock implements TemplateBlock {
 
         $buffer->setRecordOutput(true);
         $buffer->appendCode(' };');
-        $buffer->appendCode('$macro' . $this->counter . ' = new MacroTemplateFunction($macro' . $this->counter . $arguments . ');');
+        $buffer->appendCode('$macro' . $this->counter . ' = new \frame\library\func\MacroTemplateFunction($macro' . $this->counter . $arguments . ');');
         $buffer->appendCode('$context->setFunction(\'' . $name . '\', $macro' . $this->counter . ');');
     }
 

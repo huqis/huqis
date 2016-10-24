@@ -203,7 +203,6 @@ class TemplateEngine {
         $this->compiler->setContext($context);
 
         $code = '';
-        $code .= 'use frame\\library\\func\\MacroTemplateFunction;';
         $code .= 'use frame\\library\\TemplateContext;';
         $code .= 'function frameTemplate' . $runtimeId .'(TemplateContext $context) {';
         $code .= $this->compiler->compile($template);
