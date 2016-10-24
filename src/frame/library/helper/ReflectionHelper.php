@@ -125,7 +125,11 @@ class ReflectionHelper {
     private function setArrayProperty(array &$data, $name, $value) {
         $positionOpen = strpos($name, '[');
         if ($positionOpen === false) {
-            $data[$name] = $value;
+            if ($value !== null) {
+                $data[$name] = $value;
+            } elseif (isset($data[$name])) {
+                unset($data[$name]);
+            }
 
             return;
         } elseif ($positionOpen === 0) {
@@ -144,6 +148,10 @@ class ReflectionHelper {
             if (isset($array[$token]) && is_array($array[$token])) {
                 $array = &$array[$token];
             } else {
+                if ($value === null) {
+                    return;
+                }
+
                 $previousArray[$token] = [];
                 $array = &$previousArray[$token];
             }
@@ -152,7 +160,11 @@ class ReflectionHelper {
             $token = $this->parseArrayToken(array_shift($tokens), $name);
         }
 
-        $array[$token] = $value;
+        if ($value !== null) {
+            $array[$token] = $value;
+        } elseif (isset($data[$name])) {
+            unset($array[$token]);
+        }
     }
 
     /**

@@ -40,6 +40,12 @@ class TemplateOutputBuffer {
     protected $buffers = array();
 
     /**
+     * Name of the defined blocks
+     * @var array
+     */
+    protected $blocks = array();
+
+    /**
      * Name of the buffers to append indexed on key
      * @var array
      */
@@ -59,6 +65,13 @@ class TemplateOutputBuffer {
         $buffer = $this->buffer;
         if (!$this->isPhp) {
             $buffer .= '<?php ';
+        }
+
+        foreach ($this->blocks as $name => $null) {
+            $buffer = str_replace('<?php /*block-' . $name . '-start*/ ?>', '', $buffer);
+            $buffer = str_replace('<?php /*block-' . $name . '-end*/ ?>', '', $buffer);
+            $buffer = str_replace('/*block-' . $name . '-start*/', '', $buffer);
+            $buffer = str_replace('/*block-' . $name . '-end*/', '', $buffer);
         }
 
         return $buffer;
@@ -244,6 +257,8 @@ class TemplateOutputBuffer {
         if (!isset($this->buffers[$name])) {
             throw new CompileTemplateException('Cannot end block ' . $name . ': block is not opened');
         }
+
+        $this->blocks[$name] = true;
 
         $block = $this->buffer;
         if ($this->isPhp) {

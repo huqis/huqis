@@ -207,7 +207,7 @@ class TemplateContext {
 
         if ($parent) {
             if ($keepVariables) {
-                $parent->setVariables($this->variables);
+                $parent->setVariables($this->variables, false);
             }
 
             $parent->setFunctions($this->functions);
@@ -221,6 +221,21 @@ class TemplateContext {
     //
 
     /**
+     * Sets multiple variables at once
+     * @param array $variables Array with the name as key and the variable as
+     * value
+     * @param boolean $process Set to false to work without tokenizing the
+     * variable name
+     * @return null
+     * @see setVariable
+     */
+    public function setVariables(array $variables, $process = true) {
+        foreach ($variables as $variable => $value) {
+            $this->setVariable($variable, $value, $process);
+        }
+    }
+
+    /**
      * Sets a variable to the context
      * @param string $name Name of the variable. The name is tokenized on dot
      * (.) to handle nested arrays or objects. Setters can be used
@@ -229,12 +244,16 @@ class TemplateContext {
      * $person->name = $value or $person['name'] = $value depending on the value
      * of $person
      * @param mixed $value Value for the variable
+     * @param boolean $process Set to false to work without tokenizing the
+     * variable name
      * @return null
      */
-    public function setVariable($name, $value) {
-        if (strpos($name, '.') === false) {
+    public function setVariable($name, $value, $process = true) {
+        if ($process === false || strpos($name, '.') === false) {
             // no dotted name
-            $this->variables[$name] = $value;
+            if ($value !== null) {
+                $this->variables[$name] = $value;
+            }
 
             return;
         }
@@ -244,7 +263,9 @@ class TemplateContext {
 
         if (!isset($this->variables[$name])) {
             // new variable
-            $this->variables[$name] = $this->createVariable($tokens, $value);
+            if ($value !== null) {
+                $this->variables[$name] = $this->createVariable($tokens, $value);
+            }
 
             return;
         }
@@ -322,10 +343,12 @@ class TemplateContext {
      * transparantly using the property name instead of the method.
      * eg person.name could translate to $person->getName(), $person->name or
      * $person['name'] depending on the value of $person
+     * @param boolean $process Set to false to work without tokenizing the
+     * variable name
      * @param mixed $default Default value for when the variable is not set
      * @return null
      */
-    public function getVariable($name, $default = null) {
+    public function getVariable($name, $process = false, $default = null) {
         if (strpos($name, '.') === false) {
             // no dotted name
             if (!isset($this->variables[$name])) {
@@ -353,25 +376,6 @@ class TemplateContext {
         }
 
         return $value;
-    }
-
-    /**
-     * Sets the variables of this context
-     * @param array $variables Variables to set
-     * @param boolean $processDot Set to true to process the dotted (.) names.
-     * This also means appending the variables instead of overriding
-     * @return null
-     */
-    public function setVariables(array $variables, $processDot = false) {
-        if (!$processDot) {
-            $this->variables = $variables;
-
-            return;
-        }
-
-        foreach ($variables as $name => $value) {
-            $this->setVariable($name, $value);
-        }
     }
 
     /**

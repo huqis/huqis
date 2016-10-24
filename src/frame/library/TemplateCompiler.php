@@ -652,7 +652,9 @@ class TemplateCompiler {
 
     private function compileVariable($variable, $strict = true) {
         try {
-            $result = '$context->getVariable(\'' . $this->parseName($variable) . '\')';
+            $name = $this->parseName($variable);
+
+            $result = $this->compileGetVariable($name);
 
             return $this->compileOutput($result, $strict);
         } catch (CompileTemplateException $exception) {
@@ -693,7 +695,7 @@ class TemplateCompiler {
                     } else {
                         $name = $this->parseName($value);
 
-                        $result = '$context->getVariable(\'' . $name . '\')[' . $this->compileExpression($array) . ']';
+                        $result = $this->compileGetVariable($name) . '[' . $this->compileExpression($array) . ']';
                     }
 
                     $array = '';
@@ -733,13 +735,13 @@ class TemplateCompiler {
                         $nameTokens = explode(SyntaxSymbol::VARIABLE_SEPARATOR, $name);
                         if (count($nameTokens) === 1) {
                             // dynamic function call
-                            $result = '$context->call($context->getVariable(\'' . $name . '\'), [' . $this->compileFunction($nested) . '])';
+                            $result = '$context->call(' . $this->compileGetVariable($name) . ', [' . $this->compileFunction($nested) . '])';
                         } else {
                             // straight function call
                             $method = array_pop($nameTokens);
                             $name = implode(SyntaxSymbol::VARIABLE_SEPARATOR, $nameTokens);
 
-                            $result = '$context->getVariable(\'' . $name . '\')->' . $method . '(' . $this->compileFunction($nested) . ')';
+                            $result = $this->compileGetVariable($name) . '->' . $method . '(' . $this->compileFunction($nested) . ')';
                         }
                     }
 
@@ -768,7 +770,7 @@ class TemplateCompiler {
 
         // apply modifiers and output
         if ($result === null) {
-            $result = '$context->getVariable(\'' . $this->parseName($value) . '\')';
+            $result = $this->compileGetVariable($this->parseName($value));
         }
         if ($modifiers) {
             $result = '$context->applyModifiers(' . $result . ', [' . implode(', ', $modifiers) . '])';
@@ -935,6 +937,21 @@ class TemplateCompiler {
         }
 
         throw new CompileTemplateException('Could not compile scalar value: "' . $value . '" is not a valid scalar value syntax');
+    }
+
+    /**
+     * Compiles a get variable call
+     * @param string $name Name of the variable
+     * @return string
+     */
+    private function compileGetVariable($name) {
+        $suffix = '';
+
+        if (strpos($name, SyntaxSymbol::VARIABLE_SEPARATOR) === false) {
+            $suffix = ', false';
+        }
+
+        return '$context->getVariable(\'' . $name . '\'' . $suffix . ')';
     }
 
     /**

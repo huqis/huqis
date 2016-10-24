@@ -92,16 +92,18 @@ class ForeachTemplateBlock implements TemplateBlock {
 
         // compile foreach into the output buffer
         $this->counter++;
+        $hasLoop = isset($parts[SyntaxSymbol::FOREACH_LOOP]);
 
         $buffer->appendCode('$foreach' . $this->counter . ' = ' . $parts['iterator'] . ';');
         $buffer->appendCode('if ($foreach' . $this->counter . ') { ');
-        $buffer->appendCode('$foreach' . $this->counter . 'Index = 0;');
-        $buffer->appendCode('$foreach' . $this->counter . 'Length = count($foreach' . $this->counter . ');');
+        if ($hasLoop) {
+            $buffer->appendCode('$foreach' . $this->counter . 'Index = 0;');
+            $buffer->appendCode('$foreach' . $this->counter . 'Length = count($foreach' . $this->counter . ');');
+        }
 
-        $buffer->appendCode('foreach ($foreach' . $this->counter . ' as ' . (isset($parts[SyntaxSymbol::FOREACH_KEY]) ? '$foreach' . $this->counter . 'Key => ' : '') . '$foreach' . $this->counter . 'Value) ');
-        $buffer->startCodeBlock();
+        $buffer->appendCode('foreach ($foreach' . $this->counter . ' as ' . (isset($parts[SyntaxSymbol::FOREACH_KEY]) ? '$foreach' . $this->counter . 'Key => ' : '') . '$foreach' . $this->counter . 'Value) {');
 
-        if (isset($parts[SyntaxSymbol::FOREACH_LOOP])) {
+        if ($hasLoop) {
             $buffer->appendCode('$context->setVariable(\'' . $parts[SyntaxSymbol::FOREACH_LOOP] . '\', [');
             $buffer->appendCode('"index" => $foreach' . $this->counter . 'Index,');
             $buffer->appendCode('"revindex" => $foreach' . $this->counter . 'Length - $foreach' . $this->counter . 'Index,');
@@ -129,8 +131,15 @@ class ForeachTemplateBlock implements TemplateBlock {
         $compiler->subcompile($body);
         $compiler->setContext($context->getParent());
 
-        $buffer->endCodeBlock(true);
-        $buffer->appendCode('} ');
+
+        $buffer->appendCode('}');
+
+        if ($hasLoop) {
+            $buffer->appendCode('$context->setVariable(\'' . $parts[SyntaxSymbol::FOREACH_LOOP] . '\', null);');
+        }
+
+        $buffer->appendCode('}');
+        $buffer->appendCode('unset($foreach' . $this->counter . ');');
     }
 
 }

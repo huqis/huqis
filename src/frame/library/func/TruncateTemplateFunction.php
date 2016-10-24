@@ -13,7 +13,7 @@ use frame\library\TemplateContext;
  *
  * {$result = truncate($string)}
  * {$result = truncate($string, 80, "...", false)}
- * {$result = $string|replace:50:"..."}
+ * {$result = $string|truncate:50:"..."}
  */
 class TruncateTemplateFunction implements TemplateFunction {
 

@@ -38,9 +38,7 @@ class ElseTemplateBlock implements TemplateBlock {
         $buffer = $compiler->getOutputBuffer();
         $context = $compiler->getContext();
 
-        $buffer->endCodeBlock(true);
-        $buffer->appendCode(' else ');
-        $buffer->startCodeBlock();
+        $buffer->appendCode('} else {');
 
         $compiler->setContext($context->getParent()->createChild());
     }

@@ -14,11 +14,14 @@ use frame\library\block\LiteralTemplateBlock;
 use frame\library\block\MacroTemplateBlock;
 use frame\library\func\CapitalizeTemplateFunction;
 use frame\library\func\ConcatTemplateFunction;
+use frame\library\func\DefaultTemplateFunction;
 use frame\library\func\EscapeTemplateFunction;
 use frame\library\func\ExtendTemplateFunction;
 use frame\library\func\IncludeTemplateFunction;
+use frame\library\func\LowerTemplateFunction;
 use frame\library\func\ReplaceTemplateFunction;
 use frame\library\func\TruncateTemplateFunction;
+use frame\library\func\UpperTemplateFunction;
 use frame\library\operator\expression\AssignExpressionOperator;
 use frame\library\operator\expression\GenericExpressionOperator;
 use frame\library\operator\expression\RegexExpressionOperator;
@@ -78,11 +81,14 @@ class DefaultTemplateContext extends TemplateContext {
 
         $this->setFunction('capitalize', new CapitalizeTemplateFunction());
         $this->setFunction('concat', new ConcatTemplateFunction());
+        $this->setFunction('default', new DefaultTemplateFunction());
         $this->setFunction('escape', new EscapeTemplateFunction());
         $this->setFunction('_extends', new ExtendTemplateFunction());
         $this->setFunction('_include', new IncludeTemplateFunction());
+        $this->setFunction('lower', new LowerTemplateFunction());
         $this->setFunction('replace', new ReplaceTemplateFunction());
         $this->setFunction('truncate', new TruncateTemplateFunction());
+        $this->setFunction('upper', new UpperTemplateFunction());
 
         $this->setBlock('assign', new AssignTemplateBlock());
         $this->setBlock('block', new BlockTemplateBlock());

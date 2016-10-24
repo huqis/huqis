@@ -29,17 +29,17 @@ class EscapeTemplateFunction implements TemplateFunction {
             throw new RuntimeTemplateException('Could not call escape: invalid argument count');
         }
 
-        $string = '';
-        $type = 'html';
+        $value = '';
+        $format = 'html';
 
         foreach ($arguments as $index => $argument) {
             switch ($index) {
                 case 0:
-                    $string = $argument;
+                    $value = $argument;
 
                     break;
                 case 1:
-                    $type = $argument;
+                    $format = $argument;
 
                     break;
                 default:
@@ -47,17 +47,21 @@ class EscapeTemplateFunction implements TemplateFunction {
             }
         }
 
-        switch ($type) {
+        switch ($format) {
             case 'html':
-                $result = htmlspecialchars($string, ENT_QUOTES);
+                $result = htmlspecialchars($value, ENT_QUOTES);
 
                 break;
             case 'url':
-                $result = rawurlencode($string);
+                if (is_array($value)) {
+                    $result = http_build_query($value);
+                } else {
+                    $result = rawurlencode($value);
+                }
 
                 break;
-            case 'safe':
-                $result = StringHelper::safeString($string);
+            case 'slug':
+                $result = StringHelper::safeString($value);
 
                 break;
             default:

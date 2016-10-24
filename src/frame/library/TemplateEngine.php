@@ -89,7 +89,7 @@ class TemplateEngine {
         }
 
         if ($variables) {
-            $context->setVariables($variables);
+            $context->setVariables($variables, false);
         }
 
         $runtimeId = $this->generateRuntimeId($resource);
@@ -203,8 +203,10 @@ class TemplateEngine {
         $this->compiler->setContext($context);
 
         $code = '';
+        $code .= "\n";
         $code .= 'use frame\\library\\TemplateContext;';
-        $code .= 'function frameTemplate' . $runtimeId .'(TemplateContext $context) {';
+        $code .= "\n\n";
+        $code .= 'function frameTemplate' . $runtimeId .'(TemplateContext $context) {' . "\n";
         $code .= $this->compiler->compile($template);
         $code .= '}';
 
