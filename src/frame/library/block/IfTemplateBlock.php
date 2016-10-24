@@ -38,8 +38,7 @@ class IfTemplateBlock implements TemplateBlock {
         $buffer = $compiler->getOutputBuffer();
         $context = $compiler->getContext();
 
-        $buffer->appendCode('if (' . $compiler->compileCondition($signature) . ') ');
-        $buffer->startCodeBlock();
+        $buffer->appendCode('if (' . $compiler->compileCondition($signature) . ') {');
 
         $context = $context->createChild();
         $context->setBlock('elseif', new ElseIfTemplateBlock());
@@ -49,7 +48,7 @@ class IfTemplateBlock implements TemplateBlock {
         $compiler->subcompile($body);
         $compiler->setContext($context->getParent());
 
-        $buffer->endCodeBlock(true);
+        $buffer->appendCode('}');
     }
 
 }

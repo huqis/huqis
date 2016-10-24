@@ -92,6 +92,12 @@ class SyntaxSymbol extends NestedSymbol {
     const FOREACH_LOOP = ' loop ';
 
     /**
+     * Symbol to add arguments to an include
+     * @var string
+     */
+    const INCLUDE_WITH = ' with ';
+
+    /**
      * Symbol to separate function arguments
      * @var string
      */

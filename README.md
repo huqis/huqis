@@ -73,9 +73,12 @@ Template functions can also be used as a modifier.
 Implementations out of the box:
 - ```CapitalizeTemplateFunction```
 - ```ConcatTemplateFunction```
+- ```DefaultTemplateFunction```
 - ```EscapeTemplateFunction```
+- ```LowerTemplateFunction```
 - ```ReplaceTemplateFunction```
 - ```TruncateTemplateFunction```
+- ```UpperTemplateFunction```
 
 ### ExpressionOperator
 

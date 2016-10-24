@@ -6,14 +6,14 @@ use frame\library\exception\RuntimeTemplateException;
 use frame\library\TemplateContext;
 
 /**
- * Simple search and replace function
+ * Transform a string to lower case characters.
  *
- * Syntax: replace(<string>, <search>, <replace>)
+ * Syntax: lower(<string>)
  *
- * {$result = replace($string, "search", "replace")}
- * {$result = $string|replace:"search":"replace"}
+ * {$result = lower($string)}
+ * {$result = $string|lower}
  */
-class ReplaceTemplateFunction implements TemplateFunction {
+class LowerTemplateFunction implements TemplateFunction {
 
     /**
      * Calls the function with the provided context and arguments
@@ -22,11 +22,11 @@ class ReplaceTemplateFunction implements TemplateFunction {
      * @return mixed Result of the function
      */
     public function call(TemplateContext $context, array $arguments) {
-        if (count($arguments) !== 3) {
-            throw new RuntimeTemplateException('Could not call replace: invalid argument count');
+        if (count($arguments) !== 1) {
+            throw new RuntimeTemplateException('Could not call lower: invalid argument count');
         }
 
-        return str_replace($arguments[1], $arguments[2], $arguments[0]);
+        return strtolower($arguments[0]);
     }
 
 }

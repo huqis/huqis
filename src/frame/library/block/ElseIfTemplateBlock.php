@@ -38,9 +38,7 @@ class ElseIfTemplateBlock implements TemplateBlock {
         $buffer = $compiler->getOutputBuffer();
         $context = $compiler->getContext();
 
-        $buffer->endCodeBlock(true);
-        $buffer->appendCode(' elseif (' . $compiler->compileCondition($signature) . ') ');
-        $buffer->startCodeBlock();
+        $buffer->appendCode('} elseif (' . $compiler->compileCondition($signature) . ') {');
 
         $context = $context->getParent()->createChild();
         $context->setBlock('elseif', new ElseIfTemplateBlock());
