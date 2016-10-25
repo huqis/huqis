@@ -255,7 +255,7 @@ class TemplateEngine {
      * @return string
      */
     private function generateResourceId(TemplateContext $context, $resource, $append = null) {
-        return substr(md5($resource . '#' . $append), 0, 10) . '-' . StringHelper::safeString($resource);
+        return substr(crc32($resource . '#' . $append), 0, 10) . '-' . str_replace('/', '-', $resource);
     }
 
     /**
@@ -263,7 +263,7 @@ class TemplateEngine {
      * @return string
      */
     private function generateRuntimeId($resource) {
-        return StringHelper::generate() . md5(microtime() . $resource);
+        return StringHelper::generate() . crc32(microtime() . $resource);
     }
 
 }
