@@ -46,9 +46,11 @@ class TemplateEngine {
      * @param \frame\library\cache\TemplateCache $cache Instance of the cache
      * @return null
      */
-    public function __construct(TemplateContext $context) {
+    public function __construct(TemplateContext $context, TemplateCache $cache = null) {
         $this->context = $context;
         $this->context->setEngine($this);
+
+        $this->setCache($cache);
 
         $this->compiler = new TemplateCompiler($this->context);
         $this->loadedCode = [];
@@ -200,6 +202,8 @@ class TemplateEngine {
      * @return string Compiled template
      */
     private function compile(TemplateContext $context, $template, $runtimeId) {
+        $context->preCompile();
+
         $this->compiler->setContext($context);
 
         $code = '';

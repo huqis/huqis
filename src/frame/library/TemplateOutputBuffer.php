@@ -10,12 +10,6 @@ use frame\library\exception\CompileTemplateException;
 class TemplateOutputBuffer {
 
     /**
-     * Flag to see if the current mode is PHP mode
-     * @var boolean
-     */
-    protected $isPhp = true;
-
-    /**
      * Flag to see the current output buffer has actual output
      * @var boolean
      */
@@ -63,13 +57,8 @@ class TemplateOutputBuffer {
      */
     public function __toString() {
         $buffer = $this->buffer;
-        if (!$this->isPhp) {
-            $buffer .= '<?php ';
-        }
 
         foreach ($this->blocks as $name => $null) {
-            $buffer = str_replace('<?php /*block-' . $name . '-start*/ ?>', '', $buffer);
-            $buffer = str_replace('<?php /*block-' . $name . '-end*/ ?>', '', $buffer);
             $buffer = str_replace('/*block-' . $name . '-start*/', '', $buffer);
             $buffer = str_replace('/*block-' . $name . '-end*/', '', $buffer);
         }
@@ -116,17 +105,11 @@ class TemplateOutputBuffer {
      * @see appendCode
      */
     public function appendText($text) {
-        if ($this->isPhp) {
-            // switch to text mode
-            $this->isPhp = false;
-            $this->buffer .= ' ?>';
-        }
-
         if ($this->recordOutput) {
             $this->hasOutput = true;
         }
 
-        $this->buffer .= $text;
+        $this->buffer .= 'echo "' . addcslashes($text, '"$\\') . '";';
     }
 
     /**
@@ -136,12 +119,6 @@ class TemplateOutputBuffer {
      * @see appendText
      */
     public function appendCode($code) {
-        if (!$this->isPhp) {
-            // switch to php mode
-            $this->isPhp = true;
-            $this->buffer .= '<?php ';
-        }
-
         if ($this->recordOutput && substr($code, 0, 5) == 'echo ') {
             $this->hasOutput = true;
         }
@@ -214,13 +191,9 @@ class TemplateOutputBuffer {
             throw new CompileTemplateException('Cannot start a block ' . $name . ': block has the same name as a parent block');
         }
 
-        $this->buffers[$name] = array(
-            'buffer' => $this->buffer,
-            'isPhp' => $this->isPhp,
-        );
+        $this->buffers[$name] = $this->buffer;
 
         $this->buffer = '';
-        $this->isPhp = false;
     }
 
     /**
@@ -261,18 +234,14 @@ class TemplateOutputBuffer {
         $this->blocks[$name] = true;
 
         $block = $this->buffer;
-        if ($this->isPhp) {
-            $block .= ' ?>';
-        }
 
         // reset to parent buffer
-        $this->buffer = $this->buffers[$name]['buffer'];
-        $this->isPhp = $this->buffers[$name]['isPhp'];
+        $this->buffer = $this->buffers[$name];
         unset($this->buffers[$name]);
 
         // look for the block
-        $open = '/*block-' . $name . '-start*/ ?>';
-        $close = '<?php /*block-' . $name . '-end*/ ?>';
+        $open = '/*block-' . $name . '-start*/';
+        $close = '/*block-' . $name . '-end*/';
 
         $positionOpen = strpos($this->buffer, $open);
         $positionClose = strpos($this->buffer, $close);
@@ -300,9 +269,6 @@ class TemplateOutputBuffer {
         } else {
             // new block, just append it
             $this->appendCode($open . $block . $close);
-
-            // a block end with closing php, so turn it off
-            $this->isPhp = false;
         }
     }
 

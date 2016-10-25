@@ -30,6 +30,12 @@ class TemplateCompiler {
     private $context;
 
     /**
+     * Flag to check if the compiler is initialized
+     * @var boolean
+     */
+    private $isInitialized;
+
+    /**
      * Flag to check if a compile function is running
      * @var boolean
      */
@@ -47,27 +53,9 @@ class TemplateCompiler {
      * @return null
      */
     public function __construct(TemplateContext $context) {
-        $this->syntaxTokenizer = new SyntaxTokenizer();
-        $this->valueTokenizer = new ValueTokenizer();
-        $this->variableTokenizer = new VariableTokenizer();
-        $this->modifierTokenizer = new ModifierTokenizer();
-        $this->functionTokenizer = new FunctionTokenizer();
-        $this->conditionTokenizer = new ConditionTokenizer();
-        $this->expressionTokenizer = new ExpressionTokenizer();
-        $this->arrayTokenizer = new ArrayTokenizer();
-
-        $logicalOperators = $context->getLogicalOperators();
-        foreach ($logicalOperators as $syntax => $logicalOperator) {
-            $this->conditionTokenizer->setOperator($syntax);
-        }
-
-        $expressionOperators = $context->getExpressionOperators();
-        foreach ($expressionOperators as $syntax => $expressionOperator) {
-            $this->expressionTokenizer->setOperator($syntax);
-        }
-
         $this->context = $context;
         $this->buffer = null;
+        $this->isInitialized = false;
         $this->isCompiling = false;
     }
 
@@ -98,6 +86,37 @@ class TemplateCompiler {
     }
 
     /**
+     * Initializes the compiler the first time it's used
+     * @return null
+     */
+    private function initialize() {
+        if ($this->isInitialized) {
+            return;
+        }
+
+        $this->syntaxTokenizer = new SyntaxTokenizer();
+        $this->valueTokenizer = new ValueTokenizer();
+        $this->variableTokenizer = new VariableTokenizer();
+        $this->modifierTokenizer = new ModifierTokenizer();
+        $this->arrayTokenizer = new ArrayTokenizer();
+        $this->functionTokenizer = new FunctionTokenizer();
+        $this->expressionTokenizer = new ExpressionTokenizer();
+        $this->conditionTokenizer = new ConditionTokenizer();
+
+        $expressionOperators = $this->context->getExpressionOperators();
+        foreach ($expressionOperators as $syntax => $expressionOperator) {
+            $this->expressionTokenizer->setOperator($syntax);
+        }
+
+        $logicalOperators = $this->context->getLogicalOperators();
+        foreach ($logicalOperators as $syntax => $logicalOperator) {
+            $this->conditionTokenizer->setOperator($syntax);
+        }
+
+        $this->isInitialized = true;
+    }
+
+    /**
      * Compiles the provided template
      * @param string $template Template code to compile
      * @return string PHP code of the compiled template
@@ -109,6 +128,8 @@ class TemplateCompiler {
         if ($this->isCompiling) {
             throw new CompileTemplateException('Could not compile the provided template: already compiling');
         }
+
+        $this->initialize();
 
         $this->isCompiling = true;
         $this->buffer = new TemplateOutputBuffer();

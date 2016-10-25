@@ -2,19 +2,24 @@
 
 Frame is a PHP template engine with _&lt;insert great features talk&gt;_.
 
-Check a basic example of the template syntax:
+__Note: this engine is still under development, syntax may change__
+
+## Getting Started
+
+Check this basic example of the [template syntax](manual/syntax.md):
 
 ```html
 <html>
     <head>
-        <title>{$title}</title>
+        <title>{block "title"}{$title|lower|capitalize}{/block}</title>
     </head>
     <body>
         <table>
-        {foreach $entries as $entry}
-            <tr>
+        {foreach $entries as $entry key $index loop $loop}
+            <tr class="entry{if $loop.first} first{elseif $loop.last} last{/if}">
+                <td>{$loop.index + 1}</td>
                 <td>{$entry.id}</td>
-                <td>{$entry.name|escape}</td>
+                <td>{$entry.name|truncate|escape}</td>
             </tr>
         {/foreach}
         </table>
@@ -36,8 +41,7 @@ $cache = new DirectoryTemplateCache(__DIR__ . '/cache');
 $resourceHandler = new DirectoryTemplateResourceHandler(__DIR__ . '/templates');
 $context = new DefaultTemplateContext($resourceHandler);
 
-$engine = new TemplateEngine($context);
-$engine->setCache($directoryCache);
+$engine = new TemplateEngine($context, $cache);
 
 echo $engine->render('my-template.tpl', ['title' => 'My dynamic title']);
 ```
@@ -254,13 +258,11 @@ function createTemplateEngine() {
     // allow PHP functions
     $context->setAllowPhpFunctions(true);
 
-    // our context is initialized, create the engine
-    $engine = new TemplateEngine($context);
-    
     // use a cache to store compiled templates
     $directoryCache = new DirectoryTemplateCache(__DIR__ . '/cache');
-
-    $engine->setCache($directoryCache);
+    
+    // our context is initialized, create the engine
+    $engine = new TemplateEngine($context, $directoryCache);
 
     return $engine;
 }

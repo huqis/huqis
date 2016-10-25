@@ -56,13 +56,13 @@ class TemplateContext {
      * Array with the available blocks
      * @var array
      */
-    private $blocks;
+    protected $blocks;
 
     /**
      * Array with the available functions
      * @var array
      */
-    private $functions;
+    protected $functions;
 
     /**
      * Array with the available logical operators
@@ -183,6 +183,14 @@ class TemplateContext {
         return $this->engine;
     }
 
+    /**
+     * Hook invoked before compiling
+     * @return null
+     */
+    public function preCompile() {
+
+    }
+
     //
     // SCOPE METHODS
     //
@@ -192,7 +200,7 @@ class TemplateContext {
      * @return \frame\library\TemplateContext
      */
     public function createChild() {
-        return new self(null, null, $this);
+        return new static(null, null, $this);
     }
 
     /**

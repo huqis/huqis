@@ -72,7 +72,7 @@ class CallTemplateBlock implements TemplateBlock {
                 if ($needsSeparator && $argument === SyntaxSymbol::FUNCTION_ARGUMENT) {
                     $needsSeparator = false;
                 } elseif (!$needsSeparator && $argument !== SyntaxSymbol::FUNCTION_ARGUMENT) {
-                    if ($argument === '$_call') {
+                    if ($argument === '$call') {
                         // the $_call argument is the body of the block,
                         // rendered through a closure
                         $arguments[] = '$_call($context)';
@@ -100,6 +100,7 @@ class CallTemplateBlock implements TemplateBlock {
 
         $buffer->endBufferBlock();
         $buffer->appendCode(' };');
+        $buffer->appendCode('unset($_call);');
 
         // call the macro function with the compiled arguments
         if ($arguments) {

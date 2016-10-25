@@ -36,11 +36,7 @@ class ReturnTemplateBlock implements TemplateBlock {
      */
     public function compile(TemplateCompiler $compiler, $signature, $body) {
         $buffer = $compiler->getOutputBuffer();
-        $buffer->appendCode('return ');
-
-        $compiler->subcompile(SyntaxSymbol::SYNTAX_OPEN . $signature . SyntaxSymbol::SYNTAX_CLOSE, true);
-
-        $buffer->appendCode(';');
+        $buffer->appendCode('return ' . $compiler->compileExpression($signature) . ';');
     }
 
 }

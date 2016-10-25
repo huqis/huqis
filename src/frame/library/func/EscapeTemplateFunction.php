@@ -60,12 +60,16 @@ class EscapeTemplateFunction implements TemplateFunction {
                 }
 
                 break;
+            case 'tags':
+                $result = strip_tags($value);
+
+                break;
             case 'slug':
                 $result = StringHelper::safeString($value);
 
                 break;
             default:
-                throw new RuntimeTemplateException('Could not call escape: ' . $type . ' is not a valid escape type (html, url, safe)');
+                throw new RuntimeTemplateException('Could not call escape: ' . $format . ' is not a valid escape format (html, url, safe)');
         }
 
         return $result;

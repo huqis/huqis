@@ -17,9 +17,11 @@ use frame\library\func\ConcatTemplateFunction;
 use frame\library\func\DefaultTemplateFunction;
 use frame\library\func\EscapeTemplateFunction;
 use frame\library\func\ExtendTemplateFunction;
+use frame\library\func\FormatTemplateFunction;
 use frame\library\func\IncludeTemplateFunction;
 use frame\library\func\LowerTemplateFunction;
 use frame\library\func\ReplaceTemplateFunction;
+use frame\library\func\TrimTemplateFunction;
 use frame\library\func\TruncateTemplateFunction;
 use frame\library\func\UpperTemplateFunction;
 use frame\library\operator\expression\AssignExpressionOperator;
@@ -52,14 +54,29 @@ class DefaultTemplateContext extends TemplateContext {
         }
 
         $this->setAllowPhpFunctions(false);
+    }
 
-        $andLogicalOperator = new GenericLogicalOperator('and');
-        $orLogicalOperator = new GenericLogicalOperator('or');
+    /**
+     * Hook invoked before compiling
+     * @return null
+     */
+    public function preCompile() {
+        $this->ensureExpressions();
+    }
 
-        $this->setLogicalOperator(' and ', $andLogicalOperator);
-        $this->setLogicalOperator('&&', $andLogicalOperator);
-        $this->setLogicalOperator(' or ', $orLogicalOperator);
-        $this->setLogicalOperator('||', $orLogicalOperator);
+    /**
+     * Ensure all expressions exist
+     * @return null
+     */
+    protected function ensureExpressions() {
+        if ($this->hasLogicalOperator(' and ')) {
+            return;
+        }
+
+        $this->setLogicalOperator(' and ', new GenericLogicalOperator('and'));
+        $this->setLogicalOperator('&&', new GenericLogicalOperator('and'));
+        $this->setLogicalOperator(' or ', new GenericLogicalOperator('or'));
+        $this->setLogicalOperator('||', new GenericLogicalOperator('or'));
         $this->setLogicalOperator(' xor ', new GenericLogicalOperator('xor'));
 
         $this->setExpressionOperator('=', new AssignExpressionOperator());
@@ -78,28 +95,142 @@ class DefaultTemplateContext extends TemplateContext {
         $this->setExpressionOperator('<=', new GenericExpressionOperator('<='));
         $this->setExpressionOperator('<', new GenericExpressionOperator('<'));
         $this->setExpressionOperator('~=', new RegexExpressionOperator());
+    }
 
-        $this->setFunction('capitalize', new CapitalizeTemplateFunction());
-        $this->setFunction('concat', new ConcatTemplateFunction());
-        $this->setFunction('default', new DefaultTemplateFunction());
-        $this->setFunction('escape', new EscapeTemplateFunction());
-        $this->setFunction('_extends', new ExtendTemplateFunction());
-        $this->setFunction('_include', new IncludeTemplateFunction());
-        $this->setFunction('lower', new LowerTemplateFunction());
-        $this->setFunction('replace', new ReplaceTemplateFunction());
-        $this->setFunction('truncate', new TruncateTemplateFunction());
-        $this->setFunction('upper', new UpperTemplateFunction());
+    /**
+     * Checks if the provided function is registered
+     * @return boolean
+     */
+    public function hasFunction($name) {
+        if (isset($this->functions[$name])) {
+            return true;
+        }
 
-        $this->setBlock('assign', new AssignTemplateBlock());
-        $this->setBlock('block', new BlockTemplateBlock());
-        $this->setBlock('call', new CallTemplateBlock());
-        $this->setBlock('cycle', new CycleTemplateBlock());
-        $this->setBlock('extends', new ExtendsTemplateBlock());
-        $this->setBlock('foreach', new ForeachTemplateBlock());
-        $this->setBlock('if', new IfTemplateBlock());
-        $this->setBlock('include', new IncludeTemplateBlock());
-        $this->setBlock('literal', new LiteralTemplateBlock());
-        $this->setBlock('macro', new MacroTemplateBlock());
+        $this->ensureFunction($name);
+
+        return isset($this->functions[$name]);
+    }
+
+    /**
+     * Ensures the function exists
+     * @param $name Name of a default function
+     * @return null
+     */
+    protected function ensureFunction($name) {
+        switch ($name) {
+            case 'capitalize':
+                $this->setFunction('capitalize', new CapitalizeTemplateFunction());
+
+                break;
+            case 'concat':
+                $this->setFunction('concat', new ConcatTemplateFunction());
+
+                break;
+            case 'default':
+                $this->setFunction('default', new DefaultTemplateFunction());
+
+                break;
+            case 'escape':
+                $this->setFunction('escape', new EscapeTemplateFunction());
+
+                break;
+            case '_extends':
+                $this->setFunction('_extends', new ExtendTemplateFunction());
+
+                break;
+            case 'format':
+                $this->setFunction('format', new FormatTemplateFunction());
+
+                break;
+            case '_include':
+                $this->setFunction('_include', new IncludeTemplateFunction());
+
+                break;
+            case 'lower':
+                $this->setFunction('lower', new LowerTemplateFunction());
+
+                break;
+            case 'replace':
+                $this->setFunction('replace', new ReplaceTemplateFunction());
+
+                break;
+            case 'trim':
+                $this->setFunction('trim', new TrimTemplateFunction());
+
+                break;
+            case 'truncate':
+                $this->setFunction('truncate', new TruncateTemplateFunction());
+
+                break;
+            case 'upper':
+                $this->setFunction('upper', new UpperTemplateFunction());
+
+                break;
+        }
+    }
+
+    /**
+     * Checks if the provided block is registered
+     * @return boolean
+     */
+    public function hasBlock($name) {
+        if (isset($this->blocks[$name])) {
+            return true;
+        }
+
+        $this->ensureBlock($name);
+
+        return isset($this->blocks[$name]);
+    }
+
+    /**
+     * Ensures the block exists
+     * @param $name Name of a default block
+     * @return null
+     */
+    protected function ensureBlock($name) {
+        switch ($name) {
+            case 'block':
+                $this->setBlock('block', new BlockTemplateBlock());
+
+                break;
+            case 'call':
+                $this->setBlock('call', new CallTemplateBlock());
+
+                break;
+            case 'capture':
+                $this->setBlock('capture', new AssignTemplateBlock());
+
+                break;
+            case 'cycle':
+                $this->setBlock('cycle', new CycleTemplateBlock());
+
+                break;
+            case 'extends':
+                $this->setBlock('extends', new ExtendsTemplateBlock());
+
+                break;
+            case 'foreach':
+                $this->setBlock('foreach', new ForeachTemplateBlock());
+
+                break;
+            case 'if':
+                $this->setBlock('if', new IfTemplateBlock());
+
+                break;
+            case 'include':
+                $this->setBlock('include', new IncludeTemplateBlock());
+
+                break;
+            case 'literal':
+                $this->setBlock('literal', new LiteralTemplateBlock());
+
+                break;
+            case 'macro':
+                $this->setBlock('macro', new MacroTemplateBlock());
+
+                break;
+        }
     }
 
 }

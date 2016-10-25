@@ -54,6 +54,7 @@ class AssignTemplateBlock implements TemplateBlock {
 
         // call the closure and assign the result to the variable
         $buffer->appendCode('$context->setVariable("' . $name . '", $_assign($context));');
+        $buffer->appendCode('unset($_assign);');
     }
 
 }
