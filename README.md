@@ -6,7 +6,7 @@ __Note: this engine is still under development, syntax may change__
 
 ## Syntax
 
-You can get more information about the syntax of this template engine in the [manual pages](manual/syntax.md).
+You can get more information about the syntax in the [manual pages](manual/syntax.md).
 
 ## Getting Started
 
