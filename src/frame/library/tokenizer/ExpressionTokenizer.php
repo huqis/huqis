@@ -19,7 +19,7 @@ class ExpressionTokenizer extends Tokenizer {
     public function __construct() {
         $this->nestedTokenizer = new Tokenizer();
         $this->nestedTokenizer->addSymbol(new StringSymbol());
-        $this->nestedTokenizer->addSymbol(new NestedSymbol(SyntaxSymbol::NESTED_OPEN, SyntaxSymbol::NESTED_CLOSE, $this));
+        $this->nestedTokenizer->addSymbol(new NestedSymbol(SyntaxSymbol::NESTED_OPEN, SyntaxSymbol::NESTED_CLOSE, $this, true));
         $this->nestedTokenizer->addSymbol(new NestedSymbol(SyntaxSymbol::ARRAY_OPEN, SyntaxSymbol::ARRAY_CLOSE, null, true));
 
         $this->tokenizers = [];

@@ -39,6 +39,14 @@ class ValueTokenizerTest extends PHPUnit_Framework_TestCase {
                     '"'
                 ),
             ),
+            array(
+                'functionCall()',
+                array(
+                    'functionCall',
+                    '(',
+                    ')',
+                ),
+            ),
         );
     }
 

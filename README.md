@@ -4,9 +4,13 @@ Frame is a PHP template engine with _&lt;insert great features talk&gt;_.
 
 __Note: this engine is still under development, syntax may change__
 
+## Syntax
+
+You can get more information about the syntax of this template engine in the [manual pages](manual/syntax.md).
+
 ## Getting Started
 
-Check this basic example of the [template syntax](manual/syntax.md):
+Check this basic example of the template syntax:
 
 ```html
 <html>

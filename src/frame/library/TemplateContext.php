@@ -395,6 +395,14 @@ class TemplateContext {
     }
 
     /**
+     * Removes all variables from this context
+     * @return null
+     */
+    public function resetVariables() {
+        $this->variables = [];
+    }
+
+    /**
      * Applies the provided modifiers on the provided value
      * @param mixed $value Value to apply the modifiers to
      * @param array $modifiers Array with modifier arrays as value. A modifier

@@ -100,7 +100,6 @@ class CallTemplateBlock implements TemplateBlock {
 
         $buffer->endBufferBlock();
         $buffer->appendCode(' };');
-        $buffer->appendCode('unset($_call);');
 
         // call the macro function with the compiled arguments
         if ($arguments) {
@@ -110,6 +109,7 @@ class CallTemplateBlock implements TemplateBlock {
         }
 
         $buffer->appendCode('echo $context->call("' . $name . '", ' . $arguments . ');');
+        $buffer->appendCode('unset($_call);');
     }
 
 }

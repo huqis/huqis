@@ -384,8 +384,8 @@ class TemplateCompiler {
 
         foreach ($tokens as $tokenIndex => $token) {
             if ($token === SyntaxSymbol::ASSIGNMENT) {
+                // assignment
                 $strict = true;
-                // return $this->compileVariable($expression, $strict, $allowModifiers);
             }
 
             if ($token === StringSymbol::SYMBOL) {
@@ -401,16 +401,19 @@ class TemplateCompiler {
                 // token inside a string
                 $string .= $token;
             } elseif ($token === SyntaxSymbol::ARRAY_OPEN) {
+                // array open symbol
                 $inArray = true;
             } elseif ($token === SyntaxSymbol::ARRAY_CLOSE) {
+                // array close symbol
                 $inArray = false;
                 $value .= SyntaxSymbol::ARRAY_OPEN . $array . SyntaxSymbol::ARRAY_CLOSE;
                 $array = '';
             } elseif ($inArray) {
+                // token inside an array
                 $array .= $token;
             } elseif (is_array($token)) {
                 // rebuild nested token and add to current value
-                $value .= SyntaxSymbol::NESTED_OPEN . $this->parseNested($token) . SyntaxSymbol::NESTED_CLOSE;
+                $value .= $this->parseNested($token);
             } elseif ($this->context->hasExpressionOperator($token)) {
                 // encountered operator
                 $expressionOperator = $this->context->getExpressionOperator($token);

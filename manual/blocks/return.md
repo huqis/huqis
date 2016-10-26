@@ -5,7 +5,7 @@ Returns a value from inside a ```macro``` block.
 ## Syntax
 
 ```
-{return $variable}
+{return $expression}
 ```
 
 ## Example

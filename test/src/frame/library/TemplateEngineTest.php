@@ -119,6 +119,12 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                     'title' => 'my cool title',
                 ),
             ),
+            array(
+                '15',
+                array(
+                    'index' => '{$value = 15}{$value}',
+                ),
+            ),
             // if test
             array(
                 '2',
@@ -167,6 +173,15 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
             ),
             // macro tests
             array(
+                '<p>Hello, my name is John</p><p>Hello, my name is Jane</p>',
+                array(
+                    'index' => '{macro sayName($name)}<p>Hello, my name is {$name}</p>{/macro}{foreach $names as $name}{sayName($name)}{/foreach}',
+                ),
+                array(
+                    'names' => array('John', 'Jane'),
+                ),
+            ),
+            array(
                 'Hello, my name is Joe',
                 array(
                     'index' => '{macro sayName($name)}{$name}{/macro}Hello, my name is {$echoName($name)}',
@@ -174,15 +189,6 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                 array(
                     'echoName' => 'sayName',
                     'name' => 'Joe',
-                ),
-            ),
-            array(
-                '<p>Hello, my name is John</p><p>Hello, my name is Jane</p>',
-                array(
-                    'index' => '{macro sayName($name)}<p>Hello, my name is {$name}</p>{/macro}{foreach $names as $name}{sayName($name)}{/foreach}',
-                ),
-                array(
-                    'names' => array('John', 'Jane'),
                 ),
             ),
             array(
@@ -207,23 +213,22 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                 ),
             ),
             array(
-                '<p>Hello, my name is  </p>',
-                array(
-                    'index' => '{macro sayName($name, $test)}<p>Hello, my name is {$name} {$test}</p>{/macro}{sayName()}',
-                ),
-                array(),
-            ),
-            array(
                 '19',
                 array(
-                    'index' => '{macro calculateSum($variable1, $variable2)}{return $variable1 + $variable2}{/macro}{$value1 = 7}{$value2 = 12}{$sum = calculateSum($value1, $value2)}{$sum}',
+                    'index' => '{macro calculateSum($variable1, $variable2)}{$value3 = "scope test"}{return $variable1 + $variable2}{/macro}{$value1 = 7}{$value2 = 12}{$sum = calculateSum($value1, $value2)}{$sum}{$value3}',
+                ),
+            ),
+            array(
+                'test3',
+                array(
+                    'index' => '{macro renderSomething($variable1 = 1, $variable2 = 2, $variable3 = "test", $variable4 = null)}{return $variable3 ~ ($variable1 + $variable2)}{/macro}{renderSomething()}',
                 ),
             ),
             // call tests
             array(
                 '<p>Hello, my name is John and I\'m 30 years old.</p>',
                 array(
-                    'index' => '{macro sayName($name, $age)}<p>Hello, my name is {$name} and I\'m {$age} years old.</p>{/macro}{$age = 30}{call sayName($_call, $age)}{$name}{/call}',
+                    'index' => '{macro sayName($name, $age)}<p>Hello, my name is {$name} and I\'m {$age} years old.</p>{/macro}{$age = 30}{call sayName($call, $age)}{$name}{/call}',
                 ),
                 array(
                     'name' => 'John',
@@ -232,7 +237,7 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
             array(
                 '<p>Hello, my name is John and I\'m 30 years old.</p>',
                 array(
-                    'index' => '{macro sayName($name, $age)}<p>Hello, my name is {$name} and I\'m {$age} years old.</p>{/macro}{call sayName($_call, 30)}{$name}{/call}',
+                    'index' => '{macro sayName($name, $age)}<p>Hello, my name is {$name} and I\'m {$age} years old.</p>{/macro}{call sayName($call, 30)}{$name}{/call}',
                 ),
                 array(
                     'name' => 'John',

@@ -56,7 +56,17 @@ class ExpressionTokenizerTest extends PHPUnit_Framework_TestCase {
                     ' 10',
                 ),
             ),
-        );
+            array(
+                '$variable = functionCall()',
+                array(
+                    '$variable ',
+                    '=',
+                    ' functionCall',
+                    '(',
+                    ')',
+                ),
+            ),
+                    );
     }
 
 }

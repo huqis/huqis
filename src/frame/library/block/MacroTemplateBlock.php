@@ -59,6 +59,7 @@ class MacroTemplateBlock implements TemplateBlock {
         // parse the arguments from the signature
         $name = $compiler->parseName($tokens[0], false);
         $arguments = [];
+        $defaults = [];
 
         array_shift($tokens); // name
         array_shift($tokens); // (
@@ -68,21 +69,39 @@ class MacroTemplateBlock implements TemplateBlock {
             $tokens = array_pop($tokens);
 
             $needsSeparator = false;
-            foreach ($tokens as $argument) {
-                if ($needsSeparator && $argument === SyntaxSymbol::FUNCTION_ARGUMENT) {
+            $value = '';
+            foreach ($tokens as $token) {
+                if ($token === SyntaxSymbol::FUNCTION_ARGUMENT) {
+                    if (!$needsSeparator) {
+                        throw new CompileTemplateException($signature . ' is an invalid macro signature');
+                    }
+
+                    $this->addArgument($compiler, $value, $arguments, $defaults);
+
                     $needsSeparator = false;
-                } elseif (!$needsSeparator && $argument !== SyntaxSymbol::FUNCTION_ARGUMENT) {
-                    $arguments[] = $compiler->parseName(trim($argument));
-                    $needsSeparator = true;
+                    $value = '';
                 } else {
-                    throw new CompileTemplateException($signature . ' is an invalid macro signature');
+                    $needsSeparator = true;
+                    $value .= $token;
                 }
+            }
+
+            if ($value) {
+                $this->addArgument($compiler, $value, $arguments, $defaults);
             }
         }
 
         // compile the macro function to the output buffer
         if ($arguments) {
+            $isFirst = true;
+
             $arguments = ', [\'' . implode('\', \'', $arguments) . '\']';
+            $arguments .= ', [';
+            foreach ($defaults as $index => $value) {
+                $arguments .= (!$isFirst ? ', ' : '') . $index . ' => ' . $value;
+                $isFirst = false;
+            }
+            $arguments .= ']';
         } else {
             $arguments = '';
         }
@@ -102,7 +121,25 @@ class MacroTemplateBlock implements TemplateBlock {
 
         $buffer->setRecordOutput(true);
         $buffer->appendCode(' };');
-        $buffer->appendCode('$context->setFunction(\'' . $name . '\', new \frame\library\func\MacroTemplateFunction($macro' . $this->counter . $arguments . '));');
+        $buffer->appendCode('$context->setFunction(\'' . $name . '\', new \frame\library\func\MacroTemplateFunction("' . $name . '", $macro' . $this->counter . $arguments . '));');
+    }
+
+    private function addArgument(TemplateCompiler $compiler, $value, array &$arguments, array &$defaults) {
+        $default = null;
+
+        $positionAssignment = strpos($value, SyntaxSymbol::ASSIGNMENT);
+        if ($positionAssignment) {
+            $default = substr($value, $positionAssignment + 1);
+            $argument = substr($value, 0, $positionAssignment);
+        } else {
+            $argument = $value;
+        }
+
+        $arguments[] = $compiler->parseName(trim($argument));
+
+        if ($default) {
+            $defaults[count($arguments) - 1] = $compiler->compileScalarValue(trim($default));
+        }
     }
 
 }
