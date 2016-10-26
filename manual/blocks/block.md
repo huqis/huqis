@@ -35,7 +35,7 @@ Main template:
 
 ```
 {extends "parent.tpl"}
-    {block name="head-title" prepnd}Page |{/block}
+    {block name="head-title" prepend}Page |{/block}
     {block name="content"}
         This is my content
     {/block}
