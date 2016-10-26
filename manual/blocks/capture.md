@@ -1,6 +1,6 @@
 # Blocks: capture
 
-An ```capture``` block is used to capture the contents of a block into a variable.
+A ```capture``` block is used to capture the contents of a block into a variable.
 
 ## Syntax
 
