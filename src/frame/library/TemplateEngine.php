@@ -78,13 +78,13 @@ class TemplateEngine {
      * @param string $resource Name of the template resource
      * @param array $variables Variables assigned to the template
      * @param \frame\library\TemplateContext $context Initial context
+     * @param string $extends Template code from a dynamic extends block, used
+     * by the compiler
      * @return string Rendered template
-     * @param string $append Template code to append to the resource, used for a
-     * dynamic extends block
      * @throws \frame\library\exception\TemplateException when a compile or
      * runtime error occured
      */
-    public function render($resource, array $variables, TemplateContext $context = null, $append = null) {
+    public function render($resource, array $variables, TemplateContext $context = null, $extends = null) {
         // initialize context
         if (!$context) {
             $context = $this->context->createChild();
@@ -98,7 +98,7 @@ class TemplateEngine {
 
         // retrieve and compile the template
         try {
-            $code = $this->getResource($context, $resource, $runtimeId, $append);
+            $code = $this->getResource($context, $resource, $runtimeId, $extends);
         } catch (CompileTemplateException $exception) {
             $resource = $exception->getResource() ? $exception->getResource() : $resource;
 
@@ -146,15 +146,15 @@ class TemplateEngine {
      * @param TemplateContext $context Runtime context of the template
      * @param string $resource Name of the template resource
      * @param string $runtimeId Id for the compiled template function
-     * @param string $append Template code to append to the resource, used for a
+     * @param string $extends Template code to append to the resource, used by a
      * dynamic extends block
      * @return string Compiled template
      */
-    private function getResource(TemplateContext $context, $resource, &$runtimeId, $append = null) {
+    private function getResource(TemplateContext $context, $resource, &$runtimeId, $extends = null) {
         $resourceHandler = $template = $context->getResourceHandler();
 
         if ($this->cache) {
-            $resourceId = $this->generateResourceId($context, $resource, $append);
+            $resourceId = $this->generateResourceId($context, $resource, $extends);
 
             $cacheItem = $this->cache->get($resourceId);
             if ($cacheItem->isValid()) {
@@ -178,9 +178,8 @@ class TemplateEngine {
 
         // not loaded before and not cached, compile the template
         $template = $resourceHandler->getResource($resource);
-        $template .= $append;
 
-        $code = $this->compile($context, $template, $runtimeId);
+        $code = $this->compile($context, $template, $runtimeId, $extends);
 
         if ($this->cache) {
             // cache the compiled code
@@ -199,9 +198,10 @@ class TemplateEngine {
      * @param TemplateContext $context Runtime context of the template
      * @param string $template Template code which needs to be compiled
      * @param string $runtimeId Id for the compiled template function
+     * @param string $extends Template code from a dynamic extends block
      * @return string Compiled template
      */
-    private function compile(TemplateContext $context, $template, $runtimeId) {
+    private function compile(TemplateContext $context, $template, $runtimeId, $extends = null) {
         $context->preCompile();
 
         $this->compiler->setContext($context);
@@ -211,7 +211,7 @@ class TemplateEngine {
         $code .= 'use frame\\library\\TemplateContext;';
         $code .= "\n\n";
         $code .= 'function frameTemplate' . $runtimeId .'(TemplateContext $context) {' . "\n";
-        $code .= $this->compiler->compile($template);
+        $code .= $this->compiler->compile($template, $extends);
         $code .= '}';
 
         return $code;
@@ -256,14 +256,18 @@ class TemplateEngine {
 
     /**
      * Generates a resource id
+     * @param TemplateContext $context Runtime context of the template
+     * @param string $resource Name of the template resource
+     * @param string $extends Template code from a dynamic extends block
      * @return string
      */
-    private function generateResourceId(TemplateContext $context, $resource, $append = null) {
-        return substr(crc32($resource . '#' . $append), 0, 10) . '-' . str_replace('/', '-', $resource);
+    private function generateResourceId(TemplateContext $context, $resource, $extends = null) {
+        return substr(crc32($resource . '#' . $extends), 0, 10) . '-' . str_replace('/', '-', $resource);
     }
 
     /**
      * Generates a runtime id
+     * @param string $resource Name of the template resource
      * @return string
      */
     private function generateRuntimeId($resource) {

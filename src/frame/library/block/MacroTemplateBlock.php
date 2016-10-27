@@ -109,7 +109,7 @@ class MacroTemplateBlock implements TemplateBlock {
         $this->counter++;
 
         $buffer->appendCode('$macro' . $this->counter . ' = function(TemplateContext $context) { ');
-        $buffer->setRecordOutput(false);
+        $buffer->setAllowOutput(true);
 
         $context = $context->createChild();
         $context->removeBlock('macro');
@@ -119,11 +119,21 @@ class MacroTemplateBlock implements TemplateBlock {
         $compiler->subcompile($body);
         $compiler->setContext($context->getParent());
 
-        $buffer->setRecordOutput(true);
+        $buffer->clearAllowOutput();
         $buffer->appendCode(' };');
         $buffer->appendCode('$context->setFunction(\'' . $name . '\', new \frame\library\func\MacroTemplateFunction("' . $name . '", $macro' . $this->counter . $arguments . '));');
     }
 
+    /**
+     * Compiles and add an argument to the provided arguments and defaults
+     * arrays
+     * @param \frame\library\TemplateCompiler $compiler Instance of the compiler
+     * @param string $value Argument value
+     * @param array $arguments Parsed argument names
+     * @param array $defaults Default values indexed on argument index in the
+     * function signature
+     * @return null
+     */
     private function addArgument(TemplateCompiler $compiler, $value, array &$arguments, array &$defaults) {
         $default = null;
 

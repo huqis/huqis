@@ -10,16 +10,46 @@ use frame\library\exception\CompileTemplateException;
 class TemplateOutputBuffer {
 
     /**
-     * Flag to see the current output buffer has actual output
-     * @var boolean
+     * Comment to mark the start of an extends block
+     * @var string
      */
-    protected $hasOutput = false;
+    const EXTENDS_START = '/*extends-start*/';
 
     /**
-     * Flag to see if output is recorded
-     * @var boolean
+     * Comment to mark the end of an extends block
+     * @var string
      */
-    protected $recordOutput = true;
+    const EXTENDS_END = '/*extends-end*/';
+
+    /**
+     * Comment to mark the start of a block
+     * @var string
+     */
+    const BLOCK_START = '/*block-%name%-start*/';
+
+    /**
+     * Comment to mark the end of a block
+     * @var string
+     */
+    const BLOCK_END = '/*block-%name%-end*/';
+
+    /**
+     * Append strategy for extendable blocks
+     * @var string
+     */
+    const STRATEGY_APPEND = 'append';
+
+    /**
+     * Prepend strategy for extendable blocks
+     * @var string
+     */
+    const STRATEGY_PREPEND = 'prepend';
+
+    /**
+     * Replace strategy for extendable blocks, default
+     * @var string
+     */
+    const STRATEGY_REPLACE = 'replace';
 
     /**
      * Contents of the current buffer
@@ -37,19 +67,25 @@ class TemplateOutputBuffer {
      * Name of the defined blocks
      * @var array
      */
-    protected $blocks = array();
+    protected $blocks = [];
 
     /**
-     * Name of the buffers to append indexed on key
+     * Stack of the block elements
      * @var array
      */
-    protected $append = array();
+    protected $blockStack = [];
 
     /**
-     * Name of the buffers to prepend indexed on key
+     * Flag to see if output is allowed
+     * @var boolean
+     */
+    protected $allowOutput = true;
+
+    /**
+     * Stack for the history of the $allowOutput flag
      * @var array
      */
-    protected $prepend = array();
+    protected $allowOutputStack = [];
 
     /**
      * Gets the string representation of this buffer
@@ -59,42 +95,69 @@ class TemplateOutputBuffer {
         $buffer = $this->buffer;
 
         foreach ($this->blocks as $name => $null) {
-            $buffer = str_replace('/*block-' . $name . '-start*/', '', $buffer);
-            $buffer = str_replace('/*block-' . $name . '-end*/', '', $buffer);
+            $buffer = str_replace(str_replace('%name%', $name, self::BLOCK_START), '', $buffer);
+            $buffer = str_replace(str_replace('%name%', $name, self::BLOCK_END), '', $buffer);
         }
+        $buffer = str_replace(self::EXTENDS_START, '', $buffer);
+        $buffer = str_replace(self::EXTENDS_END, '', $buffer);
 
         return $buffer;
     }
 
     /**
-     * Sets whether output is being recorded
-     * @param boolean $recordOutput
+     * Checks if the output is part of a specific block
+     * @param string $name Name of the parent block
+     * @return boolean True when one of the parent blocks is the provided block,
+     * false otherwise
+     */
+    public function hasParentBlock($name) {
+        return in_array($name, $this->blockStack);
+    }
+
+    /**
+     * Pushes a block to the block stack
+     * $param string $name Name of the block
      * @return null
-     * @see recordsOutput
-     * @see hasOutput
      */
-    public function setRecordOutput($recordOutput) {
-        $this->recordOutput = $recordOutput;
+    public function pushToBlockStack($name) {
+        $this->blockStack[] = $name;
     }
 
     /**
-     * Gets whether output is being recorded
-     * @return boolea,
-     * @see setRecordOutput
-     * @see hasOutput
+     * Pops the last element from the block stack
+     * @return string Name of the block
      */
-    public function recordsOutput() {
-        return $this->recordOutput;
+    public function popFromBlockStack() {
+        return array_pop($this->blockStack);
     }
 
     /**
-     * Checks if this buffer has recorded actual output, meaning text or echo
+     * Sets whether output is allowed
+     * @param boolean $allowOutput
+     * @return null
+     * @see allowOutput
+     */
+    public function setAllowOutput($allowOutput) {
+        $this->allowOutputStack[] = $this->allowOutput;
+        $this->allowOutput = $allowOutput;
+    }
+
+    /**
+     * Clears the last set allow output
+     * @return null
+     */
+    public function clearAllowOutput() {
+        $this->allowOutput = array_pop($this->allowOutputStack);
+    }
+
+    /**
+     * Checks if this buffer allows actual output, meaning text or echo
      * code statements
      * @return boolean
-     * @see setRecordOutput
-     * @see recordsOutput
+     * @see setAllowOutput
+     * @see clearAllowOutput
      */
-    public function hasOutput() {
+    public function allowOutput() {
         return $this->hasOutput;
     }
 
@@ -105,8 +168,8 @@ class TemplateOutputBuffer {
      * @see appendCode
      */
     public function appendText($text) {
-        if ($this->recordOutput) {
-            $this->hasOutput = true;
+        if (!$this->allowOutput && trim($text)) {
+            throw new CompileTemplateException('Output is not allowed in block ' . end($this->blockStack));
         }
 
         $this->buffer .= 'echo "' . addcslashes($text, '"$\\') . '";';
@@ -119,8 +182,8 @@ class TemplateOutputBuffer {
      * @see appendText
      */
     public function appendCode($code) {
-        if ($this->recordOutput && substr($code, 0, 5) == 'echo ') {
-            $this->hasOutput = true;
+        if (!$this->allowOutput && substr($code, 0, 5) == 'echo ') {
+            throw new CompileTemplateException('Output is not allowed in block ' . end($this->blockStack));
         }
 
         $this->buffer .= $code;
@@ -180,6 +243,23 @@ class TemplateOutputBuffer {
     }
 
     /**
+     * Starts an extends block
+     * @return null
+     */
+    public function startExtends() {
+        $this->appendCode(self::EXTENDS_START);
+    }
+
+    /**
+     * Ends an extends block
+     * @return null
+     */
+    public function endExtends() {
+        $this->appendCode(self::EXTENDS_END);
+        $this->clearAllowOutput();
+    }
+
+    /**
      * Starts an extendable block
      * @param string $name Name of the extendable block
      * @return null
@@ -197,38 +277,18 @@ class TemplateOutputBuffer {
     }
 
     /**
-     * Starts an extendable block but appends the contents to the contents in
-     * the parent block
-     * @param string $name Name of the extendable block
-     * @return null
-     */
-    public function appendExtendableBlock($name) {
-        $this->startExtendableBlock($name);
-
-        $this->append[$name] = true;
-    }
-
-    /**
-     * Starts an extendable block but prepends the contents to the contents in
-     * the parent block
-     * @param string $name Name of the extendable block
-     * @return null
-     */
-    public function prependExtendableBlock($name) {
-        $this->startExtendableBlock($name);
-
-        $this->prepend[$name] = true;
-    }
-
-    /**
      * Ends an extendable block
      * @param string $name Name of the parent block
+     * @param string $strategy Strategy to handle the block, can be replace, append
+     * or prepend
      * @throws \frame\library\exception\CompileTemplateException when the block
-     * is not opened
+     * is not opened or an invalid strategy provided
      */
-    public function endExtendableBlock($name) {
+    public function endExtendableBlock($name, $strategy = self::STRATEGY_REPLACE) {
         if (!isset($this->buffers[$name])) {
             throw new CompileTemplateException('Cannot end block ' . $name . ': block is not opened');
+        } elseif ($strategy != self::STRATEGY_APPEND && $strategy != self::STRATEGY_PREPEND && $strategy != self::STRATEGY_REPLACE) {
+            throw new CompileTemplateException('Cannot end block ' . $name . ': invalid strategy provided, try ' . self::STRATEGY_APPEND . ', ' . self::STRATEGY_PREPEND . ' or ' . self::STRATEGY_REPLACE);
         }
 
         $this->blocks[$name] = true;
@@ -240,36 +300,67 @@ class TemplateOutputBuffer {
         unset($this->buffers[$name]);
 
         // look for the block
-        $open = '/*block-' . $name . '-start*/';
-        $close = '/*block-' . $name . '-end*/';
+        $commentOpen = str_replace('%name%', $name, self::BLOCK_START);
+        $commentClose = str_replace('%name%', $name, self::BLOCK_END);
 
-        $positionOpen = strpos($this->buffer, $open);
-        $positionClose = strpos($this->buffer, $close);
+        $extendsPosition = $this->getExtendsPosition($this->buffer);
+        if ($extendsPosition === false) {
+            $offset = 0;
+        } else {
+            $offset = $extendsPosition;
+        }
+
+        $positionOpen = strpos($this->buffer, $commentOpen, $offset);
+        $positionClose = strpos($this->buffer, $commentClose, $offset);
 
         if ($positionOpen !== false && $positionClose !== false) {
             // block already exists
-            if (isset($this->append[$name])) {
+            if ($strategy == self::STRATEGY_APPEND) {
                 // process to append to the parent block
-                $start = $positionOpen + strlen($open);
+                $start = $positionOpen + strlen($commentOpen);
                 $parentBlock = substr($this->buffer, $start, $positionClose - $start);
                 $block = $parentBlock . $block;
-
-                unset($this->append[$name]);
-            } elseif (isset($this->prepend[$name])) {
+            } elseif ($strategy == self::STRATEGY_PREPEND) {
                 // process to prepend to the parent block
-                $start = $positionOpen + strlen($open);
+                $start = $positionOpen + strlen($commentOpen);
                 $parentBlock = substr($this->buffer, $start, $positionClose - $start);
                 $block .= $parentBlock;
-
-                unset($this->prepend[$name]);
             }
 
             // replace the existing block with the new block content
-            $this->buffer = substr($this->buffer, 0, $positionOpen) . $open . $block . substr($this->buffer, $positionClose);
+            $this->buffer = substr($this->buffer, 0, $positionOpen) . $commentOpen . $block . substr($this->buffer, $positionClose);
         } else {
-            // new block, just append it
-            $this->appendCode($open . $block . $close);
+            // new block
+
+            // no output allowed
+            if (!$this->allowOutput) {
+                throw new CompileTemplateException('Cannot extend block ' . $name . ': not defined in extended template');
+            }
+
+            // we're cool,
+            $this->appendCode($commentOpen . $block . $commentClose);
         }
+    }
+
+    /**
+     * Gets the position of the open extends
+     * @param string $string String to look in
+     * @return integer Position of the open extends
+     * @throws \ride\library\tokenizer\exception\TokenizeException when the symbol is opened but not closed
+     */
+    protected function getExtendsPosition($string) {
+        // look for first close
+        $startPosition = strrpos($string, self::EXTENDS_START);
+
+        // look for another open between initial open and close
+        $endPosition = strrpos($string, self::EXTENDS_END);
+        if ($endPosition === false || $endPosition < $startPosition) {
+            return $startPosition;
+        }
+
+        $startEndPosition = $this->getExtendsPosition(substr($string, 0, $endPosition));
+
+        return $this->getExtendsPosition(substr($string, 0, $startEndPosition));
     }
 
 }

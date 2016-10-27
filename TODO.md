@@ -2,4 +2,6 @@
 
 - implement auto escape
 - change modifier syntax from $var|modifier:$argument:argument to $var|modifier($argument, $argument)
-- allow output only in block elements when inside an extends element
+- rename macro to function
+- rename call to macro 
+- add option to make blocks private in the template context. no copy to child or parent. think of else, elseif and return.

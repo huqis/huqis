@@ -119,12 +119,14 @@ class TemplateCompiler {
     /**
      * Compiles the provided template
      * @param string $template Template code to compile
+     * @param string $extends Template code from a dynamic extends block where
+     * $template is the template code of the extended template
      * @return string PHP code of the compiled template
      * @throws \frame\library\exception\CompileTemplateException when this
      * method is called while already compiling or when the template syntax is
      * invalid
      */
-    public function compile($template) {
+    public function compile($template, $extends = null) {
         if ($this->isCompiling) {
             throw new CompileTemplateException('Could not compile the provided template: already compiling');
         }
@@ -135,6 +137,10 @@ class TemplateCompiler {
         $this->buffer = new TemplateOutputBuffer();
 
         $this->subcompile($template, false);
+
+        if ($extends) {
+            $this->compileExtends($extends);
+        }
 
         $result = (string) $this->buffer;
 
@@ -278,6 +284,21 @@ class TemplateCompiler {
     }
 
     /**
+     * Compiles an extends block and ends the block
+     * @param string $extends Template code from an extends block
+     * @return null
+     * @see \frame\library\block\ExtendsTemplateBlock
+     * @see \frame\library\func\ExtendsTemplateFunction
+     */
+    public function compileExtends($extends) {
+        $this->buffer->setAllowOutput(false);
+
+        $this->subcompile($extends);
+
+        $this->buffer->endExtends();
+    }
+
+    /**
      * Compiles a template block
      * @param string $name Name of the template block
      * @param string $signature Signature of the call
@@ -326,15 +347,21 @@ class TemplateCompiler {
             if ($endTokenIndex === null) {
                 throw new CompileTemplateException('Block ' . $name . ' opened but not closed');
             }
+
+            $this->buffer->pushToBlockStack($name);
         } else {
             $endTokenIndex = $tokenIndex + 1;
         }
 
-        $block = $block->compile($this, $signature, $body);
+        $result = $block->compile($this, $signature, $body);
+
+        if ($block->needsClose()) {
+            $this->buffer->popFromBlockStack();
+        }
 
         $tokenIndex = $endTokenIndex;
 
-        return $block;
+        return $result;
     }
 
     /**

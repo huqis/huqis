@@ -1,8 +1,8 @@
 # Blocks: extends
 
-Extends the current template from another template.
+Extends a block from another template and alters the template's blocks.
 
-_Note: no output can be generated before the extends statement._
+Inside an ```extends```, you cannot generate output except from inside a ```block``` or ```macro```.
 
 ## Syntax
 
@@ -15,17 +15,21 @@ _Note: no output can be generated before the extends statement._
 ## Example
 
 ```
-{extends "parent.tpl"}
+{extends "head.tpl"}
+    {block name="title" prepend}Page | {/block}
+{/extends}
 
-    {block name="head-title" prepnd}Page |{/block}
-    
-    {block name="content"}
-        This is my content
+{block name="body"}{/block}
+
+{extends "footer.tpl"}
+    {block name="body"}
+        This is my footer
     {/block}
-    
 {/extends}
 ```
 
 ## See Also
 
 - [block](block.md)
+- [include](include.md)
+- [macro](macro.md)

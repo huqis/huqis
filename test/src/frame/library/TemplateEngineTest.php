@@ -319,6 +319,18 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                 ),
             ),
             array(
+                'index <h1>Section - Site</h1>test and <div>Title</div>',
+                array(
+                    'index' => 'index {extends "base"}{block "title" prepend}{$title} - {/block}{/extends} and {extends "base2"}{block "title"}{$subtitle}{/block}{/extends}',
+                    'base2' => '{block "container"}<div>{block "title"}{/block}</div>{/block}',
+                    'base' => '<h1>{block "title"}Site{/block}</h1>{block "container"}test{/block}',
+                ),
+                array(
+                    'title' => 'Section',
+                    'subtitle' => 'Title',
+                ),
+            ),
+            array(
                 '<h2>Heading 2: Section</h2>',
                 array(
                     'index' => '{$base = "template-2"}{extends $base}{block "title" append}: {$title}{/block}{/extends}',
@@ -360,6 +372,33 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
         $result = $engine->render(reset($resourceIds), $variables);
 
         $this->assertEquals($output, $result);
+    }
+
+    public function providerRenderThrowsException() {
+        return array(
+            array(
+                array(
+                    'index' => '{extends "base"}{block "unexistant"}{/block}{/extends}',
+                    'base' => '{block "title"}{/block}',
+                ),
+            ),
+        );
+    }
+
+    /**
+     * @dataProvider providerRenderThrowsException
+     * @expectedException \frame\library\exception\CompileTemplateException
+     */
+    public function testRenderThrowsException(array $resources) {
+        $resourceHandler = new ArrayTemplateResourceHandler();
+        $resourceHandler->setResources($resources);
+
+        $resourceIds = array_keys($resources);
+
+        $context = new DefaultTemplateContext($resourceHandler);
+
+        $engine = new TemplateEngine($context);
+        $engine->render(reset($resourceIds), []);
     }
 
 }

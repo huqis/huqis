@@ -5,10 +5,10 @@ namespace frame\library\func;
 use frame\library\TemplateContext;
 
 /**
- * Function to include another template resource which needs to be rendered at
+ * Function to extend another template resource which needs to be rendered at
  * runtime. For dynamic extend blocks, used internally.
  *
- * Syntax: _extends(<resource>, <append-template-code>)
+ * Syntax: _extends(<resource>, <extends-template-code>)
  *
  * {_extends("my-template.tpl", "Display my {$variable})}
  */
@@ -25,14 +25,14 @@ class ExtendTemplateFunction implements TemplateFunction {
         $output = '';
 
         $resource = array_shift($arguments);
-        $body = array_shift($arguments);
-        $body = str_replace('\\$', '$', $body);
+        $extends = array_shift($arguments);
+        $extends = str_replace('\\$', '$', $extends);
 
         if (!$resource) {
             throw new RuntimeTemplateException('Could not include template: no resource(s) provided');
         }
 
-        $output .= $engine->render($resource, [], $context, $body);
+        $output .= $engine->render($resource, [], $context, $extends);
 
         return $output;
     }

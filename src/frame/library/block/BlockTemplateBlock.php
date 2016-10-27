@@ -3,6 +3,7 @@
 namespace frame\library\block;
 
 use frame\library\TemplateCompiler;
+use frame\library\TemplateOutputBuffer;
 
 /**
  * Block element for an extendable block used when extending from another
@@ -36,32 +37,27 @@ class BlockTemplateBlock implements TemplateBlock {
     public function compile(TemplateCompiler $compiler, $signature, $body) {
         $buffer = $compiler->getOutputBuffer();
         $context = $compiler->getContext();
-        $append = false;
-        $prepend = false;
 
         if (substr($signature, -7) === ' append') {
             $name = substr($signature, 0, -7);
-            $append = true;
+            $strategy = TemplateOutputBuffer::STRATEGY_APPEND;
         } elseif (substr($signature, -8) === ' prepend') {
             $name = substr($signature, 0, -8);
-            $prepend = true;
+            $strategy = TemplateOutputBuffer::STRATEGY_PREPEND;
         } else {
             $name = $signature;
+            $strategy = TemplateOutputBuffer::STRATEGY_REPLACE;
         }
 
         $name = $compiler->compileScalarValue($name);
 
-        if ($append) {
-            $buffer->appendExtendableBlock($name);
-        } elseif ($prepend) {
-            $buffer->prependExtendableBlock($name);
-        } else {
-            $buffer->startExtendableBlock($name);
-        }
+        $buffer->startExtendableBlock($name);
+        $buffer->setAllowOutput(true);
 
         $compiler->subcompile($body);
 
-        $buffer->endExtendableBlock($name);
+        $buffer->clearAllowOutput();
+        $buffer->endExtendableBlock($name, $strategy);
     }
 
 }

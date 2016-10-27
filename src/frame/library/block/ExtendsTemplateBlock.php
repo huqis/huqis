@@ -36,10 +36,7 @@ class ExtendsTemplateBlock extends IncludeTemplateBlock {
      * @return null
      */
     public function compile(TemplateCompiler $compiler, $signature, $body) {
-        $outputBuffer = $compiler->getOutputBuffer();
-        if ($outputBuffer->hasOutput()) {
-            throw new CompileTemplateException('Extends can only be used when there is no output generated');
-        }
+        $buffer = $compiler->getOutputBuffer();
 
         $resource = null;
 
@@ -53,7 +50,7 @@ class ExtendsTemplateBlock extends IncludeTemplateBlock {
         if ($isStaticTemplate) {
             $resource = substr($resource, 1, -1);
             $code = $compiler->getContext()->getResourceHandler()->getResource($resource);
-            $code .= $body;
+
         } else {
             $body = str_replace('$', '\\$', $body);
             $body = StringHelper::escapeQuotes($body);
@@ -62,9 +59,15 @@ class ExtendsTemplateBlock extends IncludeTemplateBlock {
         }
 
         try {
+            $buffer->startExtends();
+
             $compiler->subcompile($code);
+
+            if ($isStaticTemplate) {
+                $compiler->compileExtends($body);
+            }
         } catch (CompileTemplateException $exception) {
-            $e = new CompileTemplateException('Could not compile ' . $resource . ': syntax error on line ' . $exception->getLineNumber(), 0, $exception->getPrevious());
+            $e = new CompileTemplateException('Could not compile ' . $resource . ': syntax error on line ' . $exception->getLineNumber(), 0, $exception);
             $e->setResource($resource);
             $e->setLineNumber($exception->getLineNumber());
 
