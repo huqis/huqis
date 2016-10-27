@@ -224,11 +224,11 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                     'index' => '{function renderSomething($variable1 = 1, $variable2 = 2, $variable3 = "test", $variable4 = null)}{return $variable3 ~ ($variable1 + $variable2)}{/function}{renderSomething()}',
                 ),
             ),
-            // call tests
+            // macro tests
             array(
                 '<p>Hello, my name is John and I\'m 30 years old.</p>',
                 array(
-                    'index' => '{function sayName($name, $age)}<p>Hello, my name is {$name} and I\'m {$age} years old.</p>{/function}{$age = 30}{call sayName($call, $age)}{$name}{/call}',
+                    'index' => '{function sayName($name, $age)}<p>Hello, my name is {$name} and I\'m {$age} years old.</p>{/function}{$age = 30}{macro sayName($macro, $age)}{$name}{/macro}',
                 ),
                 array(
                     'name' => 'John',
@@ -237,7 +237,7 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
             array(
                 '<p>Hello, my name is John and I\'m 30 years old.</p>',
                 array(
-                    'index' => '{function sayName($name, $age)}<p>Hello, my name is {$name} and I\'m {$age} years old.</p>{/function}{call sayName($call, 30)}{$name}{/call}',
+                    'index' => '{function sayName($name, $age)}<p>Hello, my name is {$name} and I\'m {$age} years old.</p>{/function}{macro sayName($macro, 30)}{$name}{/macro}',
                 ),
                 array(
                     'name' => 'John',

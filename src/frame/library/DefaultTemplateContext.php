@@ -4,7 +4,6 @@ namespace frame\library;
 
 use frame\library\block\AssignTemplateBlock;
 use frame\library\block\BlockTemplateBlock;
-use frame\library\block\CallTemplateBlock;
 use frame\library\block\CycleTemplateBlock;
 use frame\library\block\ExtendsTemplateBlock;
 use frame\library\block\ForeachTemplateBlock;
@@ -12,6 +11,7 @@ use frame\library\block\FunctionTemplateBlock;
 use frame\library\block\IfTemplateBlock;
 use frame\library\block\IncludeTemplateBlock;
 use frame\library\block\LiteralTemplateBlock;
+use frame\library\block\MacroTemplateBlock;
 use frame\library\func\CapitalizeTemplateFunction;
 use frame\library\func\ConcatTemplateFunction;
 use frame\library\func\DefaultTemplateFunction;
@@ -194,10 +194,6 @@ class DefaultTemplateContext extends TemplateContext {
                 $this->setBlock('block', new BlockTemplateBlock());
 
                 break;
-            case 'call':
-                $this->setBlock('call', new CallTemplateBlock());
-
-                break;
             case 'capture':
                 $this->setBlock('capture', new AssignTemplateBlock());
 
@@ -214,6 +210,10 @@ class DefaultTemplateContext extends TemplateContext {
                 $this->setBlock('foreach', new ForeachTemplateBlock());
 
                 break;
+            case 'function':
+                $this->setBlock('function', new FunctionTemplateBlock());
+
+                break;
             case 'if':
                 $this->setBlock('if', new IfTemplateBlock());
 
@@ -226,8 +226,8 @@ class DefaultTemplateContext extends TemplateContext {
                 $this->setBlock('literal', new LiteralTemplateBlock());
 
                 break;
-            case 'function':
-                $this->setBlock('function', new FunctionTemplateBlock());
+            case 'macro':
+                $this->setBlock('macro', new MacroTemplateBlock());
 
                 break;
         }

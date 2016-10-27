@@ -302,7 +302,7 @@ class TemplateCompiler {
     /**
      * Compiles a template block
      * @param string $name Name of the template block
-     * @param string $signature Signature of the call
+     * @param string $signature Signature of the block
      * @param array $tokens All tokens of the template
      * @param integer $tokenIndex Current token index
      * @return string|boolean Compiled block is a valid block name, false

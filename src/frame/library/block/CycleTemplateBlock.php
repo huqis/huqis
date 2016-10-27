@@ -5,7 +5,7 @@ namespace frame\library\block;
 use frame\library\TemplateCompiler;
 
 /**
- * Cycle element values in a loop everytime you call this block
+ * Cycle element values in a loop or whenever this block is encountered
  * @see ForeachBlockElement
  */
 class CycleTemplateBlock implements TemplateBlock {

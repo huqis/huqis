@@ -8,10 +8,10 @@ use frame\library\tokenizer\FunctionTokenizer;
 use frame\library\TemplateCompiler;
 
 /**
- * Call block to pass the compiled body as argument
- * @see MacroBlockElement
+ * Macro block to pass the compiled body as an argument to a function call
+ * @see FunctionTemplateBlock
  */
-class CallTemplateBlock implements TemplateBlock {
+class MacroTemplateBlock implements TemplateBlock {
 
     /**
      * Constructs a new macro template block
@@ -19,6 +19,7 @@ class CallTemplateBlock implements TemplateBlock {
      */
     public function __construct() {
         $this->tokenizer = new FunctionTokenizer();
+        $this->counter = 0;
     }
 
     /**
@@ -53,8 +54,10 @@ class CallTemplateBlock implements TemplateBlock {
         // validate the signature
         $numTokens = count($tokens);
         if ($numTokens < 3 || $numTokens > 4 || $tokens[1] !== SyntaxSymbol::NESTED_OPEN || $tokens[$numTokens - 1] !== SyntaxSymbol::NESTED_CLOSE) {
-            throw new CompileTemplateException($signature . ' is an invalid call signature');
+            throw new CompileTemplateException($signature . ' is an invalid macro signature');
         }
+
+        $this->counter++;
 
         // parse the arguments from the signature
         $name = $compiler->parseName($tokens[0], false);
@@ -72,10 +75,10 @@ class CallTemplateBlock implements TemplateBlock {
                 if ($needsSeparator && $argument === SyntaxSymbol::FUNCTION_ARGUMENT) {
                     $needsSeparator = false;
                 } elseif (!$needsSeparator && $argument !== SyntaxSymbol::FUNCTION_ARGUMENT) {
-                    if ($argument === '$call') {
-                        // the $_call argument is the body of the block,
+                    if ($argument === '$macro') {
+                        // the $macro argument is the body of the block,
                         // rendered through a closure
-                        $arguments[] = '$_call($context)';
+                        $arguments[] = '$macro' . $this->counter . '($context)';
                     } else {
                         // any other argument is considered an expression
                         $arguments[] = $compiler->compileExpression(trim($argument));
@@ -83,13 +86,13 @@ class CallTemplateBlock implements TemplateBlock {
 
                     $needsSeparator = true;
                 } else {
-                    throw new CompileTemplateException($signature . ' is an invalid call signature');
+                    throw new CompileTemplateException($signature . ' is an invalid macro signature');
                 }
             }
         }
 
         // create a closure from the body block
-        $buffer->appendCode('$_call = function(TemplateContext $context) { ');
+        $buffer->appendCode('$macro' . $this->counter . ' = function(TemplateContext $context) { ');
         $buffer->startBufferBlock();
 
         $context = $context->createChild();
@@ -109,7 +112,7 @@ class CallTemplateBlock implements TemplateBlock {
         }
 
         $buffer->appendCode('echo $context->call("' . $name . '", ' . $arguments . ');');
-        $buffer->appendCode('unset($_call);');
+        $buffer->appendCode('unset($macro' . $this->counter . ');');
     }
 
 }

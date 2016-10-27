@@ -167,7 +167,7 @@ class TemplateContext {
      * Gets whether native PHP functions are included in the function list
      * @return boolean True to include PHP functions, false otherwise
      * @see setAllowPhpFunctions
-     * @see call
+     * @see call()
      */
     public function allowsPhpFunctions() {
         return $this->allowPhpFunctions;
@@ -418,7 +418,7 @@ class TemplateContext {
      * and the extra arguments for that function are the remaining values.
      * @return mixed Value with the modifiers applied
      * @see \frame\library\func\TemplateFunction
-     * @see call
+     * @see call()
      */
     public function applyModifiers($value, array $modifiers) {
         foreach ($modifiers as $arguments) {
@@ -575,7 +575,7 @@ class TemplateContext {
                 return call_user_func_array($name, $arguments);
             }
 
-            throw new RuntimeTemplateException('Could not call ' . $name . ': function is not registered');
+            throw new RuntimeTemplateException('Could not call function ' . $name . ': function is not registered');
         }
 
         return $this->getFunction($name)->call($this, $arguments);

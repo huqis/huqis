@@ -46,6 +46,6 @@ will output:
 
 ## See Also
 
-- [call](call.md)
+- [macro](macro.md)
 - [return](return.md)
 

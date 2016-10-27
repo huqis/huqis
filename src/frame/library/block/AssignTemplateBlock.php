@@ -10,6 +10,14 @@ use frame\library\TemplateCompiler;
 class AssignTemplateBlock implements TemplateBlock {
 
     /**
+     * Constructs a new assign block
+     * @return null
+     */
+    public function __construct() {
+        $this->counter = 0;
+    }
+
+    /**
      * Gets whether this block has a signature
      * @return boolean
      */
@@ -39,8 +47,10 @@ class AssignTemplateBlock implements TemplateBlock {
         // validate the signature as a variable
         $name = $compiler->parseName($signature);
 
+        $this->counter++;
+
         // create a closure from the body block
-        $buffer->appendCode('$_assign = function(TemplateContext $context) { ');
+        $buffer->appendCode('$assign' . $this->counter . ' = function(TemplateContext $context) { ');
         $buffer->startBufferBlock();
 
         $context = $context->createChild();
@@ -53,8 +63,8 @@ class AssignTemplateBlock implements TemplateBlock {
         $buffer->appendCode(' };');
 
         // call the closure and assign the result to the variable
-        $buffer->appendCode('$context->setVariable("' . $name . '", $_assign($context));');
-        $buffer->appendCode('unset($_assign);');
+        $buffer->appendCode('$context->setVariable("' . $name . '", $assign' . $this->counter . '($context));');
+        $buffer->appendCode('unset($assign' . $this->counter . ');');
     }
 
 }

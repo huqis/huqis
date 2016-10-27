@@ -43,7 +43,6 @@ Blocks are interpreted at compile time.
 
 - [block](blocks/block.md)
 - [break](blocks/break.md)
-- [call](blocks/call.md)
 - [capture](blocks/capture.md)
 - [continue](blocks/continue.md)
 - [cycle](blocks/cycle.md)
@@ -52,6 +51,7 @@ Blocks are interpreted at compile time.
 - [if](blocks/if.md)
 - [include](blocks/include.md)
 - [literal](blocks/literal.md)
+- [macro](blocks/macro.md)
 - [return](blocks/return.md)
 
 ## Functions
