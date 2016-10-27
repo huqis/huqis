@@ -331,6 +331,18 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                 ),
             ),
             array(
+                '<div>Section</div>test',
+                array(
+                    'index' => '{extends "base"}{block "container" prepend}{extends "block"}{block "title"}{$title}{/block}{/extends}{/block}{/extends}',
+                    'block' => '{block "block-container"}<div>{block "title"}{/block}</div>{/block}',
+                    'base' => '{block "container"}test{/block}',
+                ),
+                array(
+                    'title' => 'Section',
+                    'subtitle' => 'Title',
+                ),
+            ),
+                        array(
                 '<h2>Heading 2: Section</h2>',
                 array(
                     'index' => '{$base = "template-2"}{extends $base}{block "title" append}: {$title}{/block}{/extends}',
