@@ -102,7 +102,7 @@ class DefaultTemplateContext extends TemplateContext {
      * @return boolean
      */
     public function hasFunction($name) {
-        if (isset($this->functions[$name])) {
+        if (parent::hasFunction($name)) {
             return true;
         }
 
@@ -174,7 +174,7 @@ class DefaultTemplateContext extends TemplateContext {
      * @return boolean
      */
     public function hasBlock($name) {
-        if (isset($this->blocks[$name])) {
+        if (parent::hasBlock($name)) {
             return true;
         }
 

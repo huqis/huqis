@@ -59,6 +59,13 @@ class TemplateContext {
     protected $blocks;
 
     /**
+     * Array with the available private blocks, block who are not copied to the
+     * child context
+     * @var array
+     */
+    protected $privateBlocks;
+
+    /**
      * Array with the available functions
      * @var array
      */
@@ -89,6 +96,7 @@ class TemplateContext {
     public function __construct(TemplateResourceHandler $resourceHandler = null, ReflectionHelper $reflectionHelper = null, TemplateContext $parent = null) {
         $this->variables = [];
         $this->blocks = [];
+        $this->privateBlocks = [];
         $this->functions = [];
         $this->logicalOperators = [];
         $this->expressionOperators = [];
@@ -431,10 +439,16 @@ class TemplateContext {
      * Sets a template block to this context
      * @param string $name Name of the block
      * @param \frame\library\block\TemplateBlock $block Instance of the block
+     * @param boolean $isPrivate Set to true to keep this block in this context,
+     * no copies are made to child contexts
      * @return null
      */
-    public function setBlock($name, TemplateBlock $block) {
-        $this->blocks[$name] = $block;
+    public function setBlock($name, TemplateBlock $block, $isPrivate = false) {
+        if ($isPrivate) {
+            $this->privateBlocks[$name] = $block;
+        } else {
+            $this->blocks[$name] = $block;
+        }
     }
 
     /**
@@ -455,7 +469,7 @@ class TemplateContext {
      * @return boolean
      */
     public function hasBlock($name) {
-        return isset($this->blocks[$name]);
+        return isset($this->blocks[$name]) || isset($this->privateBlocks[$name]);
     }
 
     /**
@@ -465,11 +479,13 @@ class TemplateContext {
      * it's registered, null otherwise
      */
     public function getBlock($name) {
-        if (!$this->hasBlock($name)) {
+        if (isset($this->blocks[$name])) {
+            return $this->blocks[$name];
+        } elseif (isset($this->privateBlocks[$name])) {
+            return $this->privateBlocks[$name];
+        } else {
             return null;
         }
-
-        return $this->blocks[$name];
     }
 
     /**
@@ -479,13 +495,17 @@ class TemplateContext {
      * registered
      */
     public function removeBlock($name) {
-        if (!$this->hasBlock($name)) {
+        if (isset($this->blocks[$name])) {
+            unset($this->blocks[$name]);
+
+            return true;
+        } elseif (isset($this->privateBlocks[$name])) {
+            unset($this->privateBlocks[$name]);
+
+            return true;
+        } else {
             return false;
         }
-
-        unset($this->blocks[$name]);
-
-        return true;
     }
 
     //

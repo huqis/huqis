@@ -296,6 +296,7 @@ class TemplateCompiler {
         $this->subcompile($extends);
 
         $this->buffer->endExtends();
+        $this->context = $this->context->getParent();
     }
 
     /**

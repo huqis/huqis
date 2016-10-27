@@ -37,6 +37,7 @@ class ExtendsTemplateBlock extends IncludeTemplateBlock {
      */
     public function compile(TemplateCompiler $compiler, $signature, $body) {
         $buffer = $compiler->getOutputBuffer();
+        $context = $compiler->getContext();
 
         $resource = null;
 
@@ -61,6 +62,7 @@ class ExtendsTemplateBlock extends IncludeTemplateBlock {
         try {
             $buffer->startExtends();
 
+            $compiler->setContext($context->createChild());
             $compiler->subcompile($code);
 
             if ($isStaticTemplate) {

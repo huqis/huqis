@@ -143,6 +143,7 @@ class TemplateCompilerTest extends PHPUnit_Framework_TestCase {
             array('Test {extends "file"}{/extends}'),
             // invalid block name
             array('{block file}{/block}'),
+            array('{if true}{block "file"}{else}{/block}{/if}'),
         );
     }
 

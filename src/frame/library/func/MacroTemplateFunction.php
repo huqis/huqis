@@ -70,7 +70,7 @@ class MacroTemplateFunction implements TemplateFunction {
         $context->resetVariables();
 
         foreach ($this->arguments as $index => $name) {
-            if (isset($arguments[$index])) {
+            if (array_key_exists($index, $arguments)) {
                 $context->setVariable($name, $arguments[$index]);
             } elseif (array_key_exists($index, $this->defaults)) {
                 $context->setVariable($name, $this->defaults[$index]);

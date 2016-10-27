@@ -54,7 +54,11 @@ class BlockTemplateBlock implements TemplateBlock {
         $buffer->startExtendableBlock($name);
         $buffer->setAllowOutput(true);
 
+        $context = $context->createChild();
+
+        $compiler->setContext($context);
         $compiler->subcompile($body);
+        $compiler->setContext($context->getParent());
 
         $buffer->clearAllowOutput();
         $buffer->endExtendableBlock($name, $strategy);
