@@ -75,3 +75,7 @@ The first argument will be the value it's modifying.
 ## Operators
 
 Check the overview of the available [operators](operators.md).
+
+## Comments
+
+Comments are delimited by ```{*``` and ```*}```.

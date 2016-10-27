@@ -4,6 +4,8 @@ Extends a block from another template and alters the template's blocks.
 
 Inside an ```extends```, you cannot generate output except from inside a ```block``` or ```macro```.
 
+You can create nested extends blocks but you cannot use a block name of a parent block.
+
 ## Syntax
 
 ```
