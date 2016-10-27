@@ -13,7 +13,7 @@ use frame\library\TemplateCompiler;
 class IncludeTemplateBlock implements TemplateBlock {
 
     /**
-     * Constructs a new macro template block
+     * Constructs a new include template block
      * @return null
      */
     public function __construct() {

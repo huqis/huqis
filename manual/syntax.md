@@ -48,10 +48,10 @@ Blocks are interpreted at compile time.
 - [continue](blocks/continue.md)
 - [cycle](blocks/cycle.md)
 - [extends](blocks/extends.md)
+- [function](blocks/function.md)
 - [if](blocks/if.md)
 - [include](blocks/include.md)
 - [literal](blocks/literal.md)
-- [macro](blocks/macro.md)
 - [return](blocks/return.md)
 
 ## Functions

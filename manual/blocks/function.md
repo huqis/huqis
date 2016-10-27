@@ -1,30 +1,30 @@
-# Blocks: macro 
+# Blocks: function 
 
-Defines a macro (or function) inside the template syntax.
+Defines a function inside the template syntax.
 
 All arguments are required unless a default value is defined in the signature.
 A default argument value can only be a scalar value like null, a boolean, a number or a string. 
 
-The macro cannot access variables outside it's block.
+The function cannot access variables outside it's block.
 
 ## Syntax
 
 ```
-{macro $functionName([$argument1[, $argument2 = $default[, ...]]])}
+{function $functionName([$argument1[, $argument2 = $default[, ...]]])}
     ...
-{/macro}
+{/function}
 ```
 
 ## Example
 
 ```
-{macro renderTitle($title)}
+{function renderTitle($title)}
     <h1>{$title|lower|capitalize}</h1>
-{/macro}
+{/function}
 
-{macro calculateSum($variable1, $variable2 = 12)}
+{function calculateSum($variable1, $variable2 = 12)}
     {return $variable1 + $variable2}
-{/macro}
+{/function}
 
 {$value1 = 7}
 {$value2 = 3}

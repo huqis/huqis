@@ -8,12 +8,12 @@ use frame\library\tokenizer\FunctionTokenizer;
 use frame\library\TemplateCompiler;
 
 /**
- * Macro block element, used to define functions inline in the template
+ * Function block element, used to define functions inline in the template
  */
-class MacroTemplateBlock implements TemplateBlock {
+class FunctionTemplateBlock implements TemplateBlock {
 
     /**
-     * Constructs a new macro template block
+     * Constructs a new function template block
      * @return null
      */
     public function __construct() {
@@ -53,7 +53,7 @@ class MacroTemplateBlock implements TemplateBlock {
         // validate the signature
         $numTokens = count($tokens);
         if ($numTokens < 3 || $numTokens > 4 || $tokens[1] !== SyntaxSymbol::NESTED_OPEN || $tokens[$numTokens - 1] !== SyntaxSymbol::NESTED_CLOSE) {
-            throw new CompileTemplateException($signature . ' is an invalid macro signature');
+            throw new CompileTemplateException($signature . ' is an invalid function signature');
         }
 
         // parse the arguments from the signature
@@ -73,7 +73,7 @@ class MacroTemplateBlock implements TemplateBlock {
             foreach ($tokens as $token) {
                 if ($token === SyntaxSymbol::FUNCTION_ARGUMENT) {
                     if (!$needsSeparator) {
-                        throw new CompileTemplateException($signature . ' is an invalid macro signature');
+                        throw new CompileTemplateException($signature . ' is an invalid function signature');
                     }
 
                     $this->addArgument($compiler, $value, $arguments, $defaults);
@@ -91,7 +91,7 @@ class MacroTemplateBlock implements TemplateBlock {
             }
         }
 
-        // compile the macro function to the output buffer
+        // compile the function to the output buffer
         if ($arguments) {
             $isFirst = true;
 
@@ -108,11 +108,11 @@ class MacroTemplateBlock implements TemplateBlock {
 
         $this->counter++;
 
-        $buffer->appendCode('$macro' . $this->counter . ' = function(TemplateContext $context) { ');
+        $buffer->appendCode('$function' . $this->counter . ' = function(TemplateContext $context) { ');
         $buffer->setAllowOutput(true);
 
         $context = $context->createChild();
-        $context->removeBlock('macro');
+        $context->removeBlock('function');
         $context->setBlock('return', new ReturnTemplateBlock());
 
         $compiler->setContext($context);
@@ -121,7 +121,7 @@ class MacroTemplateBlock implements TemplateBlock {
 
         $buffer->clearAllowOutput();
         $buffer->appendCode(' };');
-        $buffer->appendCode('$context->setFunction(\'' . $name . '\', new \frame\library\func\MacroTemplateFunction("' . $name . '", $macro' . $this->counter . $arguments . '));');
+        $buffer->appendCode('$context->setFunction(\'' . $name . '\', new \frame\library\func\FunctionTemplateFunction("' . $name . '", $function' . $this->counter . $arguments . '));');
     }
 
     /**

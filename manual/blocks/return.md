@@ -1,6 +1,6 @@
 # Blocks: return 
 
-Returns a value from inside a ```macro``` block.
+Returns a value from inside a ```function``` block.
 
 ## Syntax
 
@@ -11,9 +11,9 @@ Returns a value from inside a ```macro``` block.
 ## Example
 
 ```
-{macro calculateSum($variable1, $variable2)}
+{function calculateSum($variable1, $variable2)}
     {return $variable1 + $variable2}
-{/macro}
+{/function}
 
 {$value1 = 7}
 {$value2 = 12}
@@ -27,3 +27,7 @@ will output:
 ```
 19
 ```
+
+## See Also
+
+- [function](function.md)

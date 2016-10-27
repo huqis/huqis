@@ -27,4 +27,4 @@ The con...
 
 ## See Also
 
-- [macro](macro.md)
+- [function](function.md)

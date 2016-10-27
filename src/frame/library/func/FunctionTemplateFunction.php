@@ -6,26 +6,26 @@ use frame\library\exception\RuntimeTemplateException;
 use frame\library\TemplateContext;
 
 /**
- * Function to call defined macro blocks which are compiled as a function in the
- * compiled template. Used internally to create dynamic macro blocks.
- * @see \frame\library\block\MacroTemplateBlock
+ * Function to call defined function blocks which are compiled as a function in
+ * the compiled template. Used internally to create dynamic function blocks.
+ * @see \frame\library\block\FunctionTemplateBlock
  */
-class MacroTemplateFunction implements TemplateFunction {
+class FunctionTemplateFunction implements TemplateFunction {
 
     /**
-     * Name of the macro
+     * Name of the function
      * @var string
      */
     private $name;
 
     /**
-     * Callback for the macro
+     * Callback for the function
      * @var callable
      */
     private $callback;
 
     /**
-     * Argument mapping for incoming arguments to the macro child context
+     * Argument mapping for incoming arguments to the function child context
      * variables. An array with the index of the incoming argument as key and
      * the variable name as value
      * @var array
@@ -33,23 +33,23 @@ class MacroTemplateFunction implements TemplateFunction {
     private $arguments;
 
     /**
-     * Default value mapping for incoming arguments to the macro child context
-     * variables. An array with the index of the incoming argument as key and
-     * the default as value
+     * Default value mapping for incoming arguments to the function child
+     * context variables. An array with the index of the incoming argument as
+     * key and the default as value
      * @var array
      */
     private $defaults;
 
     /**
-     * Constructs a new macro function
-     * @param string $name Name of the macro
-     * @param callable $callback Callback for the macro block function
+     * Constructs a new function
+     * @param string $name Name of the function
+     * @param callable $callback Callback for the function block function
      * @param array $arguments Argument mapping for incoming arguments to the
-     * macro child context variables. An array with the index of the incoming
+     * function child context variables. An array with the index of the incoming
      * argument as key and the variable name as value
      * @param array $defaults Default value mapping for incoming arguments to
-     * the macro child context variables. An array with the index of the incoming
-     * argument as key and the default as value
+     * the function child context variables. An array with the index of the
+     * incoming argument as key and the default as value
      * @return null
      */
     public function __construct($name, $callback, array $arguments = [], $defaults = []) {
@@ -75,7 +75,7 @@ class MacroTemplateFunction implements TemplateFunction {
             } elseif (array_key_exists($index, $this->defaults)) {
                 $context->setVariable($name, $this->defaults[$index]);
             } else {
-                throw new RuntimeTemplateException('Could not call ' . $this->name . ': missing argument ' . ($index + 1) . ' $' . $name);
+                throw new RuntimeTemplateException('Could not call function ' . $this->name . ': missing argument ' . ($index + 1) . ' $' . $name);
             }
         }
 

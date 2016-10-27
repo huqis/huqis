@@ -6,8 +6,8 @@ use frame\library\tokenizer\symbol\SyntaxSymbol;
 use frame\library\TemplateCompiler;
 
 /**
- * Return block element, used in a macro block
- * @see MacroTemplateBlock
+ * Return block element, used in a function block
+ * @see FunctionTemplateBlock
  */
 class ReturnTemplateBlock implements TemplateBlock {
 

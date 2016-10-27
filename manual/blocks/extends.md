@@ -2,7 +2,7 @@
 
 Extends a block from another template and alters the template's blocks.
 
-Inside an ```extends```, you cannot generate output except from inside a ```block``` or ```macro```.
+Inside an ```extends```, you cannot generate output except from inside a ```block``` or ```function```.
 
 You can create nested extends blocks but you cannot use a block name of a parent block.
 
@@ -34,4 +34,4 @@ You can create nested extends blocks but you cannot use a block name of a parent
 
 - [block](block.md)
 - [include](include.md)
-- [macro](macro.md)
+- [function](function.md)

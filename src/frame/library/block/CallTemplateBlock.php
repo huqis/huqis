@@ -101,7 +101,7 @@ class CallTemplateBlock implements TemplateBlock {
         $buffer->endBufferBlock();
         $buffer->appendCode(' };');
 
-        // call the macro function with the compiled arguments
+        // call the function with the compiled arguments
         if ($arguments) {
             $arguments = '[' . implode(', ', $arguments) . ']';
         } else {

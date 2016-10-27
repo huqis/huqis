@@ -171,11 +171,11 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                     'names' => array('John', 'Jane', 'Mike'),
                 ),
             ),
-            // macro tests
+            // function tests
             array(
                 '<p>Hello, my name is John</p><p>Hello, my name is Jane</p>',
                 array(
-                    'index' => '{macro sayName($name)}<p>Hello, my name is {$name}</p>{/macro}{foreach $names as $name}{sayName($name)}{/foreach}',
+                    'index' => '{function sayName($name)}<p>Hello, my name is {$name}</p>{/function}{foreach $names as $name}{sayName($name)}{/foreach}',
                 ),
                 array(
                     'names' => array('John', 'Jane'),
@@ -184,7 +184,7 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
             array(
                 'Hello, my name is Joe',
                 array(
-                    'index' => '{macro sayName($name)}{$name}{/macro}Hello, my name is {$echoName($name)}',
+                    'index' => '{function sayName($name)}{$name}{/function}Hello, my name is {$echoName($name)}',
                 ),
                 array(
                     'echoName' => 'sayName',
@@ -194,7 +194,7 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
             array(
                 '<p>Hello, my name is John</p><p>Hello, my name is Jane</p>',
                 array(
-                    'index' => '{macro sayName($name)}<p>Hello, my name is {$name}</p>{/macro}{include "include"}',
+                    'index' => '{function sayName($name)}<p>Hello, my name is {$name}</p>{/function}{include "include"}',
                     'include' => '{foreach $names as $name}{sayName($name)}{/foreach}',
                 ),
                 array(
@@ -204,7 +204,7 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
             array(
                 '<p>Hello, my name is John</p><p>Hello, my name is Jane</p>',
                 array(
-                    'index' => '{macro sayName($name)}<p>Hello, my name is {$name}</p>{/macro}{include $include}',
+                    'index' => '{function sayName($name)}<p>Hello, my name is {$name}</p>{/function}{include $include}',
                     'include' => '{foreach $names as $name}{sayName($name)}{/foreach}',
                 ),
                 array(
@@ -215,20 +215,20 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
             array(
                 '19',
                 array(
-                    'index' => '{macro calculateSum($variable1, $variable2)}{$value3 = "scope test"}{return $variable1 + $variable2}{/macro}{$value1 = 7}{$value2 = 12}{$sum = calculateSum($value1, $value2)}{$sum}{$value3}',
+                    'index' => '{function calculateSum($variable1, $variable2)}{$value3 = "scope test"}{return $variable1 + $variable2}{/function}{$value1 = 7}{$value2 = 12}{$sum = calculateSum($value1, $value2)}{$sum}{$value3}',
                 ),
             ),
             array(
                 'test3',
                 array(
-                    'index' => '{macro renderSomething($variable1 = 1, $variable2 = 2, $variable3 = "test", $variable4 = null)}{return $variable3 ~ ($variable1 + $variable2)}{/macro}{renderSomething()}',
+                    'index' => '{function renderSomething($variable1 = 1, $variable2 = 2, $variable3 = "test", $variable4 = null)}{return $variable3 ~ ($variable1 + $variable2)}{/function}{renderSomething()}',
                 ),
             ),
             // call tests
             array(
                 '<p>Hello, my name is John and I\'m 30 years old.</p>',
                 array(
-                    'index' => '{macro sayName($name, $age)}<p>Hello, my name is {$name} and I\'m {$age} years old.</p>{/macro}{$age = 30}{call sayName($call, $age)}{$name}{/call}',
+                    'index' => '{function sayName($name, $age)}<p>Hello, my name is {$name} and I\'m {$age} years old.</p>{/function}{$age = 30}{call sayName($call, $age)}{$name}{/call}',
                 ),
                 array(
                     'name' => 'John',
@@ -237,7 +237,7 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
             array(
                 '<p>Hello, my name is John and I\'m 30 years old.</p>',
                 array(
-                    'index' => '{macro sayName($name, $age)}<p>Hello, my name is {$name} and I\'m {$age} years old.</p>{/macro}{call sayName($call, 30)}{$name}{/call}',
+                    'index' => '{function sayName($name, $age)}<p>Hello, my name is {$name} and I\'m {$age} years old.</p>{/function}{call sayName($call, 30)}{$name}{/call}',
                 ),
                 array(
                     'name' => 'John',
@@ -354,12 +354,12 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                 ),
             ),
 
-            // Nope, macros/functions should be defined before a block is first used
+            // Nope, functions/functions should be defined before a block is first used
             // array(
                 // array(
                     // 'index' => '{extends "base2"}{/extends}',
-                    // 'base2' => '{extends "base"}{macro sayName($name)}Hi {$name}{/macro}{block "title" prepend}{sayName($name)} - {/block}{/extends}',
-                    // 'base' => '{macro sayName($name)}Hello {$name}{/macro}<h1>{block "title"}Site{/block}</h1>',
+                    // 'base2' => '{extends "base"}{function sayName($name)}Hi {$name}{/function}{block "title" prepend}{sayName($name)} - {/block}{/extends}',
+                    // 'base' => '{function sayName($name)}Hello {$name}{/function}<h1>{block "title"}Site{/block}</h1>',
                 // ),
                 // array(
                     // 'name' => 'John',

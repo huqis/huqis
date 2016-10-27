@@ -67,10 +67,10 @@ Implementations out of the box:
 - ```ElseTemplateBlock```
 - ```ExtendsTemplateBlock```
 - ```ForeachTemplateBlock```
+- ```FunctionTemplateBlock```
 - ```IfTemplateBlock```
 - ```IncludeTemplateBlock```
 - ```LiteralTemplateBlock```
-- ```MacroTemplateBlock```
 - ```ReturnTemplateBlock```
 
 ### TemplateFunction
