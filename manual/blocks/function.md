@@ -7,6 +7,8 @@ A default argument value can only be a scalar value like null, a boolean, a numb
 
 The function cannot access variables outside it's block.
 
+Use the [```return```](return.md) block if you want the function to return something when called.
+
 ## Syntax
 
 ```

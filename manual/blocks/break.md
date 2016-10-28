@@ -1,6 +1,6 @@
 # Blocks: break
 
-Breaks the current ```foreach``` block.
+Breaks the current [```foreach```](foreach.md) block.
 
 ## Syntax
 

@@ -1,6 +1,8 @@
 # Blocks: return 
 
-Returns a value from inside a ```function``` block.
+Returns a value as the result of a [```function```](function.md) block.
+
+This block exists only inside a ```function``` block.
 
 ## Syntax
 

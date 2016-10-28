@@ -1,6 +1,6 @@
 # Blocks: continue
 
-Forwards to the next iteration in a ```foreach``` block and skips the rest of the block code.
+Forwards to the next iteration in a [```foreach```](foreach.md) block and skips the rest of the block code.
 
 ## Syntax
 

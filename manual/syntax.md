@@ -4,34 +4,53 @@ All template syntax expressions are delimited by ```{``` and ```}```.
 
 ## Variables
 
-Strings can only be delimited by ```"```.
-
-Arrays are delimited by ```[``` and ```]``` with a ```,``` between the elements.
-To specify a key, use the assignment ```=``` operator.
-
-You can unset any variable by assigning null to it:
-
 ```
 {"test"}
 {15.987}
 {true}
 {null}
+```
 
+Strings can only be delimited by ```"```.
+
+Variables are prefixed with a ```$``` and set with the assignment ```=``` operator.
+
+```
 {$variable}
 {$variable = "test"}
+```
 
+Arrays are delimited by ```[``` and ```]``` with a ```,``` between the elements.
+To specify a key, use the assignment ```=``` operator.
+
+```
 {$array = ["John", "Jane"]}
-{$array = ["key1" = "value1", "key2" = "value2"]}
+{$array = ["key1" = "value1", "key2" = $variable]}
+```
 
-{$array.key}
+When accessing variables, you can use ```.``` do go deeper in a structural variable like arrays and objects.
+This is also used to call methods on objects.
+
+The following expressions both have the same result:
+
+```
+{$array.key1}
+{$array["key1"]}
 
 {$object.property}
-{$object.method()}
+{$object.getProperty()}
+```
 
+You can go as deep as you want with this.
+
+```
 {$array.key3.object = $object}
-
 {$array.key3.object.method()}
+```
 
+You can unset any variable by assigning ```null``` to it:
+
+```
 {$variable = null}
 {$array.key3 = null}
 {$object = null}
@@ -70,17 +89,17 @@ Functions are interpreted at runtime.
 - [truncate](functions/truncate.md)
 - [upper](functions/upper.md)
 
-A function can also be used as a modifier with ```|``` after an expression.
-The first argument will be the value it's modifying.
+A function can be called straight but it can also be used as a modifier by using ```|``` after an expression.
+The first argument for the function will be the result of the expression.
 
-Both of the following expressions have the same result:
+Knowing this, both of the following expressions have the same result:
 
 ```
 {capitalize($string, "first")}
 {$string|capitalize("first")}
 ```
 
-You can chain modifiers after each other:
+Modifiers can be chained after each other:
 
 ```
 {$string|lower|capitalize("all")}

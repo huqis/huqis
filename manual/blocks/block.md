@@ -2,6 +2,14 @@
 
 Defines an inheritable and overridable template block.
 
+Blocks are used together with [```extends```](extends.md). 
+
+You create a parent template which uses ```block``` to create placeholders.
+These placeholders blocks can have a default body for when they are untouched.
+
+The main template uses ```extends``` to include the parent template.
+Inside the ```extends``` block, it defines the same blocks as the parent to override or alter those blocks.
+
 ## Syntax
 
 ```

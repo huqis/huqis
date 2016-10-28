@@ -1,10 +1,12 @@
 # Blocks: extends
 
-Extends a block from another template and alters the template's blocks.
+Includes another template in the current context and alters the template's [```block```](block.md) placeholders.
 
-Inside an ```extends```, you cannot generate output except from inside a ```block``` or ```function```.
+You cannot create new ```block``` placeholders inside this block, they should exist in the extended template.
 
-You can create nested extends blocks but you cannot use a block name of a parent block.
+Output is not allowed except when inside a ```block``` or [```function```](function.md) block.
+
+You can nest this block, meaning an ```extends``` inside an ```extends```,  but you cannot use a ```block``` name which is used in a parent ```extends``` block.
 
 ## Syntax
 
