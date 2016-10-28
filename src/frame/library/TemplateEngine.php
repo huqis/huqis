@@ -5,6 +5,8 @@ namespace frame\library;
 use frame\library\cache\TemplateCache;
 use frame\library\exception\CompileTemplateException;
 use frame\library\exception\RuntimeTemplateException;
+use frame\library\executor\EvalTemplateExecutor;
+use frame\library\executor\IncludeTemplateExecutor;
 use frame\library\helper\StringHelper;
 use frame\library\resource\TemplateResourceHandler;
 
@@ -28,16 +30,22 @@ class TemplateEngine {
     private $compiler;
 
     /**
+     * Instance of the template executor
+     * @var \frame\library\executor\TemplateExecutor
+     */
+    private $executor;
+
+    /**
      * Cache for the compiled templates
      * @var \frame\library\cache\TemplateCache
      */
     private $cache;
 
     /**
-     * History of loaded code indexed by runtimeId
-     * @var array
+     * Flag to see if debug mode is on
+     * @var boolean
      */
-    private $loadedCode;
+    private $isDebug;
 
     /**
      * Constructs a new template engine
@@ -50,10 +58,10 @@ class TemplateEngine {
         $this->context = $context;
         $this->context->setEngine($this);
 
-        $this->setCache($cache);
-
         $this->compiler = new TemplateCompiler($this->context);
-        $this->loadedCode = [];
+
+        $this->setIsDebug(false);
+        $this->setCache($cache);
     }
 
     /**
@@ -71,6 +79,31 @@ class TemplateEngine {
      */
     public function setCache(TemplateCache $cache = null) {
         $this->cache = $cache;
+    }
+
+    /**
+     * Sets the debug flag on
+     * @param boolean $isDebug True to enable debug, this will execute templates
+     * through a temporary file so a runtime exception can show the source of
+     * the compiled template, false to use the eval function
+     * @return null
+     */
+    public function setIsDebug($isDebug) {
+        if ($isDebug) {
+            $this->executor = new IncludeTemplateExecutor();
+        } else {
+            $this->executor = new EvalTemplateExecutor();
+        }
+
+        $this->isDebug = $isDebug;
+    }
+
+    /**
+     * Gets the debug flag
+     * @return boolean
+     */
+    public function isDebug() {
+        return $this->isDebug;
     }
 
     /**
@@ -228,29 +261,7 @@ class TemplateEngine {
         ob_start();
 
         try {
-            $file = null;
-
-            if (!isset($this->loadedCode[$runtimeId])) {
-                $file = tempnam(sys_get_temp_dir(), 'frame-' . $runtimeId . '-');
-                file_put_contents($file, '<?php ' . $code);
-                include($file);
-
-                // $result = eval($code);
-                // if ($result === false) {
-                    // $error = error_get_last();
-
-                    // throw new RuntimeTemplateException($error['message'] . ' on line ' . $error['line']);
-                // }
-
-                $this->loadedCode[$runtimeId] = true;
-            }
-
-            $template = 'frameTemplate' . $runtimeId;
-            $template($context);
-
-            if ($file) {
-                unlink($file);
-            }
+            $this->executor->execute($context, $code, $runtimeId);
         } catch (Exception $exception) {
             ob_end_clean();
 
