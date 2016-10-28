@@ -46,11 +46,14 @@ class IncludeTemplateBlock implements TemplateBlock {
     public function compile(TemplateCompiler $compiler, $signature, $body) {
         $resource = null;
         $arguments = null;
+        $hasWith = false;
         $value = '';
 
+        // parse signature
         $tokens = $this->tokenizer->tokenize($signature);
         foreach ($tokens as $token) {
             if ($token == SyntaxSymbol::INCLUDE_WITH) {
+                $hasWith = true;
                 $resource .= trim($value);
                 $value = '';
             } else {
@@ -66,35 +69,41 @@ class IncludeTemplateBlock implements TemplateBlock {
             }
         }
 
+        if ($hasWith && !$arguments) {
+            throw new CompileTemplateException('Could not include ' . $resource . ': with keyword provided but no variables');
+        }
+
+        // check for dynamic include
         try {
             $resource = $compiler->compileScalarValue($resource);
-            $isStaticTemplate = true;
+            $isDynamicInclude = false;
         } catch (CompileTemplateException $exception) {
-            $isStaticTemplate = false;
+            $isDynamicInclude = true;
         }
 
-        if ($arguments) {
-            $arguments = $compiler->compileExpression($arguments);
-            if (substr($arguments, 0, 1) != SyntaxSymbol::ARRAY_OPEN && substr($arguments, -1) != SyntaxSymbol::ARRAY_CLOSE) {
-                throw new CompileTemplateException('Could not include ' . $resource . ': arguments should be an array');
+        // prepare the code to compile
+        if ($isDynamicInclude) {
+            if ($arguments) {
+                $arguments = ', ' . $arguments;
             }
-        }
 
-        if ($isStaticTemplate) {
+            $code = '{_include(' . $resource  . $arguments . ')}';
+        } else {
             $resource = substr($resource, 1, -1);
+
+            if ($arguments) {
+                $arguments = $compiler->compileExpression($arguments);
+                $arguments = '$context->ensureArray(' . $arguments . ', "Could not include ' . $resource . ': with variables should be an array")';
+            }
+
             $code = $compiler->getContext()->getResourceHandler()->getResource($resource);
 
             if ($arguments) {
                 $compiler->getOutputBuffer()->appendCode('$context->setVariables(' . $arguments . ');');
             }
-        } else {
-            if ($arguments) {
-                $arguments = ', ' . $arguments;
-            }
-
-            $code = '{_include(' . $signature  . $arguments . ')}';
         }
 
+        // compile the include
         try {
             $compiler->subcompile($code);
         } catch (CompileTemplateException $exception) {

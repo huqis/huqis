@@ -21,19 +21,22 @@ class IncludeTemplateFunction implements TemplateFunction {
      * @param array $arguments Arguments for the function
      * @return mixed Result of the function
      */
-    public function call(TemplateContext $context, array $resources) {
-        $engine = $context->getEngine();
-        $output = '';
-
-        foreach ($resources as $resource) {
-            if (!$resource) {
-                throw new RuntimeTemplateException('Could not include template: no resource(s) provided');
-            }
-
-            $output .= $engine->render($resource, [], $context);
+    public function call(TemplateContext $context, array $arguments) {
+        if (!$arguments) {
+            return;
         }
 
-        return $output;
+        $engine = $context->getEngine();
+        $variables = [];
+
+        $resource = array_shift($arguments);
+        if (!trim($resource)) {
+            throw new RuntimeTemplateException('Could not include template: empty resource name provided');
+        } elseif ($arguments) {
+            $variables = array_shift($arguments);
+        }
+
+        return $engine->render($resource, $variables, $context);
     }
 
 }

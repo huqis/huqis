@@ -767,23 +767,42 @@ class TemplateCompiler {
                     $nested .= $token;
                 } else {
                     if ($result) {
+                        // double function call
+                        // eg $object.method(...).method2(...)
                         if (substr($value, 0, 1) !== SyntaxSymbol::VARIABLE_SEPARATOR) {
                             throw new CompileTemplateException('Cannot call a method here');
                         }
 
-                        $result .= '->' . substr($value, 1) . '(' . $this->compileFunction($nested) . ')';
+                        $arguments = $this->compileFunction($nested);
+
+                        $expression = '';
+                        foreach ($tokens as $expressionTokenIndex => $token) {
+                            $expression .= $token;
+
+                            if ($expressionTokenIndex == $tokenIndex) {
+                                break;
+                            }
+                        }
+
+                        $expression = str_replace($value . '(' . $nested . ')', '', $expression);
+
+                        $result = '$context->ensureObject(' . $result . ', \'Could not call ' . substr($variable, strlen($expression) + 1) . ': ' . $expression . ' is not an object\')';
+                        $result .= '->' . substr($value, 1) . '(' . $arguments . ')';
                     } else {
                         $name = $this->parseName($value);
                         $nameTokens = explode(SyntaxSymbol::VARIABLE_SEPARATOR, $name);
                         if (count($nameTokens) === 1) {
                             // dynamic function call
+                            // $function(...)
                             $result = '$context->call(' . $this->compileGetVariable($name) . ', [' . $this->compileFunction($nested) . '])';
                         } else {
                             // straight function call
+                            // $object.method(...)
                             $method = array_pop($nameTokens);
                             $name = implode(SyntaxSymbol::VARIABLE_SEPARATOR, $nameTokens);
 
-                            $result = $this->compileGetVariable($name) . '->' . $method . '(' . $this->compileFunction($nested) . ')';
+                            $result = '$context->ensureObject(' . $this->compileGetVariable($name) . ', \'Could not call ' . substr($variable, strlen($name) + 2) . ': $' . $name . ' is not an object\')';
+                            $result .= '->' . $method . '(' . $this->compileFunction($nested) . ')';
                         }
                     }
 

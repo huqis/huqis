@@ -275,6 +275,31 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                     'title' => 'My Title',
                 ),
             ),
+            array(
+                'My Title',
+                array(
+                    'index' => '{include "helper" with $values}',
+                    'helper' => '{$value}',
+                ),
+                array(
+                    'values' => array(
+                        'value' => 'My Title',
+                    ),
+                ),
+            ),
+            array(
+                'My Title',
+                array(
+                    'index' => '{include $template with $values}',
+                    'helper' => '{$value}',
+                ),
+                array(
+                    'template' => 'helper',
+                    'values' => array(
+                        'value' => 'My Title',
+                    ),
+                ),
+            ),
             // extends tests
             array(
                 '<h1>My Title</h1>',
@@ -342,7 +367,7 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                     'subtitle' => 'Title',
                 ),
             ),
-                        array(
+            array(
                 '<h2>Heading 2: Section</h2>',
                 array(
                     'index' => '{$base = "template-2"}{extends $base}{block "title" append}: {$title}{/block}{/extends}',
@@ -390,6 +415,23 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
         return array(
             array(
                 array(
+                    'index' => '{include "unexistant"}',
+                ),
+            ),
+            array(
+                array(
+                    'index' => '{include "helper" with }',
+                    'helper' => '',
+                ),
+            ),
+            array(
+                array(
+                    'index' => '{include "helper" with "only-arrays-allowed"}',
+                    'helper' => '',
+                ),
+            ),
+            array(
+                array(
                     'index' => '{extends "base"}{block "unexistant"}{/block}{/extends}',
                     'base' => '{block "title"}{/block}',
                 ),
@@ -399,7 +441,7 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
 
     /**
      * @dataProvider providerRenderThrowsException
-     * @expectedException \frame\library\exception\CompileTemplateException
+     * @expectedException \frame\library\exception\TemplateException
      */
     public function testRenderThrowsException(array $resources) {
         $resourceHandler = new ArrayTemplateResourceHandler();

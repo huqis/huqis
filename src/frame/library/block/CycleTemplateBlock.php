@@ -2,6 +2,7 @@
 
 namespace frame\library\block;
 
+use frame\library\helper\StringHelper;
 use frame\library\TemplateCompiler;
 
 /**
@@ -36,8 +37,13 @@ class CycleTemplateBlock implements TemplateBlock {
     public function compile(TemplateCompiler $compiler, $signature, $body) {
         $buffer = $compiler->getOutputBuffer();
 
+        if (!trim($signature)) {
+            throw new CompileTemplateException('Could not compile cycle block: no values provided');
+        }
+
         $name = '_cycle' . md5($signature);
-        $arguments = '[' . $compiler->compileExpression($signature) . ']';
+        $arguments = $compiler->compileExpression($signature);
+        $arguments = '[$context->ensureArray(' . $arguments . ', "Could not cycle ' . StringHelper::escapeQuotes($signature) . ': values should be an array")]';
 
         $buffer->appendCode('if (!$context->hasFunction(\'' . $name . '\')) {');
         $buffer->appendCode('$' . $name . ' = new \frame\library\func\CycleTemplateFunction();');

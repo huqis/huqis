@@ -417,7 +417,7 @@ class TemplateContext {
      * @param mixed $value Value to apply the modifiers to
      * @param array $modifiers Array with modifier arrays as value. A modifier
      * array is an array with the name of the template function as first value
-     * and the extra arguments for that function are the remaining values.
+     * and the extra arguments for that function as the remaining values.
      * @return mixed Value with the modifiers applied
      * @see \frame\library\func\TemplateFunction
      * @see call()
@@ -431,6 +431,38 @@ class TemplateContext {
         }
 
         return $value;
+    }
+
+    /**
+     * Ensures the provided value is an array
+     * @param mixed $array Value to ensure
+     * @param string $error Error message for the exception
+     * @return array Provided array value
+     * @throws \frame\library\exception\RuntimeTemplateException when the
+     * provided value is not an array
+     */
+    public function ensureArray($array, $error) {
+        if (!is_array($array)) {
+            throw new RuntimeTemplateException($error);
+        }
+
+        return $array;
+    }
+
+    /**
+     * Ensures the provided value is an object
+     * @param mixed $object Value to ensure
+     * @param string $error Error message for the exception
+     * @return mixed Provided object instance
+     * @throws \frame\library\exception\RuntimeTemplateException when the
+     * provided value is not an object
+     */
+    public function ensureObject($object, $error) {
+        if (!is_object($object)) {
+            throw new RuntimeTemplateException($error);
+        }
+
+        return $object;
     }
 
     //
@@ -561,6 +593,22 @@ class TemplateContext {
     }
 
     /**
+     * Removes a function from the context
+     * @param string $name Name of the function
+     * @return boolean True when the function is removed, false when it is not
+     * registered
+     */
+    public function removeFunction($name) {
+        if (!$this->hasFunction($name)) {
+            return false;
+        }
+
+        unset($this->functions[$name]);
+
+        return true;
+    }
+
+    /**
      * Calls a function from the context. If the function name is not registered
      * and allow native PHP functions is enabled, the PHP function with the
      * provided name will be called
@@ -581,22 +629,6 @@ class TemplateContext {
         }
 
         return $this->getFunction($name)->call($this, $arguments);
-    }
-
-    /**
-     * Removes a function from the context
-     * @param string $name Name of the function
-     * @return boolean True when the function is removed, false when it is not
-     * registered
-     */
-    public function removeFunction($name) {
-        if (!$this->hasFunction($name)) {
-            return false;
-        }
-
-        unset($this->functions[$name]);
-
-        return true;
     }
 
     //

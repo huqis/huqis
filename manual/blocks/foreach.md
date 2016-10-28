@@ -7,6 +7,7 @@ The ```key``` keyword defines the variable for the key in the array.
 The ```loop``` keyword defines a variable with more information about the current iteration.
 
 All these keywords are optional but at least one is required.
+The sequence of the keywords do not matter.
 
 The ```$loop``` variable is an array with the following keys:
 - ```index```: Index of the current iteration
@@ -31,15 +32,21 @@ The ```$loop``` variable is an array with the following keys:
     {if $value == 3}
         {break}
     {/if}
-    {$value}<br />
+    {$value}<br>
 {/foreach}
 
 {foreach $values key $key}{/foreach}
 
 {foreach $values loop $loop}
     {if $loop.last}
-        {$loop.index]
-    {.if}
+        {$loop.index]<br>
+    {/if}
+{/foreach}
+
+{foreach $values as $value key $key loop $loop}
+    {if $loop.first}
+        {$loop.index]<br>
+    {/if}
 {/foreach}
 
 ```
@@ -50,6 +57,7 @@ will output:
 1
 2
 8
+0
 ```
 
 ## See Also
