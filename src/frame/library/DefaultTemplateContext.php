@@ -2,8 +2,8 @@
 
 namespace frame\library;
 
-use frame\library\block\AssignTemplateBlock;
 use frame\library\block\BlockTemplateBlock;
+use frame\library\block\CaptureTemplateBlock;
 use frame\library\block\CycleTemplateBlock;
 use frame\library\block\ExtendsTemplateBlock;
 use frame\library\block\ForeachTemplateBlock;
@@ -195,7 +195,7 @@ class DefaultTemplateContext extends TemplateContext {
 
                 break;
             case 'capture':
-                $this->setBlock('capture', new AssignTemplateBlock());
+                $this->setBlock('capture', new CaptureTemplateBlock());
 
                 break;
             case 'cycle':

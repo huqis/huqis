@@ -2,6 +2,8 @@
 
 Includes another template in the current context.
 
+You can pass variables to the included template with the ```with``` keyword followed by an array or variables.
+
 ## Syntax
 
 ```

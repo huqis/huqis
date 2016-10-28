@@ -228,6 +228,8 @@ class TemplateEngine {
         ob_start();
 
         try {
+            $file = null;
+
             if (!isset($this->loadedCode[$runtimeId])) {
                 $file = tempnam(sys_get_temp_dir(), 'frame-' . $runtimeId . '-');
                 file_put_contents($file, '<?php ' . $code);
@@ -245,6 +247,10 @@ class TemplateEngine {
 
             $template = 'frameTemplate' . $runtimeId;
             $template($context);
+
+            if ($file) {
+                unlink($file);
+            }
         } catch (Exception $exception) {
             ob_end_clean();
 

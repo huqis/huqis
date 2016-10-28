@@ -36,3 +36,7 @@ will output:
     </tr>
 </table>
 ```
+
+## See Also
+
+- [foreach](foreach.md)

@@ -5,9 +5,9 @@ namespace frame\library\block;
 use frame\library\TemplateCompiler;
 
 /**
- * Assign block to create or update a variable from a template block
+ * Capture block to create or update a variable from a template block
  */
-class AssignTemplateBlock implements TemplateBlock {
+class CaptureTemplateBlock implements TemplateBlock {
 
     /**
      * Constructs a new assign block
@@ -50,7 +50,7 @@ class AssignTemplateBlock implements TemplateBlock {
         $this->counter++;
 
         // create a closure from the body block
-        $buffer->appendCode('$assign' . $this->counter . ' = function(TemplateContext $context) { ');
+        $buffer->appendCode('$capture' . $this->counter . ' = function(TemplateContext $context) { ');
         $buffer->startBufferBlock();
 
         $context = $context->createChild();
@@ -63,8 +63,8 @@ class AssignTemplateBlock implements TemplateBlock {
         $buffer->appendCode(' };');
 
         // call the closure and assign the result to the variable
-        $buffer->appendCode('$context->setVariable("' . $name . '", $assign' . $this->counter . '($context));');
-        $buffer->appendCode('unset($assign' . $this->counter . ');');
+        $buffer->appendCode('$context->setVariable("' . $name . '", $capture' . $this->counter . '($context));');
+        $buffer->appendCode('unset($capture' . $this->counter . ');');
     }
 
 }

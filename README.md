@@ -57,10 +57,9 @@ echo $engine->render('my-template.tpl', ['title' => 'My dynamic title']);
 The ```TemplateBlock``` interface is used to implement custom template blocks in PHP.
 
 Implementations out of the box:
-- ```AssignTemplateBlock```
 - ```BlockTemplateBlock```
 - ```BreakTemplateBlock```
-- ```CallTemplateBlock```
+- ```CaptureTemplateBlock```
 - ```ContinueTemplateBlock```
 - ```CycleTemplateBlock```
 - ```ElseIfTemplateBlock```
@@ -71,6 +70,7 @@ Implementations out of the box:
 - ```IfTemplateBlock```
 - ```IncludeTemplateBlock```
 - ```LiteralTemplateBlock```
+- ```MacroTemplateBlock```
 - ```ReturnTemplateBlock```
 
 ### TemplateFunction
@@ -83,8 +83,10 @@ Implementations out of the box:
 - ```ConcatTemplateFunction```
 - ```DefaultTemplateFunction```
 - ```EscapeTemplateFunction```
+- ```FormatTemplateFunction```
 - ```LowerTemplateFunction```
 - ```ReplaceTemplateFunction```
+- ```TrimTemplateFunction```
 - ```TruncateTemplateFunction```
 - ```UpperTemplateFunction```
 

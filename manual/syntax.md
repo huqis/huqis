@@ -47,6 +47,7 @@ Blocks are interpreted at compile time.
 - [continue](blocks/continue.md)
 - [cycle](blocks/cycle.md)
 - [extends](blocks/extends.md)
+- [foreach](blocks/foreach.md)
 - [function](blocks/function.md)
 - [if](blocks/if.md)
 - [include](blocks/include.md)
