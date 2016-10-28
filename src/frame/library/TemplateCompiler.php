@@ -10,7 +10,6 @@ use frame\library\tokenizer\ComparisonTokenizer;
 use frame\library\tokenizer\ConditionTokenizer;
 use frame\library\tokenizer\ExpressionTokenizer;
 use frame\library\tokenizer\FunctionTokenizer;
-use frame\library\tokenizer\ModifierTokenizer;
 use frame\library\tokenizer\SyntaxTokenizer;
 use frame\library\tokenizer\ValueTokenizer;
 use frame\library\tokenizer\VariableTokenizer;
@@ -97,7 +96,6 @@ class TemplateCompiler {
         $this->syntaxTokenizer = new SyntaxTokenizer();
         $this->valueTokenizer = new ValueTokenizer();
         $this->variableTokenizer = new VariableTokenizer();
-        $this->modifierTokenizer = new ModifierTokenizer();
         $this->arrayTokenizer = new ArrayTokenizer();
         $this->functionTokenizer = new FunctionTokenizer();
         $this->expressionTokenizer = new ExpressionTokenizer();
@@ -280,7 +278,9 @@ class TemplateCompiler {
 
         $tokenIndex++;
 
-        return $this->compileExpression($token, $strict);
+        $expression = $this->compileExpression($token, $strict);
+
+        return $this->compileOutput($expression, $strict);
     }
 
     /**
@@ -375,7 +375,7 @@ class TemplateCompiler {
      * @param boolean $allowModifiers
      * @return string Compiled value
      */
-    public function compileExpression($expression, $strict = true, $allowModifiers = true) {
+    public function compileExpression($expression, &$strict = true) {
         $result = '';
         $value = '';
         $operator = null;
@@ -384,12 +384,9 @@ class TemplateCompiler {
         $firstChar = substr($expression, 0, 1);
         $lastChar = substr($expression, -1);
         if ($firstChar === SyntaxSymbol::ARRAY_OPEN && $lastChar === SyntaxSymbol::ARRAY_CLOSE) {
-            $result = $this->compileArray(substr($expression, 1, -1), $strict);
-            if (!$strict) {
-                $result .= ';';
-            }
+            $strict = true;
 
-            return $result;
+            return $this->compileArray(substr($expression, 1, -1));
         }
 
         // tokenize on operators
@@ -397,7 +394,7 @@ class TemplateCompiler {
 
         // only 1 token, handle as value
         if (count($tokens) === 1) {
-            return $this->compileValue($expression, $strict, $allowModifiers);
+            return $this->compileValue($expression);
         }
 
         // process tokens
@@ -478,7 +475,7 @@ class TemplateCompiler {
         }
 
         if (!$operator) {
-            return $this->compileValue($expression, $strict, $allowModifiers);
+            return $this->compileValue($expression);
         }
 
         $right = trim($value);
@@ -489,7 +486,7 @@ class TemplateCompiler {
 
         $result .= $this->context->getExpressionOperator($operator)->compile($this, $left, $right);
 
-        return $this->compileOutput($result, $strict);
+        return $result;
     }
 
     /**
@@ -565,12 +562,9 @@ class TemplateCompiler {
      * - $variable|truncate
      * - (15 + 7)|round
      * @param string $value Value expression
-     * @param boolean $strict Flag to see if this is parsed for output, set to
-     * false to display the result
-     * @param boolean $allowModifiers
      * @return string Compiled value
      */
-    private function compileValue($value, $strict = true, $allowModifiers = true) {
+    private function compileValue($value) {
         // validate input
         if ($value === '') {
             throw new CompileTemplateException('Value or variable expected');
@@ -590,7 +584,7 @@ class TemplateCompiler {
 
         // check for variable ($) symbol
         if ($firstChar == '$') {
-            return ($isNot ? '!' : '') . $this->compileVariable($value, $strict);
+            return ($isNot ? '!' : '') . $this->compileVariable($value);
         }
 
         $lastChar = substr($value, -1);
@@ -675,8 +669,6 @@ class TemplateCompiler {
                     throw new CompileTemplateException('Function signature expected');
                 } elseif ($tokens[$tokenIndex] !== SyntaxSymbol::MODIFIER) {
                     throw new CompileTemplateException('Modifier expected');
-                } elseif (!$allowModifiers) {
-                    throw new CompileTemplateException('No modifiers allowed');
                 }
 
                 if ($result === null) {
@@ -699,16 +691,14 @@ class TemplateCompiler {
             $result = '!' . $result;
         }
 
-        return $this->compileOutput($result, $strict);
+        return $result;
     }
 
-    private function compileVariable($variable, $strict = true) {
+    private function compileVariable($variable) {
         try {
             $name = $this->parseName($variable);
 
-            $result = $this->compileGetVariable($name);
-
-            return $this->compileOutput($result, $strict);
+            return $this->compileGetVariable($name);
         } catch (CompileTemplateException $exception) {
             // no simple variable, further code will compile
         }
@@ -828,7 +818,7 @@ class TemplateCompiler {
             $result = '$context->applyModifiers(' . $result . ', [' . implode(', ', $modifiers) . '])';
         }
 
-        return $this->compileOutput($result, $strict);
+        return $result;
     }
 
     /**
@@ -845,50 +835,61 @@ class TemplateCompiler {
         }
 
         $modifier = '';
+        $arguments = '';
+        $value = '';
+        $nested = 0;
+
         do {
-            if (is_array($tokens[$tokenIndex])) {
-                $modifier .= SyntaxSymbol::NESTED_OPEN . $this->parseNested($tokens[$tokenIndex]) . SyntaxSymbol::NESTED_CLOSE;
+            $token = $tokens[$tokenIndex];
+
+            if (is_array($token)) {
+                $value .= $this->parseNested($token);
+            } elseif ($token == SyntaxSymbol::NESTED_OPEN && !$modifier) {
+                if (!$value) {
+                    throw new CompileTemplateException(implode('', $tokens) . ' could not be parsed: name of a modifier expexted after ' . SyntaxSymbol::MODIFIER);
+                }
+
+                $modifier = $value;
+                $value = '';
+            } elseif ($token == SyntaxSymbol::NESTED_OPEN) {
+                $nested++;
+            } elseif ($token == SyntaxSymbol::NESTED_CLOSE && $nested != 0) {
+                $nested--;
+            } elseif ($token == SyntaxSymbol::NESTED_CLOSE) {
+                $arguments = $value;
+                $value = '';
+            } elseif ($arguments) {
+                throw new CompileTemplateException(implode('', $tokens) . ' could not be parsed: ' . SyntaxSymbol::MODIFIER . ' expected');
             } else {
-                $modifier .= $tokens[$tokenIndex];
+                $value .= $token;
             }
 
             $tokenIndex++;
         } while (isset($tokens[$tokenIndex]) && ($tokens[$tokenIndex] !== SyntaxSymbol::MODIFIER && $tokens[$tokenIndex] !== ' '));
 
-        $arguments = [];
-        $argument = '';
-
-        $tokens = $this->modifierTokenizer->tokenize($modifier);
-        foreach ($tokens as $index => $token) {
-            if ($index === 0) {
-                continue;
-            }
-
-            if ($token == SyntaxSymbol::MODIFIER_ARGUMENT) {
-                if ($argument !== '') {
-                    $arguments[] = $this->compileExpression($argument, true, false);
-                    $argument = '';
-                }
-
-                continue;
-            }
-
-            $argument .= $token;
+        if ($value && !$modifier) {
+            $modifier = $value;
+        } elseif ($value) {
+            throw new CompileTemplateException(implode('', $tokens) . ' could not be parsed: ' . SyntaxSymbol::NESTED_CLOSE . ' expected');
         }
 
-        if ($argument !== '') {
-            $arguments[] = $this->compileExpression($argument, true, false);
+        $result = '[';
+        $result .= var_export($modifier, true);
+
+        $arguments = $this->compileFunction($arguments);
+        if ($arguments) {
+            $result .= ', ' . $arguments;
         }
 
-        array_unshift($arguments, var_export($tokens[0], true));
+        $result .= ']';
 
-        return '[' . implode(', ', $arguments) . ']';
+        return $result;
     }
 
     /**
      * Compiles function call arguments
      * @param string $signature Template function call arguments
-     * @return string Compiled condition
+     * @return string Compiled function arguments
      */
     private function compileFunction($signature) {
         $result = '';
@@ -1014,10 +1015,10 @@ class TemplateCompiler {
      */
     private function compileOutput($output, $strict) {
         if (!$strict) {
-            $output = 'echo ' . $output . ';';
+            $output = 'echo ' . $output;
         }
 
-        return $output;
+        return $output . ';';
     }
 
     /**

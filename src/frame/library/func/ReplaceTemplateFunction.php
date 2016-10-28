@@ -11,7 +11,7 @@ use frame\library\TemplateContext;
  * Syntax: replace(<string>, <search>, <replace>)
  *
  * {$result = replace($string, "search", "replace")}
- * {$result = $string|replace:"search":"replace"}
+ * {$result = $string|replace("search", "replace")}
  */
 class ReplaceTemplateFunction implements TemplateFunction {
 

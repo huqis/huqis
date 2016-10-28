@@ -11,7 +11,7 @@ use frame\library\TemplateContext;
  * Syntax: default(<value>, <default>)
  *
  * {$result = default($string, "Defaults to this")}
- * {$result = $string|replace:"Defaults to this"}
+ * {$result = $string|default("Defaults to this")}
  */
 class DefaultTemplateFunction implements TemplateFunction {
 

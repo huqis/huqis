@@ -14,7 +14,7 @@ use frame\library\TemplateContext;
  * {$result = escape($string)}
  * {$result = escape($string, "html")}
  * {$result = $string|escape}
- * {$result = $string|escape:"url"}
+ * {$result = $string|escape("url")}
   */
 class EscapeTemplateFunction implements TemplateFunction {
 

@@ -68,12 +68,6 @@ class SyntaxSymbol extends NestedSymbol {
     const MODIFIER = '|';
 
     /**
-     * Symbol of an argument for a variable modifier
-     * @var string
-     */
-    const MODIFIER_ARGUMENT = ':';
-
-    /**
      * Symbol to get the value of a foreach
      * @var string
      */

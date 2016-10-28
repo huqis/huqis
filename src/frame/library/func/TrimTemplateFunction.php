@@ -11,9 +11,9 @@ use frame\library\TemplateContext;
  * Syntax: trim([$string[, $characters])
  *
  * {$result = trim($string)}
- * {$result = trim($string, '-')}
+ * {$result = trim($string, "-")}
  * {$result = $string|trim}
- * {$result = $string|trim}:"-"}
+ * {$result = $string|trim("-")}
  */
 class TrimTemplateFunction implements TemplateFunction {
 

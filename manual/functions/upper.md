@@ -17,5 +17,5 @@ Transform a string to upper case characters.
 ```
 {$result = upper($string)}
 
-{$result = $string|upper
+{$result = $string|upper}
 ```

@@ -28,7 +28,7 @@ When the value is an array, a query string is generated using PHP's [http_build_
 {$result = escape($string, "html")}
 
 {$result = $string|escape}
-{$result = $string|escape:"html"}
-{$result = $url|escape:"url"}
-{$result = $title|escape:"slug"}
+{$result = $string|escape("html")}
+{$result = $url|escape("url")}
+{$result = $title|escape("slug")}
 ```

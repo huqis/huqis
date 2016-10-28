@@ -22,5 +22,5 @@ This function truncates a value to a specified length.
 {$result = truncate($string, 80, "...", false)}
 
 {$result = $string|truncate}
-{$result = $string|truncate:50:"..."}
+{$result = $string|truncate(50, "...")}
 ```

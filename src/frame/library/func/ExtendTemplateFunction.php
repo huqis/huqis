@@ -10,7 +10,7 @@ use frame\library\TemplateContext;
  *
  * Syntax: _extends(<resource>, <extends-template-code>)
  *
- * {_extends("my-template.tpl", "Display my {$variable})}
+ * {_extends("my-template.tpl", "Display my {$variable}")}
  */
 class ExtendTemplateFunction implements TemplateFunction {
 

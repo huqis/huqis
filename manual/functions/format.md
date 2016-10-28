@@ -25,12 +25,12 @@ The ```extra``` argument is the number of decimals.
 
 ```
 {$value = 15.987654321}
-{$value|format:"number"}
-{$value|format:"number":5}
+{$value|format("number")}
+{$value|format("number", 5)}
 
 {$timestamp = 1477376776}
-{$timestamp|format:"date"}
-{$timestamp|format:"date":"%F"}
+{$timestamp|format("date")}
+{$timestamp|format("date", "%F")}
 ```
 
 will output:

@@ -11,7 +11,7 @@ use frame\library\TemplateContext;
  * Syntax: format($value, $format[, $extra]])
  *
  * {$result = format($string, "date")}
- * {$result = $string|format:"date"}
+ * {$result = $string|format("date")}
   */
 class FormatTemplateFunction implements TemplateFunction {
 

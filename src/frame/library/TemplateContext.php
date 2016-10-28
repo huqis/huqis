@@ -262,7 +262,7 @@ class TemplateContext {
      * @param mixed $value Value for the variable
      * @param boolean $process Set to false to work without tokenizing the
      * variable name
-     * @return null
+     * @return mixed Value of the variable
      */
     public function setVariable($name, $value, $process = true) {
         if ($process === false || strpos($name, '.') === false) {
@@ -271,7 +271,7 @@ class TemplateContext {
                 $this->variables[$name] = $value;
             }
 
-            return;
+            return $value;
         }
 
         $tokens = explode('.', $name);
@@ -283,11 +283,13 @@ class TemplateContext {
                 $this->variables[$name] = $this->createVariable($tokens, $value);
             }
 
-            return;
+            return $value;
         }
 
         // modify an existing variable
         $this->setVariableValue($this->variables[$name], $tokens, $value);
+
+        return $value;
     }
 
     /**
