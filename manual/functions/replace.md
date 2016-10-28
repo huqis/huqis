@@ -19,5 +19,5 @@ Simple search and replace function, equivalent of PHP's [str_replace](http://php
 ```
 {$result = replace($string, "search", "replace")}
 
-{$result = $string|replace:"search":"replace"}
+{$result = $string|replace("search", "replace")}
 ```

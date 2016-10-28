@@ -20,5 +20,5 @@ Strips whitespace characters or whatever you provide, equivalent of PHP's [trim]
 {$result = trim($string, "-")}
 
 {$result = $string|trim}
-{$result = $string|trim:"-"}
+{$result = $string|trim("-")}
 ```

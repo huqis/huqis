@@ -58,9 +58,6 @@ Blocks are interpreted at compile time.
 
 Functions are interpreted at runtime.
 
-A functions can also be used as a modifier.
-The first argument will be the value it's modifying.
-
 - [capitalize](functions/capitalize.md)
 - [concat](functions/concat.md)
 - [default](functions/default.md)
@@ -71,6 +68,22 @@ The first argument will be the value it's modifying.
 - [trim](functions/trim.md)
 - [truncate](functions/truncate.md)
 - [upper](functions/upper.md)
+
+A function can also be used as a modifier with ```|``` after an expression.
+The first argument will be the value it's modifying.
+
+Both of the following expressions have the same result:
+
+```
+{capitalize($string, "first")}
+{$string|capitalize("first")}
+```
+
+You can chain modifiers after each other:
+
+```
+{$string|lower|capitalize("all")}
+```
 
 ## Operators
 

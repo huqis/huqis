@@ -113,7 +113,7 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
             array(
                 '<h1>My Cool Title</h1><h2>My cool title</h2>',
                 array(
-                    'index' => '<h1>{$title|capitalize}</h1><h2>{$title|capitalize:"first"}</h2>',
+                    'index' => '<h1>{$title|capitalize}</h1><h2>{$title|capitalize("first")}</h2>',
                 ),
                 array(
                     'title' => 'my cool title',
@@ -158,7 +158,7 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
             array(
                 '15.99 15.98765 Tue Oct 25 08:26:16 2016 2016-10-25',
                 array(
-                    'index' => '{$value = 15.987654321}{$value|format:"number"} {$value|format:"number":5} {$timestamp = 1477376776}{$timestamp|format:"date"} {$timestamp|format:"date":"%F"}',
+                    'index' => '{$value = 15.987654321}{$value|format("number")} {$value|format("number",5)} {$timestamp = 1477376776}{$timestamp|format("date")} {$timestamp|format("date", "%F")}',
                 ),
             ),
             // cycle tests

@@ -19,5 +19,5 @@ Concats the provided arguments into a string.
 ```
 {$result = concat($value1, $value2, $value3)}
 
-{$result = $value1|concat:$value2:value3}
+{$result = $value1|concat($value2, value3)}
 ```

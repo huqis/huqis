@@ -18,5 +18,5 @@ Use a default value when the provided value is empty.
 ```
 {$result = default($value, "Defaults to this")}
 
-{$result = $value|default:"Defaults to this"}
+{$result = $value|default("Defaults to this")}
 ```

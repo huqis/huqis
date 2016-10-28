@@ -18,7 +18,7 @@ class AssignExpressionOperator implements ExpressionOperator {
      * @return string PHP operator
      */
     public function compile(TemplateCompiler $compiler, $left, $right) {
-        return '$context->setVariable("' . $compiler->parseName($left) . '", ' . $compiler->compileExpression($right) . ');';
+        return '$context->setVariable("' . $compiler->parseName($left) . '", ' . $compiler->compileExpression($right) . ')';
     }
 
 }

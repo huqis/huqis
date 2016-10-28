@@ -229,12 +229,16 @@ class TemplateEngine {
 
         try {
             if (!isset($this->loadedCode[$runtimeId])) {
-                $result = eval($code);
-                if ($result === false) {
-                    $error = error_get_last();
+                $file = tempnam(sys_get_temp_dir(), 'frame-' . $runtimeId . '-');
+                file_put_contents($file, '<?php ' . $code);
+                include($file);
 
-                    throw new RuntimeTemplateException($error['message'] . ' on line ' . $error['line']);
-                }
+                // $result = eval($code);
+                // if ($result === false) {
+                    // $error = error_get_last();
+
+                    // throw new RuntimeTemplateException($error['message'] . ' on line ' . $error['line']);
+                // }
 
                 $this->loadedCode[$runtimeId] = true;
             }
