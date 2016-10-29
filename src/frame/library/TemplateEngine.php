@@ -60,7 +60,7 @@ class TemplateEngine {
 
         $this->compiler = new TemplateCompiler($this->context);
 
-        $this->setIsDebug(true);
+        $this->setIsDebug(false);
         $this->setCache($cache);
     }
 
