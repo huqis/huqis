@@ -1,4 +1,4 @@
-# Function: escape
+# Function: format
 
 Formats the provided string or number.
 
@@ -20,6 +20,8 @@ Formats the provided string or number.
 The ```extra``` argument is the date format.
 - __number__: Formats a number, equivalent of PHP's [number_format](http://php.net/manual/en/function.number_format.php).
 The ```extra``` argument is the number of decimals.
+- __json__: Encodes the value as json, equivalent of PHP's [json_encode](http://php.net/manual/en/function.json_encode.php).
+No ```extra``` argument allowed for this format.
 
 ## Example
 

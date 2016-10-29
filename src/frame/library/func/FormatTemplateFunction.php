@@ -66,8 +66,16 @@ class FormatTemplateFunction implements TemplateFunction {
                 $result = number_format($value, $extra);
 
                 break;
+            case 'json':
+                if ($extra !== null) {
+                    throw new RuntimeTemplateException('Could not call format: ' . $format . ' does not take any extra arguments');
+                }
+
+                $result = json_encode($value, JSON_PRETTY_PRINT);
+
+                break;
             default:
-                throw new RuntimeTemplateException('Could not call format: ' . $format . ' is not a valid format (date, number)');
+                throw new RuntimeTemplateException('Could not call format: ' . $format . ' is not a valid format (date, number, json)');
         }
 
         return $result;

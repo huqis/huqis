@@ -418,6 +418,47 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($output, $result);
     }
 
+    /**
+     * @dataProvider providerRenderWithOutputFilter
+     */
+    public function testRenderWithOutputFilter($output, array $resources, array $variables = array()) {
+        $resourceHandler = new ArrayTemplateResourceHandler();
+        $resourceHandler->setResources($resources);
+
+        $resourceIds = array_keys($resources);
+
+        $context = new DefaultTemplateContext($resourceHandler);
+        $context->setOutputFilter('auto-escape', 'escape');
+
+        $engine = new TemplateEngine($context);
+        $result = $engine->render(reset($resourceIds), $variables);
+
+        $this->assertEquals($output, $result);
+    }
+
+    public function providerRenderWithOutputFilter() {
+        return array(
+            array(
+                '&lt;test&gt;',
+                array(
+                    'index' => '{$variable = "<test>"}{$variable}',
+                ),
+            ),
+            array(
+                '&lt;test&gt;',
+                array(
+                    'index' => '{$variable = "<test>"}{$variable|escape}',
+                ),
+            ),
+            array(
+                '<test>',
+                array(
+                    'index' => '{$variable = "<test>"}{$variable|raw}',
+                ),
+            ),
+        );
+    }
+
     public function providerRenderThrowsException() {
         return array(
             array(

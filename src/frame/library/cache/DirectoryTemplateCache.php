@@ -22,7 +22,13 @@ class DirectoryTemplateCache extends AbstractTemplateCache {
      * Path to the directory of the cache
      * @var string
      */
-    protected $directory;
+    private $directory;
+
+    /**
+     * Requested cache items which are already retrieved from the file system
+     * @var array
+     */
+    private $items;
 
     /**
      * Constructs a new directory cache
@@ -33,6 +39,7 @@ class DirectoryTemplateCache extends AbstractTemplateCache {
         parent::__construct();
 
         $this->directory = rtrim($directory, '/');
+        $this->items = [];
     }
 
     /**
@@ -41,8 +48,14 @@ class DirectoryTemplateCache extends AbstractTemplateCache {
      * @return null
      */
     public function set(TemplateCacheItem $item) {
+        $itemKey = $item->getKey();
+
         if (!$item->isValid()) {
             // not a valid item, don't store
+            if (isset($this->items[$itemKey])) {
+                unset($this->items[$itemKey]);
+            }
+
             return;
         }
 
@@ -55,7 +68,9 @@ class DirectoryTemplateCache extends AbstractTemplateCache {
         $contents .= "*/\n";
         $contents .= $item->getValue();
 
-        FileHelper::write($this->getFile($item->getKey()), $contents);
+        FileHelper::write($this->getFile($itemKey), $contents);
+
+        $this->items[$itemKey] = $item;
     }
 
     /**
@@ -64,6 +79,10 @@ class DirectoryTemplateCache extends AbstractTemplateCache {
      * @return \frame\library\cache\CacheItem Instance of the cached item
      */
     public function get($key) {
+        if (isset($this->items[$key])) {
+            return $this->items[$key];
+        }
+
         $item = $this->create($key);
 
         $contents = FileHelper::read($this->getFile($key));
@@ -106,10 +125,16 @@ class DirectoryTemplateCache extends AbstractTemplateCache {
             foreach ($files as $file) {
                 FileHelper::delete($this->directory . '/' . $file);
             }
+
+            $this->items = [];
         } else {
             $file = $this->getFile($key);
             if (file_exists($file)) {
                 FileHelper::delete($file);
+            }
+
+            if (isset($this->items[$key])) {
+                unset($this->items[$key]);
             }
         }
     }

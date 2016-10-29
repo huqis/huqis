@@ -6,7 +6,7 @@ You cannot create new ```block``` placeholders inside this block, they should ex
 
 Output is not allowed except when inside a ```block``` or [```function```](function.md) block.
 
-You can nest this block, meaning an ```extends``` inside an ```extends```,  but you cannot use a ```block``` name which is used in a parent ```extends``` block.
+You can nest this block, meaning an ```extends``` inside an ```extends```,  but you cannot use a ```block``` name which is used in one of the parent ```extends``` blocks.
 
 ## Syntax
 

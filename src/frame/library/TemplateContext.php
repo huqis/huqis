@@ -72,6 +72,14 @@ class TemplateContext {
     protected $functions;
 
     /**
+     * Array with the name of the output filter as key and an array with as
+     * first value the name of the modifier. All remaining values are the
+     * arguments.
+     * @var array
+     */
+    protected $outputFilters;
+
+    /**
      * Array with the available logical operators
      * @var array
      */
@@ -94,12 +102,13 @@ class TemplateContext {
      * resource handler is provided, nor directly, nor through the parent
      */
     public function __construct(TemplateResourceHandler $resourceHandler = null, ReflectionHelper $reflectionHelper = null, TemplateContext $parent = null) {
+        $this->logicalOperators = [];
+        $this->expressionOperators = [];
         $this->variables = [];
         $this->blocks = [];
         $this->privateBlocks = [];
         $this->functions = [];
-        $this->logicalOperators = [];
-        $this->expressionOperators = [];
+        $this->outputFilters = [];
 
         if ($parent === null) {
             // no parent context provided
@@ -129,6 +138,7 @@ class TemplateContext {
             $this->variables = $parent->variables;
             $this->logicalOperators = $parent->logicalOperators;
             $this->expressionOperators = $parent->expressionOperators;
+            $this->outputFilters = $parent->outputFilters;
         }
 
         $this->resourceHandler = $resourceHandler;
@@ -629,6 +639,64 @@ class TemplateContext {
         }
 
         return $this->getFunction($name)->call($this, $arguments);
+    }
+
+    //
+    // OUTPUT FILTER METHODS
+    //
+
+    /**
+     * Sets an output filter
+     * @param string $name Name of the output filter
+     * @param string $function Name of the function to call
+     * @param array $arguments The value to be filtered is the first argument
+     * for the function, set this to the remaining arguments
+     * @return boolean True if the output filter is set, false if it's already
+     * set under the provided or another name
+     */
+    public function setOutputFilter($name, $function, array $arguments = null) {
+        if (!$arguments) {
+            $arguments = [];
+        }
+
+        array_unshift($arguments, $function);
+
+        foreach ($this->outputFilters as $filterName => $filterArguments) {
+            if ($filterArguments == $arguments) {
+                return false;
+            }
+        }
+
+        $this->outputFilters[$name] = $arguments;
+
+        return true;
+    }
+
+    /**
+     * Gets the output filters
+     * @return array Array with the name of the output filter as key and an
+     * array with as first value the name of the modifier. All remaining values
+     * are the arguments.
+     * @see applyModifiers
+     */
+    public function getOutputFilters() {
+        return $this->outputFilters;
+    }
+
+    /**
+     * Removes an output filter from the context
+     * @param string $name Name of the output filter
+     * @return boolean True when the output filter is removed, false when it is
+     * not registered
+     */
+    public function removeOutputFilter($name) {
+        if (!isset($this->outputFilters[$name])) {
+            return false;
+        }
+
+        unset($this->outputFilters[$name]);
+
+        return true;
     }
 
     //
