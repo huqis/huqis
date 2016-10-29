@@ -9,7 +9,7 @@ use frame\library\exception\TemplateException;
  * Template resource handler with a directory as template container and files as
  * template resources
  */
-class DirectoryTemplateResourceHandler extends ArrayTemplateResourceHandler {
+class DirectoryTemplateResourceHandler extends AbstractTemplateResourceHandler {
 
     /**
      * Path of the template directory
@@ -64,6 +64,8 @@ class DirectoryTemplateResourceHandler extends ArrayTemplateResourceHandler {
 
         $contents = @file_get_contents($fileName);
         if ($contents !== false) {
+            $this->requestedResources[$name] = true;
+
             return $contents;
         }
 

@@ -29,4 +29,10 @@ interface TemplateResourceHandler {
      */
     public function getModificationTime($name);
 
+    /**
+     * Gets and resets the requested resources
+     * @return array Array with a template resource name as key
+     */
+    public function getRequestedResources();
+
 }

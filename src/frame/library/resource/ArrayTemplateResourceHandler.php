@@ -7,7 +7,7 @@ use frame\library\exception\NotFoundTemplateException;
 /**
  * Template resource handler with an array as template container
  */
-class ArrayTemplateResourceHandler implements TemplateResourceHandler {
+class ArrayTemplateResourceHandler extends AbstractTemplateResourceHandler {
 
     /**
      * Resources held by this handler. An array with the resource name as key
@@ -72,6 +72,8 @@ class ArrayTemplateResourceHandler implements TemplateResourceHandler {
      */
     public function getResource($name) {
         $this->testResource($name);
+
+        $this->requestedResources[$name] = true;
 
         return $this->resources[$name];
     }

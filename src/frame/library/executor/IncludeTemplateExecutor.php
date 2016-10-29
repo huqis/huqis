@@ -10,6 +10,12 @@ use frame\library\TemplateContext;
 class IncludeTemplateExecutor extends AbstractTemplateExecutor {
 
     /**
+     * Stack of paths to the temporary files with the compiled template code
+     * @var array
+     */
+    private $files = [];
+
+    /**
      * Executes the provided compiled code
      * @param \frame\library\TemplateContext $context Runtime context of the
      * template
@@ -18,12 +24,13 @@ class IncludeTemplateExecutor extends AbstractTemplateExecutor {
      * @return string Rendered template
      */
     public function execute(TemplateContext $context, $code, $runtimeId) {
-        $this->file = null;
+        $this->files[] = null;
 
         parent::execute($context, $code, $runtimeId);
 
-        if ($this->file) {
-            unlink($this->file);
+        $file = array_pop($this->files);
+        if ($file) {
+            unlink($file);
         }
     }
 
@@ -34,11 +41,13 @@ class IncludeTemplateExecutor extends AbstractTemplateExecutor {
      * @return null
      */
     protected function loadCode($code, $runtimeId) {
-        $this->file = tempnam(sys_get_temp_dir(), 'frame-' . $runtimeId . '-');
+        $file = tempnam(sys_get_temp_dir(), 'frame-' . $runtimeId . '-');
 
-        file_put_contents($this->file, '<?php ' . $code);
+        file_put_contents($file, '<?php ' . $code);
 
-        include($this->file);
+        include($file);
+
+        $this->files[count($this->files) - 1] = $file;
     }
 
 }

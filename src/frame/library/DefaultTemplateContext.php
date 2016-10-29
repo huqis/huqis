@@ -108,7 +108,7 @@ class DefaultTemplateContext extends TemplateContext {
 
         $this->ensureFunction($name);
 
-        return isset($this->functions[$name]);
+        return parent::hasFunction($name);
     }
 
     /**
@@ -180,7 +180,7 @@ class DefaultTemplateContext extends TemplateContext {
 
         $this->ensureBlock($name);
 
-        return isset($this->blocks[$name]);
+        return parent::hasBlock($name);
     }
 
     /**

@@ -8,7 +8,7 @@ use frame\library\exception\TemplateException;
  * Template resource handler which chains or combines different template
  * resource handlers to use them alongside each other
  */
-class ChainTemplateResourceHandler implements TemplateResourceHandler {
+class ChainTemplateResourceHandler extends AbstractTemplateResourceHandler {
 
     /**
      * Resource handlers held by this handler. An array with the name as key
@@ -147,11 +147,15 @@ class ChainTemplateResourceHandler implements TemplateResourceHandler {
      * resource does not exist
      */
     public function getResource($name) {
-        $shackle = $this->getShackleFromResource($name);
+        list($shackle, $resource) = $this->getShackleFromResource($name);
 
         $resourceHandler = $this->getResourceHandler($shackle);
 
-        return $resourceHandler->getResource($name);
+        $template = $resourceHandler->getResource($resource);
+
+        $this->requestedResources[$name] = true;
+
+        return $template;
     }
 
     /**
@@ -164,11 +168,11 @@ class ChainTemplateResourceHandler implements TemplateResourceHandler {
      * @see getResource
      */
     public function getModificationTime($name) {
-        $shackle = $this->getShackleFromResource($name);
+        list($shackle, $resource) = $this->getShackleFromResource($name);
 
         $resourceHandler = $this->getResourceHandler($shackle);
 
-        return $resourceHandler->getModificationTime($name);
+        return $resourceHandler->getModificationTime($resource);
     }
 
     /**
@@ -180,16 +184,16 @@ class ChainTemplateResourceHandler implements TemplateResourceHandler {
      * shackle is requested, the prefix will be removed from the provided name.
      * @return Name of the resource handler
      */
-    private function getShackleFromResource(&$name) {
+    private function getShackleFromResource($name) {
         $positionSeparator = strpos($name, $this->separator);
         if ($positionSeparator === false) {
-            return $this->defaultResourceHandler;
+            $shackle = $this->defaultResourceHandler;
+        } else {
+            $shackle = substr($name, 0, $positionSeparator);
+            $name = substr($name, $positionSeparator + 1);
         }
 
-        $shackle = substr($name, 0, $positionSeparator);
-        $name = substr($name, $positionSeparator + 1);
-
-        return $shackle;
+        return [$shackle, $name];
     }
 
 }

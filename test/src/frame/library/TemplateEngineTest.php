@@ -40,6 +40,19 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                     'index' => "using a bracket{\nand new line"
                 ),
             ),
+            // comments
+            array(
+                '',
+                array(
+                    'index' => '{* comment *}',
+                ),
+            ),
+            array(
+                '',
+                array(
+                    'index' => '{* {if $varaieble} *}',
+                ),
+            ),
             // variables
             array(
                 '"test"',
@@ -99,18 +112,6 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                 ),
             ),
             array(
-                '',
-                array(
-                    'index' => '{* comment *}',
-                ),
-            ),
-            array(
-                '',
-                array(
-                    'index' => '{* {if $varaieble} *}',
-                ),
-            ),
-            array(
                 '<h1>My Cool Title</h1><h2>My cool title</h2>',
                 array(
                     'index' => '<h1>{$title|capitalize}</h1><h2>{$title|capitalize("first")}</h2>',
@@ -123,6 +124,12 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                 '15',
                 array(
                     'index' => '{$value = 15}{$value}',
+                ),
+            ),
+            array(
+                '15 15',
+                array(
+                    'index' => '{$array = ["key1" = 15]}{$array.key1} {$array["key1"]}',
                 ),
             ),
             // if test
@@ -368,9 +375,9 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                 ),
             ),
             array(
-                '<h2>Heading 2: Section</h2>',
+                'Head<h2>Heading 2: Section</h2>Foot',
                 array(
-                    'index' => '{$base = "template-2"}{extends $base}{block "title" append}: {$title}{/block}{/extends}',
+                    'index' => 'Head{$base = "template-2"}{extends $base}{block "title" append}: {$title}{/block}{/extends}Foot',
                     'template-1' => '<h1>{block "title"}Heading 1{/block}</h1>',
                     'template-2' => '<h2>{block "title"}Heading 2{/block}</h2>',
                 ),

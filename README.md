@@ -270,6 +270,11 @@ function createTemplateEngine() {
     // our context is initialized, create the engine
     $engine = new TemplateEngine($context, $directoryCache);
 
+    // Enable debug to invoke templates through a file to debug runtime errors, 
+    // also makes the cache check modification times of templates so you don't 
+    // need to clear the cache whenever you make a change 
+    $engine->setDebug(true);
+
     return $engine;
 }
 

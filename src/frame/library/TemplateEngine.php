@@ -82,10 +82,12 @@ class TemplateEngine {
     }
 
     /**
-     * Sets the debug flag on
-     * @param boolean $isDebug True to enable debug, this will execute templates
-     * through a temporary file so a runtime exception can show the source of
-     * the compiled template, false to use the eval function
+     * Sets the debug flag. When debugging is enabled, templates will be
+     * executed through a temporary file so a runtime exception can show the
+     * source of the compiled template. When debugging is disabled, templates
+     * will be executed through the eval function and the cache becomes lazy and
+     * will not check any modification times.
+     * @param boolean $isDebug True to enable debug
      * @return null
      */
     public function setIsDebug($isDebug) {
@@ -101,6 +103,7 @@ class TemplateEngine {
     /**
      * Gets the debug flag
      * @return boolean
+     * @see setIsDebug
      */
     public function isDebug() {
         return $this->isDebug;
@@ -194,9 +197,18 @@ class TemplateEngine {
                 // valid cache item, check for changes
                 $useCache = true;
 
-                if ($resourceHandler->getModificationTime($resource) > $cacheItem->getMeta('created')) {
-                    // template has changed, skip the cache
-                    $useCache = false;
+                // check for changes in the templates
+                if ($this->isDebug) {
+                    $time = $cacheItem->getMeta('created');
+                    $resources = explode(',', $cacheItem->getMeta('resources'));
+                    foreach ($resources as $includedResource) {
+                        if ($resourceHandler->getModificationTime($includedResource) > $time) {
+                            // template has changed, skip the cache
+                            $useCache = false;
+
+                            break;
+                        }
+                    }
                 }
 
                 if ($useCache) {
@@ -214,11 +226,14 @@ class TemplateEngine {
 
         $code = $this->compile($context, $template, $runtimeId, $extends);
 
+        $requestedResources = $resourceHandler->getRequestedResources();
+
         if ($this->cache) {
             // cache the compiled code
             $cacheItem->setValue($code);
             $cacheItem->setMeta('runtime-id', $runtimeId);
             $cacheItem->setMeta('created', time());
+            $cacheItem->setMeta('resources', implode(',', array_keys($requestedResources)));
 
             $this->cache->set($cacheItem);
         }
