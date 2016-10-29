@@ -60,7 +60,7 @@ class TemplateEngine {
 
         $this->compiler = new TemplateCompiler($this->context);
 
-        $this->setIsDebug(false);
+        $this->setIsDebug(true);
         $this->setCache($cache);
     }
 
@@ -194,7 +194,7 @@ class TemplateEngine {
 
             $cacheItem = $this->cache->get($resourceId);
             if ($cacheItem->isValid()) {
-                // valid cache item, check for changes
+                // valid cache item
                 $useCache = true;
 
                 // check for changes in the templates
@@ -212,7 +212,7 @@ class TemplateEngine {
                 }
 
                 if ($useCache) {
-                    // cache item will be used
+                    // cache item is valid and no changes
                     $code = $cacheItem->getValue();
                     $runtimeId = $cacheItem->getMeta('runtime-id');
 
@@ -221,7 +221,7 @@ class TemplateEngine {
             }
         }
 
-        // not loaded before and not cached, compile the template
+        // not cached, compile the template
         $template = $resourceHandler->getResource($resource);
 
         $code = $this->compile($context, $template, $runtimeId, $extends);
@@ -229,7 +229,7 @@ class TemplateEngine {
         $requestedResources = $resourceHandler->getRequestedResources();
 
         if ($this->cache) {
-            // cache the compiled code
+            // store the compiled code in the cache
             $cacheItem->setValue($code);
             $cacheItem->setMeta('runtime-id', $runtimeId);
             $cacheItem->setMeta('created', time());

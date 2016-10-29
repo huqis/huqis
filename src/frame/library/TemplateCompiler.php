@@ -134,7 +134,7 @@ class TemplateCompiler {
         $this->isCompiling = true;
         $this->buffer = new TemplateOutputBuffer();
 
-        $this->subcompile($template, false);
+        $this->subcompile($template);
 
         if ($extends) {
             $this->compileExtends($extends);
@@ -151,13 +151,13 @@ class TemplateCompiler {
     /**
      * Compiles a part of a template and appends it to the compile buffer
      * @param string $template Template code to compile
-     * @param boolean $strict Flag to see if the result is parsed for output.
+     * @param boolean $isLogic Flag to see if the result is parsed for output.
      * Set to false to display the result, true is considered template logic.
      * @return null
      * @throws CompileTemplateException when this method is called outside of
      * a compile call or when the template syntax is invalid
      */
-    public function subcompile($template, $strict = false) {
+    public function subcompile($template, $isLogic = false) {
         if (!$this->isCompiling) {
             throw new CompileTemplateException('Could not subcompile the provided template: no main compile process running');
         }
@@ -221,7 +221,7 @@ class TemplateCompiler {
             } else {
                 // syntax, compile
                 try {
-                    $code = $this->compileSyntax($token, $tokens, $tokenIndex, $strict);
+                    $code = $this->compileSyntax($token, $tokens, $tokenIndex, $isLogic);
                 } catch (Exception $exception) {
                     $lineNumber = 1;
 
@@ -256,11 +256,11 @@ class TemplateCompiler {
      * @param string $token Current token
      * @param array $tokens All tokens of the template
      * @param integer $tokenIndex Current token index
-     * @param boolean $strict Flag to see if the result is parsed for output.
+     * @param boolean $isLogic Flag to see if the result is parsed for output.
      * Set to false to display the result, true is considered template logic.
      * @return string Compiled value
      */
-    private function compileSyntax($token, $tokens, &$tokenIndex, $strict = false) {
+    private function compileSyntax($token, $tokens, &$tokenIndex, $isLogic = false) {
         $positionSpace = strpos($token, ' ');
         if ($positionSpace === false) {
             $firstToken = $token;
@@ -278,9 +278,9 @@ class TemplateCompiler {
 
         $tokenIndex++;
 
-        $expression = $this->compileExpression($token, $strict);
+        $expression = $this->compileExpression($token, $isLogic);
 
-        return $this->compileOutput($expression, $strict);
+        return $this->compileOutput($expression, $isLogic);
     }
 
     /**
@@ -370,12 +370,12 @@ class TemplateCompiler {
      * @param string $token Current token
      * @param array $tokens All tokens of the template
      * @param integer $tokenIndex Current token index
-     * @param boolean $strict Flag to see if the result is parsed for output.
+     * @param boolean $isLogic Flag to see if the result is parsed for output.
      * Set to false to display the result, true is considered template logic.
      * @param boolean $allowModifiers
      * @return string Compiled value
      */
-    public function compileExpression($expression, &$strict = true) {
+    public function compileExpression($expression, &$isLogic = true) {
         $result = '';
         $value = '';
         $operator = null;
@@ -384,7 +384,7 @@ class TemplateCompiler {
         $firstChar = substr($expression, 0, 1);
         $lastChar = substr($expression, -1);
         if ($firstChar === SyntaxSymbol::ARRAY_OPEN && $lastChar === SyntaxSymbol::ARRAY_CLOSE) {
-            $strict = true;
+            $isLogic = true;
 
             return $this->compileArray(substr($expression, 1, -1));
         }
@@ -394,7 +394,7 @@ class TemplateCompiler {
 
         // only 1 token, handle as value
         if (count($tokens) === 1) {
-            return $this->compileValue($expression);
+            return $this->compileValue($expression, $isLogic);
         }
 
         // process tokens
@@ -410,7 +410,7 @@ class TemplateCompiler {
         foreach ($tokens as $tokenIndex => $token) {
             if ($token === SyntaxSymbol::ASSIGNMENT) {
                 // assignment
-                $strict = true;
+                $isLogic = true;
             }
 
             if ($token === StringSymbol::SYMBOL) {
@@ -475,7 +475,7 @@ class TemplateCompiler {
         }
 
         if (!$operator) {
-            return $this->compileValue($expression);
+            return $this->compileValue($expression, $isLogic);
         }
 
         $right = trim($value);
@@ -557,14 +557,18 @@ class TemplateCompiler {
      * Compiles a single value
      * Single values are:
      * - "value"
+     * - true
+     * - 15.6789
      * - $variable
      * - $variable.property
      * - $variable|truncate
-     * - (15 + 7)|round
+     * - functionCall()
      * @param string $value Value expression
+     * @param boolean $isLogic Flag to see if the result is parsed for output.
+     * Set to false to display the result, true is considered template logic.
      * @return string Compiled value
      */
-    private function compileValue($value) {
+    private function compileValue($value, $isLogic) {
         // validate input
         if ($value === '') {
             throw new CompileTemplateException('Value or variable expected');
@@ -584,7 +588,7 @@ class TemplateCompiler {
 
         // check for variable ($) symbol
         if ($firstChar == '$') {
-            return ($isNot ? '!' : '') . $this->compileVariable($value);
+            return ($isNot ? '!' : '') . $this->compileVariable($value, $isLogic);
         }
 
         $lastChar = substr($value, -1);
@@ -608,8 +612,11 @@ class TemplateCompiler {
             $tokenIndex = 1;
         }
 
+        $modifiers = [];
+        $useOutputFilters = true;
         $result = null;
         $expectsFunction = false;
+
         $issetToken = isset($tokens[$tokenIndex]);
         if (!$issetToken) {
             if ($isNested) {
@@ -617,6 +624,7 @@ class TemplateCompiler {
             } else {
                 try {
                     $result = $this->compileScalarValue($var);
+                    $useOutputFilters = false;
                 } catch (Exception $exception) {
                     if (strpos($value, SyntaxSymbol::NESTED_OPEN) !== strlen($var)) {
                         // not a function
@@ -627,7 +635,6 @@ class TemplateCompiler {
         }
 
         if ($result === null) {
-            $modifiers = [];
             $hasHandledFunction = false;
 
             do {
@@ -675,14 +682,14 @@ class TemplateCompiler {
                     $result = $this->compileScalarValue($var);
                 }
 
-                $modifiers[] = $this->compileModifiers($tokens, $tokenIndex);
+                $modifier = $this->compileModifier($tokens, $tokenIndex, $useOutputFilters);
+                if ($modifier) {
+                    $modifiers[] = $modifier;
+                }
             } while (isset($tokens[$tokenIndex]));
-
-            // apply modifiers
-            if ($modifiers) {
-                $result = '$context->applyModifiers(' . $result . ', [' . implode(', ', $modifiers) . '])';
-            }
         }
+
+        $result = $this->applyModifiers($result, $modifiers, $isLogic, $useOutputFilters);
 
         if ($isNested) {
             $result = '(' . $result . ')';
@@ -694,11 +701,27 @@ class TemplateCompiler {
         return $result;
     }
 
-    private function compileVariable($variable) {
+    /**
+     * Compiles a single value
+     * Single values are:
+     * - "value"
+     * - $variable
+     * - $variable.property
+     * - $variable|truncate
+     * - (15 + 7)|round
+     * @param string $value Value expression
+     * @param boolean $isLogic Flag to see if the result is parsed for output.
+     * Set to false to display the result, true is considered template logic.
+     * @return string Compiled value
+     */
+    private function compileVariable($variable, $isLogic) {
+        $modifiers = [];
+        $useOutputFilters = true;
+
         try {
             $name = $this->parseName($variable);
 
-            return $this->compileGetVariable($name);
+            return $this->applyModifiers($this->compileGetVariable($name), $modifiers, $useOutputFilters);
         } catch (CompileTemplateException $exception) {
             // no simple variable, further code will compile
         }
@@ -711,7 +734,6 @@ class TemplateCompiler {
         $nestedLevel = 0;
         $array = '';
         $arrayLevel = 0;
-        $modifiers = [];
         $tokenIndex = 1;
         $value = $tokens[0];
 
@@ -819,7 +841,10 @@ class TemplateCompiler {
 
                 continue;
             } elseif ($token === SyntaxSymbol::MODIFIER) {
-                $modifiers[] = $this->compileModifiers($tokens, $tokenIndex);
+                $modifier = $this->compileModifier($tokens, $tokenIndex, $useOutputFilters);
+                if ($modifier) {
+                    $modifiers[] = $modifier;
+                }
 
                 continue;
             }
@@ -833,9 +858,8 @@ class TemplateCompiler {
         if ($result === null) {
             $result = $this->compileGetVariable($this->parseName($value));
         }
-        if ($modifiers) {
-            $result = '$context->applyModifiers(' . $result . ', [' . implode(', ', $modifiers) . '])';
-        }
+
+        $result = $this->applyModifiers($result, $modifiers, $isLogic, $useOutputFilters);
 
         return $result;
     }
@@ -847,7 +871,7 @@ class TemplateCompiler {
      * @return string Compiled arguments for the applyModifiers context function
      * @see TemplateContext
      */
-    private function compileModifiers(array $tokens, &$tokenIndex) {
+    private function compileModifier(array $tokens, &$tokenIndex, &$useOutputFilters) {
         $tokenIndex++;
         if ($tokenIndex == count($tokens)) {
             throw new CompileTemplateException(implode('', $tokens) . ' could not be parsed: name of a modifier expected after ' . SyntaxSymbol::MODIFIER);
@@ -892,6 +916,12 @@ class TemplateCompiler {
             throw new CompileTemplateException(implode('', $tokens) . ' could not be parsed: ' . SyntaxSymbol::NESTED_CLOSE . ' expected');
         }
 
+        if ($modifier == SyntaxSymbol::OUTPUT_RAW) {
+            $useOutputFilters = false;
+
+            return false;
+        }
+
         $result = '[';
         $result .= var_export($modifier, true);
 
@@ -903,6 +933,42 @@ class TemplateCompiler {
         $result .= ']';
 
         return $result;
+    }
+
+    private function applyModifiers($expression, $modifiers, $isLogic, $useOutputFilters = true) {
+        $outputFilters = $this->context->getOutputFilters();
+        if ((!$outputFilters || !$useOutputFilters) && !$modifiers) {
+            // nothing to be done here
+            return $expression;
+        } elseif ((!$outputFilters || $isLogic || !$useOutputFilters) && $modifiers) {
+            // no output filter or we inside logic
+            return '$context->applyModifiers(' . $expression . ', [' . implode(', ', $modifiers) . '])';
+        }
+
+        // parse output filters
+        foreach ($outputFilters as $name => $outputFilterValues) {
+            $outputFilter = '[';
+            $isFirst = true;
+            foreach ($outputFilterValues as $outputFilterValue) {
+                if ($isFirst) {
+                    $isFirst = false;
+                    $outputFilter .= var_export($outputFilterValue, true);
+                } elseif (is_string($outputFilterValue)) {
+                    $outputFilter .= ', "' . addcslashes($outputFilterValue, '"$\\') . '"';
+                } else {
+                    $outputFilter .= ', ' . var_export($outputFilterValue, true);
+                }
+            }
+            $outputFilter .= ']';
+
+            if (!in_array($outputFilter, $modifiers)) {
+                $outputFilters[$name] = $outputFilter;
+            } else {
+                unset($outputFilters[$name]);
+            }
+        }
+
+        return '$context->applyModifiers(' . $expression . ', [' . implode(', ', $modifiers + $outputFilters) . '])';
     }
 
     /**
@@ -1029,11 +1095,11 @@ class TemplateCompiler {
     /**
      * Applies the strict
      * @param string $output Compiled output of an expression
-     * @param boolean $strict
+     * @param boolean $isLogic
      * @return string
      */
-    private function compileOutput($output, $strict) {
-        if (!$strict) {
+    private function compileOutput($output, $isLogic) {
+        if (!$isLogic) {
             $output = 'echo ' . $output;
         }
 

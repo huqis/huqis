@@ -104,6 +104,12 @@ class SyntaxSymbol extends NestedSymbol {
     const OPERATOR_NOT = '!';
 
     /**
+     * Special modifier to skip the output filters
+     * @var string
+     */
+    const OUTPUT_RAW = 'raw';
+
+    /**
      * Constructs a new syntax symbol
      * @return null
      */
