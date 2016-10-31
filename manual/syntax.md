@@ -89,7 +89,7 @@ Functions are interpreted at runtime.
 - [truncate](functions/truncate.md)
 - [upper](functions/upper.md)
 
-A function can be called straight but it can also be used as a modifier by using ```|``` after an expression.
+A function can be called directly but it can also be used as a modifier by using ```|``` after an expression.
 The first argument for the function will be the result of the expression.
 
 Knowing this, both of the following expressions have the same result:

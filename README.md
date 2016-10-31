@@ -2,8 +2,6 @@
 
 Frame is a PHP template engine with _&lt;insert great features talk&gt;_.
 
-__Note: this engine is still under development, syntax may change__
-
 ## Getting Started
 
 A template in Frame looks like this:
@@ -50,5 +48,13 @@ echo $engine->render('my-template.tpl', ['title' => 'My dynamic title']);
 
 Read on about the syntax in the [template manual pages](manual/syntax.md).
 
-To know more about the engine, read the [developer manual pages](manual/engine.md)
+To know more about the engine, read the [developer manual pages](manual/engine.md).
 
+
+## Installation
+
+You can use [Composer](http://getcomposer.org) to install this template engine.
+
+```
+composer require frame/frame
+```

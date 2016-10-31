@@ -7,7 +7,7 @@ The engine is initialized with a template context.
 A template context contains all the available functions, blocks, operators, ...
 It's a passed on to the different functions and blocks as container of variables and everything it might need.
 
-To obtain templates, the engine uses resource handlers.
+To obtain templates, the engine uses a resource handler.
 Different options are available, more on this further down.
 
 The following code sample shows how to setup your engine.
