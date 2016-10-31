@@ -35,7 +35,7 @@ class EscapeTemplateFunction implements TemplateFunction {
         foreach ($arguments as $index => $argument) {
             switch ($index) {
                 case 0:
-                    $value = $argument;
+                    $value = (string) $argument;
 
                     break;
                 case 1:

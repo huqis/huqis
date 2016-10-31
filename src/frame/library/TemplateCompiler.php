@@ -942,11 +942,11 @@ class TemplateCompiler {
 
     private function applyModifiers($expression, $modifiers, $isLogic, $useOutputFilters = true) {
         $outputFilters = $this->context->getOutputFilters();
-        if ((!$outputFilters || !$useOutputFilters) && !$modifiers) {
+        if ((!$outputFilters || !$useOutputFilters || $isLogic) && !$modifiers) {
             // nothing to be done here
             return $expression;
         } elseif ((!$outputFilters || $isLogic || !$useOutputFilters) && $modifiers) {
-            // no output filter or we inside logic
+            // no output filter or we are inside logic
             return '$context->applyModifiers(' . $expression . ', [' . implode(', ', $modifiers) . '])';
         }
 
