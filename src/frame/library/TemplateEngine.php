@@ -42,6 +42,12 @@ class TemplateEngine {
     private $cache;
 
     /**
+     * Compile id of the template
+     * @var string
+     */
+    private $compileId;
+
+    /**
      * Flag to see if debug mode is on
      * @var boolean
      */
@@ -79,6 +85,24 @@ class TemplateEngine {
      */
     public function setCache(TemplateCache $cache = null) {
         $this->cache = $cache;
+    }
+
+    /**
+     * Sets the compile id of the template, this influences the cache key of the
+     * templates
+     * @param string $compileId A suffix for the resource compile id
+     * @return null
+     */
+    public function setCompileId($compileId) {
+        $this->compileId = $compileId;
+    }
+
+    /**
+     * Gets the current compile id
+     * @return string
+     */
+    public function getCompileId() {
+        return $this->compileId;
     }
 
     /**
@@ -298,7 +322,7 @@ class TemplateEngine {
      * @return string
      */
     private function generateResourceId(TemplateContext $context, $resource, $extends = null) {
-        return substr(crc32($resource . '#' . $extends), 0, 10) . '-' . str_replace('/', '-', $resource);
+        return substr(crc32($resource . $this->compileId . '#' . $extends), 0, 10) . '-' . str_replace('/', '-', $resource);
     }
 
     /**
@@ -307,7 +331,7 @@ class TemplateEngine {
      * @return string
      */
     private function generateRuntimeId($resource) {
-        return StringHelper::generate() . crc32(microtime() . $resource);
+        return StringHelper::generate() . crc32(microtime() . $resource . $this->compileId);
     }
 
 }

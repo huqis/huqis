@@ -379,6 +379,7 @@ class TemplateCompiler {
         $result = '';
         $value = '';
         $operator = null;
+        $isNot = false;
 
         // check for array value
         $firstChar = substr($expression, 0, 1);
@@ -389,12 +390,23 @@ class TemplateCompiler {
             return $this->compileArray(substr($expression, 1, -1));
         }
 
+        // check for not (!) symbol
+        if (substr($expression, 0, 1) === SyntaxSymbol::OPERATOR_NOT) {
+            $isNot = true;
+            $expression = substr($expression, 1);
+        }
+
         // tokenize on operators
         $tokens = $this->expressionTokenizer->tokenize($expression);
 
         // only 1 token, handle as value
         if (count($tokens) === 1) {
-            return $this->compileValue($expression, $isLogic);
+            $result = $this->compileValue($expression, $isLogic);
+            if ($isNot) {
+                $result = '!' . $result;
+            }
+
+            return $result;
         }
 
         // process tokens
@@ -475,16 +487,20 @@ class TemplateCompiler {
         }
 
         if (!$operator) {
-            return $this->compileValue($expression, $isLogic);
+            $result = $this->compileValue($expression, $isLogic);
+        } else {
+            $right = trim($value);
+            if ($right === '') {
+                // no right value for operator
+                throw new CompileTemplateException($expression . ' could not be parsed: no value before ' . $token);
+            }
+
+            $result .= $this->context->getExpressionOperator($operator)->compile($this, $left, $right);
         }
 
-        $right = trim($value);
-        if ($right === '') {
-            // no right value for operator
-            throw new CompileTemplateException($expression . ' could not be parsed: no value before ' . $token);
+        if ($isNot) {
+            $result = '!' . $result;
         }
-
-        $result .= $this->context->getExpressionOperator($operator)->compile($this, $left, $right);
 
         return $result;
     }
@@ -578,17 +594,9 @@ class TemplateCompiler {
 
         $firstChar = substr($value, 0, 1);
 
-        // check for not (!) symbol
-        $isNot = false;
-        if ($firstChar === SyntaxSymbol::OPERATOR_NOT) {
-            $isNot = true;
-            $value = substr($value, 1);
-            $firstChar = substr($value, 0, 1);
-        }
-
         // check for variable ($) symbol
         if ($firstChar == '$') {
-            return ($isNot ? '!' : '') . $this->compileVariable($value, $isLogic);
+            return $this->compileVariable($value, $isLogic);
         }
 
         $lastChar = substr($value, -1);
@@ -693,9 +701,6 @@ class TemplateCompiler {
 
         if ($isNested) {
             $result = '(' . $result . ')';
-        }
-        if ($isNot) {
-            $result = '!' . $result;
         }
 
         return $result;

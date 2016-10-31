@@ -117,6 +117,7 @@ class TemplateCompilerTest extends PHPUnit_Framework_TestCase {
      */
     public function testCompile($template, $compiled) {
         $context = new DefaultTemplateContext(new ArrayTemplateResourceHandler());
+        $context->setAutoEscape(false);
         $context->preCompile();
 
         $compiler = new TemplateCompiler($context);
@@ -153,6 +154,7 @@ class TemplateCompilerTest extends PHPUnit_Framework_TestCase {
      */
     public function testCompileFail($template) {
         $context = new DefaultTemplateContext(new ArrayTemplateResourceHandler());
+        $context->setAutoEscape(false);
         $context->preCompile();
 
         $compiler = new TemplateCompiler($context);
@@ -166,6 +168,7 @@ class TemplateCompilerTest extends PHPUnit_Framework_TestCase {
      */
     public function testCompileExpression($expression, $compiled) {
         $context = new DefaultTemplateContext(new ArrayTemplateResourceHandler());
+        $context->setAutoEscape(false);
         $context->preCompile();
 
         $compiler = new TemplateCompiler($context);

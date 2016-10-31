@@ -47,6 +47,12 @@ class TemplateContext {
     private $allowPhpFunctions;
 
     /**
+     * Flag to see the output should be escaped automatically
+     * @var string|boolean
+     */
+    private $autoEscape;
+
+    /**
      * Array with the available variables
      * @var array
      */
@@ -181,6 +187,33 @@ class TemplateContext {
      */
     public function allowsPhpFunctions() {
         return $this->allowPhpFunctions;
+    }
+
+    /**
+     * Sets the auto escape flag
+     * @param string|boolean Name of the escape format, true for the default
+     * HTML format and false to disable
+     * @return null
+     */
+    public function setAutoEscape($format) {
+        if ($format === false) {
+            $this->removeOutputFilter('auto-escape');
+        } elseif ($format === true) {
+            $this->setOutputFilter('auto-escape', 'escape');
+        } elseif ($format) {
+            $this->setOutputFilter('auto-escape', 'escape', array($format));
+        }
+
+        $this->autoEscape = $format;
+    }
+
+    /**
+     * Gets the auto escape flag
+     * @return string|boolean Name of the escape format, true when enabled with
+     * the default HTML default and false when disabled
+     */
+    public function getAutoEscape() {
+        return $this->autoEscape;
     }
 
     /**

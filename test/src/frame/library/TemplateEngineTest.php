@@ -151,6 +151,15 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                     'value' => 2,
                 ),
             ),
+            array(
+                '3',
+                array(
+                    'index' => '{if !($value == 1)}{$value = $value + 1}{else}{$value = $value - 1}{/if}{$value}',
+                ),
+                array(
+                    'value' => 2,
+                ),
+            ),
             // foreach test
             array(
                 '<ul><li>1 / 3: John [F]</li><li>2 / 3: Jane </li><li>3 / 3: Mike [L]</li></ul>',
@@ -411,6 +420,7 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
         $resourceIds = array_keys($resources);
 
         $context = new DefaultTemplateContext($resourceHandler);
+        $context->setAutoEscape(false);
 
         $engine = new TemplateEngine($context);
         $result = $engine->render(reset($resourceIds), $variables);
@@ -428,7 +438,7 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
         $resourceIds = array_keys($resources);
 
         $context = new DefaultTemplateContext($resourceHandler);
-        $context->setOutputFilter('auto-escape', 'escape');
+        $context->setAutoEscape(true);
 
         $engine = new TemplateEngine($context);
         $result = $engine->render(reset($resourceIds), $variables);
@@ -498,6 +508,7 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
         $resourceIds = array_keys($resources);
 
         $context = new DefaultTemplateContext($resourceHandler);
+        $context->setAutoEscape(false);
 
         $engine = new TemplateEngine($context);
         $engine->render(reset($resourceIds), []);

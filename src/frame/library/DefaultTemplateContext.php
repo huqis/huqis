@@ -54,6 +54,7 @@ class DefaultTemplateContext extends TemplateContext {
         }
 
         $this->setAllowPhpFunctions(false);
+        $this->setAutoEscape(true);
     }
 
     /**
