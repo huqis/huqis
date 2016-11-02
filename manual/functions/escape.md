@@ -10,7 +10,7 @@ Escapes the provided string.
 
 |Index|Name|Type|Required|Default|Description|
 |---|---|---|---|---|---|
-|0|value|string|array|yes|-|String to escape|
+|0|value|string or array|yes|-|String to escape|
 |1|format|string|no|html|Format of the escape|
 
 ### Formats

@@ -10,6 +10,7 @@ All these keywords are optional but at least one is required.
 The sequence of the keywords do not matter.
 
 The ```$loop``` variable is an array with the following keys:
+
 - ```index```: Index of the current iteration
 - ```revindex```: Reversed index counting from the end of the loop
 - ```first```: Boolean to see if it's the first iteration

@@ -25,6 +25,7 @@ Check the sources of the existing blocks, functions and operators to get you on 
 The ```TemplateBlock``` interface is used to implement custom template blocks.
 
 Implementations out of the box:
+
 - ```BlockTemplateBlock```
 - ```BreakTemplateBlock```
 - ```CaptureTemplateBlock```
@@ -47,6 +48,7 @@ The ```TemplateFunction``` interface is used to implement custom template functi
 Template functions can also be used as a modifier.
 
 Implementations out of the box:
+
 - ```CapitalizeTemplateFunction```
 - ```ConcatTemplateFunction```
 - ```DefaultTemplateFunction```
@@ -63,6 +65,7 @@ Implementations out of the box:
 The ```ExpressionOperator``` interface is used to implement template expression operators like +, -, <, ==, ...
 
 Implementations out of the box:
+
 - ```AssignExpressionOperator```
 - ```GenericExpressionOperator```
 - ```RegexExpressionOperator```
@@ -72,4 +75,5 @@ Implementations out of the box:
 The ```LogicalOperator``` interface is used to implement template logical operators like and, &&, or, ...
 
 Implementations out of the box:
+
 - ```GenericLogicalOperator```

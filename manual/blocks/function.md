@@ -21,7 +21,7 @@ Use the [```return```](return.md) block if you want the function to return somet
 
 ```
 {function renderTitle($title)}
-    <h1>{$title|lower|capitalize}</h1>
+    {$title|lower|capitalize}
 {/function}
 
 {function calculateSum($variable1, $variable2 = 12)}
@@ -40,7 +40,7 @@ Use the [```return```](return.md) block if you want the function to return somet
 will output:
 
 ```
-<h1>My Title</h1>
+My Title
 19
 10
 ```
