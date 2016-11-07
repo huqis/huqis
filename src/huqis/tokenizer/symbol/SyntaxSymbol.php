@@ -86,6 +86,12 @@ class SyntaxSymbol extends NestedSymbol {
     const FOREACH_LOOP = ' loop ';
 
     /**
+     * Symbol to get the value of a foreach
+     * @var string
+     */
+    const FOREACH_VALUE = ' value ';
+
+    /**
      * Symbol to add arguments to an include
      * @var string
      */

@@ -57,7 +57,7 @@ class ForeachTemplateBlock implements TemplateBlock {
 
         $tokens = $this->tokenizer->tokenize($signature);
         foreach ($tokens as $token) {
-            if ($token === SyntaxSymbol::FOREACH_AS || $token === SyntaxSymbol::FOREACH_KEY || $token === SyntaxSymbol::FOREACH_LOOP) {
+            if ($token === SyntaxSymbol::FOREACH_AS || $token === SyntaxSymbol::FOREACH_KEY || $token === SyntaxSymbol::FOREACH_LOOP || $token === SyntaxSymbol::FOREACH_VALUE) {
                 $expression = trim($expression);
                 if ($expression === '') {
                     throw new CompileTemplateException('Invalid foreach: variable expected');
@@ -67,7 +67,7 @@ class ForeachTemplateBlock implements TemplateBlock {
                     // first token, should be the array or iterator
                     $parts[$part] = $compiler->compileExpression($expression);
                 } else {
-                    // the as, key or loop variable name
+                    // the as, key, loop or value variable name
                     $parts[$part] = $compiler->parseName($expression);
                 }
 
@@ -77,7 +77,6 @@ class ForeachTemplateBlock implements TemplateBlock {
                 $expression .= $token;
             }
         }
-
         // validate signature
         $expression = trim($expression);
         if ($expression === '') {
@@ -86,8 +85,11 @@ class ForeachTemplateBlock implements TemplateBlock {
 
         $parts[$part] = $compiler->parseName($expression);
 
-        if (!isset($parts[SyntaxSymbol::FOREACH_AS]) && !isset($parts[SyntaxSymbol::FOREACH_KEY]) && !isset($parts[SyntaxSymbol::FOREACH_LOOP])) {
-            throw new CompileTemplateException('Could not compile foreach statement: use at least one of as, key or loop');
+
+        if (!isset($parts[SyntaxSymbol::FOREACH_AS]) && !isset($parts[SyntaxSymbol::FOREACH_KEY]) && !isset($parts[SyntaxSymbol::FOREACH_LOOP]) && !isset($parts[SyntaxSymbol::FOREACH_VALUE])) {
+            throw new CompileTemplateException('Could not compile foreach statement: use at least one of value, key or loop');
+        } elseif (!isset($parts[SyntaxSymbol::FOREACH_VALUE]) && isset($parts[SyntaxSymbol::FOREACH_AS])) {
+            $parts[SyntaxSymbol::FOREACH_VALUE] = $parts[SyntaxSymbol::FOREACH_AS];
         }
 
         // compile foreach into the output buffer
@@ -114,8 +116,8 @@ class ForeachTemplateBlock implements TemplateBlock {
             $buffer->appendCode('$foreach' . $this->counter . 'Index++;');
         }
 
-        if (isset($parts[SyntaxSymbol::FOREACH_AS])) {
-            $buffer->appendCode('$context->setVariable(\'' . $parts[SyntaxSymbol::FOREACH_AS] . '\', $foreach' . $this->counter . 'Value'  . (strpos($parts[SyntaxSymbol::FOREACH_AS], SyntaxSymbol::VARIABLE_SEPARATOR) ? '' : ', false') . ');');
+        if (isset($parts[SyntaxSymbol::FOREACH_VALUE])) {
+            $buffer->appendCode('$context->setVariable(\'' . $parts[SyntaxSymbol::FOREACH_VALUE] . '\', $foreach' . $this->counter . 'Value'  . (strpos($parts[SyntaxSymbol::FOREACH_VALUE], SyntaxSymbol::VARIABLE_SEPARATOR) ? '' : ', false') . ');');
         }
         if (isset($parts[SyntaxSymbol::FOREACH_KEY])) {
             $buffer->appendCode('$context->setVariable(\'' . $parts[SyntaxSymbol::FOREACH_KEY] . '\', $foreach' . $this->counter . 'Key'  . (strpos($parts[SyntaxSymbol::FOREACH_KEY], SyntaxSymbol::VARIABLE_SEPARATOR) ? '' : ', false') . ');');

@@ -2,7 +2,7 @@
 
 Loops over an array or iterator.
 
-Use the ```as``` keyword to define the variable for the value of the current iteration.
+Use the ```value``` keyword to define the variable for the value of the current iteration.
 The ```key``` keyword defines the variable for the key in the array.
 The ```loop``` keyword defines a variable with more information about the current iteration.
 
@@ -29,7 +29,7 @@ The ```$loop``` variable is an array with the following keys:
 
 ```
 {$values = [1, 2, 3, 4, 5, 6, 7, 8, 9]}
-{foreach $values as $value}
+{foreach $values value $value}
     {if $value == 3}
         {break}
     {/if}
@@ -44,7 +44,7 @@ The ```$loop``` variable is an array with the following keys:
     {/if}
 {/foreach}
 
-{foreach $values as $value key $key loop $loop}
+{foreach $values key $key loop $loop value $value}
     {if $loop.first}
         {$loop.index}<br>
     {/if}

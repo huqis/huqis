@@ -418,6 +418,8 @@ class TemplateCompiler {
      * @return string Compiled value
      */
     public function compileExpression($expression, &$isLogic = true) {
+        $expression = trim($expression);
+
         $result = '';
         $value = '';
         $operator = null;

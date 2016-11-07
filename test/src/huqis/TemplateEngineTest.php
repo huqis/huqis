@@ -170,6 +170,15 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                     'names' => array('John', 'Jane', 'Mike'),
                 ),
             ),
+            array(
+                '<ul><li>John</li><li>Jane</li><li>Mike</li></ul>',
+                array(
+                    'index' => '<ul>{foreach $names value $name}<li>{$name}</li>{/foreach}</ul>',
+                ),
+                array(
+                    'names' => array('John', 'Jane', 'Mike'),
+                ),
+            ),
             // format tests
             array(
                 '15.99 15.98765 Tue Oct 25 08:26:16 2016 2016-10-25',

@@ -18,6 +18,7 @@ class ForeachTokenizer extends Tokenizer {
         $this->addSymbol(new SimpleSymbol(SyntaxSymbol::FOREACH_AS));
         $this->addSymbol(new SimpleSymbol(SyntaxSymbol::FOREACH_KEY));
         $this->addSymbol(new SimpleSymbol(SyntaxSymbol::FOREACH_LOOP));
+        $this->addSymbol(new SimpleSymbol(SyntaxSymbol::FOREACH_VALUE));
 
         parent::setWillTrimTokens(false);
     }
