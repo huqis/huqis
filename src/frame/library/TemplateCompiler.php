@@ -119,12 +119,13 @@ class TemplateCompiler {
      * @param string $template Template code to compile
      * @param string $extends Template code from a dynamic extends block where
      * $template is the template code of the extended template
+     * @param integer $indent Level of indentation
      * @return string PHP code of the compiled template
      * @throws \frame\library\exception\CompileTemplateException when this
      * method is called while already compiling or when the template syntax is
      * invalid
      */
-    public function compile($template, $extends = null) {
+    public function compile($template, $extends = null, $indent = 0) {
         if ($this->isCompiling) {
             throw new CompileTemplateException('Could not compile the provided template: already compiling');
         }
@@ -133,6 +134,7 @@ class TemplateCompiler {
 
         $this->isCompiling = true;
         $this->buffer = new TemplateOutputBuffer();
+        $this->buffer->setIndent($indent);
 
         $this->subcompile($template);
 
@@ -163,10 +165,16 @@ class TemplateCompiler {
         }
 
         // tokenize on syntax tokens {}
+        $template = str_replace("\r\n", "\n", $template);
+
         $tokens = $this->syntaxTokenizer->tokenize($template);
 
-        $isSyntax = false;
         $isComment = false;
+        $isSyntax = false;
+        $hasSyntax = false;
+
+        $process = '';
+        $line = '';
         $tokenIndex = 0;
         $numTokens = count($tokens);
 
@@ -187,9 +195,15 @@ class TemplateCompiler {
                     if ($nextTokenIndex != $numTokens) {
                         $firstChar = substr($tokens[$nextTokenIndex], 0, 1);
                         if ($firstChar !== ' ' && $firstChar !== "\n" && $firstChar !== SyntaxSymbol::SYNTAX_CLOSE) {
-                            // echo 'open syntax' . "\n";
+                            // valid syntax opening
                             $isSyntax = true;
                             $tokenIndex++;
+
+                            // some plain text in the process buffer
+                            if ($process !== '') {
+                                $this->buffer->appendText($process);
+                                $process = '';
+                            }
 
                             continue;
                         }
@@ -209,6 +223,17 @@ class TemplateCompiler {
 
                     continue;
                 }
+            } elseif ($token === "\n") {
+                // new line
+                if (!($hasSyntax && $line === '')) {
+                    $process .= "\n";
+                }
+
+                $line = '';
+                $hasSyntax = false;
+                $tokenIndex++;
+
+                continue;
             }
 
             if ($isComment) {
@@ -216,7 +241,8 @@ class TemplateCompiler {
                 $tokenIndex++;
             } elseif (!$isSyntax) {
                 // no syntax, add plain text
-                $this->buffer->appendText($token);
+                $process .= $token;
+                $line .= $token;
                 $tokenIndex++;
             } else {
                 // syntax, compile
@@ -244,10 +270,20 @@ class TemplateCompiler {
                     throw $exception;
                 }
 
-                if ($code) {
+                $hasSyntax = true;
+
+                if ($code !== '') {
+                    if (substr($code, 0, 4) === 'echo') {
+                        $line .= $code;
+                    }
+
                     $this->buffer->appendCode($code);
                 }
             }
+        }
+
+        if ($process !== '') {
+            $this->buffer->appendText($process);
         }
     }
 
@@ -330,8 +366,10 @@ class TemplateCompiler {
                 $tokenLength = strlen($token);
 
                 if (substr($token, 0, $nameLength) === $name) {
+                    // opening block
                     $recursive++;
                 } elseif ($tokenLength === $nameLength + 1 && $token === '/' . $name) {
+                    // closing block
                     if ($recursive) {
                         $recursive--;
                     } else {
@@ -354,7 +392,11 @@ class TemplateCompiler {
             $endTokenIndex = $tokenIndex + 1;
         }
 
-        $result = $block->compile($this, $signature, $body);
+        if (substr($body, 0, 1) == "\n") {
+            $body = substr($body, 1);
+        }
+
+        $result = $block->compile($this, trim($signature), $body);
 
         if ($block->needsClose()) {
             $this->buffer->popFromBlockStack();
@@ -513,6 +555,10 @@ class TemplateCompiler {
      * @return string Compiled value
      */
     private function compileArray($array) {
+        if (trim($array) == '') {
+            return '[]';
+        }
+
         $result = '';
         $key = '';
         $expression = '';
@@ -612,7 +658,12 @@ class TemplateCompiler {
         $tokens = $this->valueTokenizer->tokenize($value);
         $numTokens = count($tokens);
 
-        if ($numTokens >= 3 && $tokens[0] == StringSymbol::SYMBOL && $tokens[2] == StringSymbol::SYMBOL) {
+        if ($numTokens >= 2 && $tokens[0] == StringSymbol::SYMBOL && $tokens[1] == StringSymbol::SYMBOL) {
+            // empty string token
+            $var = '""';
+            $tokenIndex = 2;
+        } elseif ($numTokens >= 3 && $tokens[0] == StringSymbol::SYMBOL && $tokens[2] == StringSymbol::SYMBOL) {
+            // string token
             $var = '"' . $tokens[1] . '"';
             $tokenIndex = 3;
         } else {
@@ -666,6 +717,10 @@ class TemplateCompiler {
                 } elseif ($expectsFunction || is_array($tokens[$tokenIndex])) {
                     // function
                     $functionName = $this->parseName($var, false);
+                    if ($functionName === '_extends') {
+                        $useOutputFilters = false;
+                    }
+
                     if (!$issetToken) {
                         $result = '$context->call(\'' . $functionName . '\')';
                     } elseif ($functionName === 'isset') {
@@ -683,7 +738,7 @@ class TemplateCompiler {
                 } elseif ($expectsFunction) {
                     throw new CompileTemplateException('Function signature expected');
                 } elseif ($tokens[$tokenIndex] !== SyntaxSymbol::MODIFIER) {
-                    throw new CompileTemplateException('Modifier expected');
+                    throw new CompileTemplateException('Modifier expected, got ' . $tokens[$tokenIndex]);
                 }
 
                 if ($result === null) {
@@ -726,7 +781,7 @@ class TemplateCompiler {
         try {
             $name = $this->parseName($variable);
 
-            return $this->applyModifiers($this->compileGetVariable($name), $modifiers, $useOutputFilters);
+            return $this->applyModifiers($this->compileGetVariable($name), $modifiers, $isLogic, $useOutputFilters);
         } catch (CompileTemplateException $exception) {
             // no simple variable, further code will compile
         }
@@ -993,7 +1048,7 @@ class TemplateCompiler {
         foreach ($tokens as $tokenIndex => $token) {
             if ($token === SyntaxSymbol::FUNCTION_ARGUMENT) {
                 if ($expression === '') {
-                    throw new CompileTemplateException($signature . ' could not be parsed: invalid syntax');
+                    throw new CompileTemplateException('Invalid syntax ' . $signature);
                 }
 
                 if ($result !== '') {
@@ -1041,6 +1096,7 @@ class TemplateCompiler {
      */
     private function compileConditionTokens(array $tokens) {
         $result = '';
+
         foreach ($tokens as $token) {
             if (is_array($token)) {
                 $result .= SyntaxSymbol::NESTED_OPEN . $this->compileConditionTokens($token) . SyntaxSymbol::NESTED_CLOSE;
@@ -1052,7 +1108,7 @@ class TemplateCompiler {
             if ($operator) {
                 $result .= ' ' . $operator->getOperator() . ' ';
             } else {
-                $result .= $this->compileExpression($token);
+                $result .= $this->compileExpression(trim($token));
             }
         }
 
@@ -1076,10 +1132,10 @@ class TemplateCompiler {
         }
 
         if (substr($value, 0, 1) === StringSymbol::SYMBOL && substr($value, -1) === StringSymbol::SYMBOL) {
-            return $value;
+            return '"' . addcslashes(substr(str_replace('\\"', '"', $value), 1, -1), '"$\\') . '"';
         }
 
-        throw new CompileTemplateException('Could not compile scalar value: "' . $value . '" is not a valid scalar value syntax');
+        throw new CompileTemplateException('Invalid syntax ' . $value);
     }
 
     /**
@@ -1122,10 +1178,8 @@ class TemplateCompiler {
      */
     public function parseName($name, $isVariable = true) {
         $firstChar = substr($name, 0, 1);
-        if ($isVariable && $firstChar !== '$') {
-            throw new CompileTemplateException('Invalid variable ' . $name);
-        } elseif (!$isVariable && $firstChar === '$') {
-            throw new CompileTemplateException('Invalid name ' . $name);
+        if (($isVariable && $firstChar !== '$') || (!$isVariable && $firstChar === '$')) {
+            throw new CompileTemplateException('Invalid syntax ' . $name);
         }
 
         if ($isVariable) {
@@ -1142,9 +1196,9 @@ class TemplateCompiler {
             }
 
             if ($isVariable) {
-                throw new CompileTemplateException('Invalid variable $' . $name);
+                throw new CompileTemplateException('Invalid syntax $' . $name);
             } else {
-                throw new CompileTemplateException('Invalid name ' . $name);
+                throw new CompileTemplateException('Invalid syntax ' . $name);
             }
         }
 

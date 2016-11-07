@@ -95,7 +95,7 @@ class ForeachTemplateBlock implements TemplateBlock {
         $hasLoop = isset($parts[SyntaxSymbol::FOREACH_LOOP]);
 
         $buffer->appendCode('$foreach' . $this->counter . ' = ' . $parts['iterator'] . ';');
-        $buffer->appendCode('if ($foreach' . $this->counter . ') { ');
+        $buffer->appendCode('if ($foreach' . $this->counter . ') {');
         if ($hasLoop) {
             $buffer->appendCode('$foreach' . $this->counter . 'Index = 0;');
             $buffer->appendCode('$foreach' . $this->counter . 'Length = count($foreach' . $this->counter . ');');
@@ -110,15 +110,15 @@ class ForeachTemplateBlock implements TemplateBlock {
             $buffer->appendCode('"first" => $foreach' . $this->counter . 'Index === 0,');
             $buffer->appendCode('"last" => $foreach' . $this->counter . 'Index === $foreach' . $this->counter . 'Length - 1,');
             $buffer->appendCode('"length" => $foreach' . $this->counter . 'Length,');
-            $buffer->appendCode(']);');
+            $buffer->appendCode(']'  . (strpos($parts[SyntaxSymbol::FOREACH_LOOP], SyntaxSymbol::VARIABLE_SEPARATOR) ? '' : ', false') . ');');
             $buffer->appendCode('$foreach' . $this->counter . 'Index++;');
         }
 
         if (isset($parts[SyntaxSymbol::FOREACH_AS])) {
-            $buffer->appendCode('$context->setVariable(\'' . $parts[SyntaxSymbol::FOREACH_AS] . '\', $foreach' . $this->counter . 'Value);');
+            $buffer->appendCode('$context->setVariable(\'' . $parts[SyntaxSymbol::FOREACH_AS] . '\', $foreach' . $this->counter . 'Value'  . (strpos($parts[SyntaxSymbol::FOREACH_AS], SyntaxSymbol::VARIABLE_SEPARATOR) ? '' : ', false') . ');');
         }
         if (isset($parts[SyntaxSymbol::FOREACH_KEY])) {
-            $buffer->appendCode('$context->setVariable(\'' . $parts[SyntaxSymbol::FOREACH_KEY] . '\', $foreach' . $this->counter . 'Key);');
+            $buffer->appendCode('$context->setVariable(\'' . $parts[SyntaxSymbol::FOREACH_KEY] . '\', $foreach' . $this->counter . 'Key'  . (strpos($parts[SyntaxSymbol::FOREACH_KEY], SyntaxSymbol::VARIABLE_SEPARATOR) ? '' : ', false') . ');');
         }
 
         $context = $context->createChild();
@@ -135,7 +135,7 @@ class ForeachTemplateBlock implements TemplateBlock {
         $buffer->appendCode('}');
 
         if ($hasLoop) {
-            $buffer->appendCode('$context->setVariable(\'' . $parts[SyntaxSymbol::FOREACH_LOOP] . '\', null);');
+            $buffer->appendCode('$context->setVariable(\'' . $parts[SyntaxSymbol::FOREACH_LOOP] . '\', null'  . (strpos($parts[SyntaxSymbol::FOREACH_LOOP], SyntaxSymbol::VARIABLE_SEPARATOR) ? '' : ', false') . ');');
         }
 
         $buffer->appendCode('}');

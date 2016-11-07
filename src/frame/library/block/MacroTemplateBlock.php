@@ -102,7 +102,7 @@ class MacroTemplateBlock implements TemplateBlock {
         $compiler->setContext($context->getParent());
 
         $buffer->endBufferBlock();
-        $buffer->appendCode(' };');
+        $buffer->appendCode('};');
 
         // call the function with the compiled arguments
         if ($arguments) {

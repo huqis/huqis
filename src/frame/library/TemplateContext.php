@@ -312,6 +312,8 @@ class TemplateContext {
             // no dotted name
             if ($value !== null) {
                 $this->variables[$name] = $value;
+            } elseif (array_key_exists($name, $this->variables)) {
+                unset($this->variables[$name]);
             }
 
             return $value;

@@ -2,6 +2,7 @@
 
 namespace frame\library;
 
+use frame\library\block\AutoEscapeTemplateBlock;
 use frame\library\block\BlockTemplateBlock;
 use frame\library\block\CaptureTemplateBlock;
 use frame\library\block\CycleTemplateBlock;
@@ -191,6 +192,10 @@ class DefaultTemplateContext extends TemplateContext {
      */
     protected function ensureBlock($name) {
         switch ($name) {
+            case 'autoescape':
+                $this->setBlock('autoescape', new AutoEscapeTemplateBlock());
+
+                break;
             case 'block':
                 $this->setBlock('block', new BlockTemplateBlock());
 

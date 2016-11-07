@@ -259,7 +259,13 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                     'name' => 'John',
                 ),
             ),
-            // assign tests
+            array(
+                '&lt;test&gt;',
+                array(
+                    'index' => '{$variable = "<test>"}{autoescape}{$variable}{/autoescape}',
+                ),
+            ),
+            // capture tests
             array(
                 '<p>Hello, my name is John and in 5 years, I\'m 35 years old.</p> 30',
                 array(
@@ -464,6 +470,12 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                 '<test>',
                 array(
                     'index' => '{$variable = "<test>"}{$variable|raw}',
+                ),
+            ),
+            array(
+                '<test>',
+                array(
+                    'index' => '{autoescape false}{$variable = "<test>"}{$variable}{/autoescape}',
                 ),
             ),
         );

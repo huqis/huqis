@@ -78,6 +78,7 @@ class IncludeTemplateBlock implements TemplateBlock {
             $resource = $compiler->compileScalarValue($resource);
             $isDynamicInclude = false;
         } catch (CompileTemplateException $exception) {
+            $compiler->compileExpression($resource);
             $isDynamicInclude = true;
         }
 

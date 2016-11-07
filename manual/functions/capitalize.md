@@ -25,3 +25,9 @@ Capitalizes the provided string.
 
 {$result = $string|capitalize}
 ```
+
+## See Also
+
+- [lower](lower.md)
+- [upper](upper.md)
+

@@ -108,7 +108,7 @@ class FunctionTemplateBlock implements TemplateBlock {
 
         $this->counter++;
 
-        $buffer->appendCode('$function' . $this->counter . ' = function(TemplateContext $context) { ');
+        $buffer->appendCode('$function' . $this->counter . ' = function(TemplateContext $context) {');
         $buffer->setAllowOutput(true);
 
         $context = $context->createChild();
@@ -120,7 +120,7 @@ class FunctionTemplateBlock implements TemplateBlock {
         $compiler->setContext($context->getParent());
 
         $buffer->clearAllowOutput();
-        $buffer->appendCode(' };');
+        $buffer->appendCode('};');
         $buffer->appendCode('$context->setFunction(\'' . $name . '\', new \frame\library\func\FunctionTemplateFunction("' . $name . '", $function' . $this->counter . $arguments . '));');
     }
 

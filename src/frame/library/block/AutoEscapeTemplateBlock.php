@@ -5,17 +5,9 @@ namespace frame\library\block;
 use frame\library\TemplateCompiler;
 
 /**
- * Capture block to create or update a variable from a template block
+ * Auto escape block element
  */
-class CaptureTemplateBlock implements TemplateBlock {
-
-    /**
-     * Constructs a new assign block
-     * @return null
-     */
-    public function __construct() {
-        $this->counter = 0;
-    }
+class AutoEscapeTemplateBlock implements TemplateBlock {
 
     /**
      * Gets whether this block has a signature
@@ -44,27 +36,23 @@ class CaptureTemplateBlock implements TemplateBlock {
         $buffer = $compiler->getOutputBuffer();
         $context = $compiler->getContext();
 
-        // validate the signature as a variable
-        $name = $compiler->parseName($signature);
-
-        $this->counter++;
-
-        // create a closure from the body block
-        $buffer->appendCode('$capture' . $this->counter . ' = function(TemplateContext $context) {');
-        $buffer->startBufferBlock();
+        if ($signature) {
+            $autoEscape = $compiler->compileExpression($signature);
+            if ($autoEscape === 'true') {
+                $autoEscape = true;
+            } elseif ($autoEscape === 'false') {
+                $autoEscape = false;
+            }
+        } else {
+            $autoEscape = true;
+        }
 
         $context = $context->createChild();
+        $context->setAutoEscape($autoEscape);
 
         $compiler->setContext($context);
         $compiler->subcompile($body);
         $compiler->setContext($context->getParent());
-
-        $buffer->endBufferBlock();
-        $buffer->appendCode('};');
-
-        // call the closure and assign the result to the variable
-        $buffer->appendCode('$context->setVariable("' . $name . '", $capture' . $this->counter . '($context));');
-        $buffer->appendCode('unset($capture' . $this->counter . ');');
     }
 
 }

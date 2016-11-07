@@ -115,6 +115,8 @@ class SyntaxSymbol extends NestedSymbol {
      */
     public function __construct() {
         parent::__construct(self::SYNTAX_OPEN, self::SYNTAX_CLOSE, null, true, true, false);
+
+        $this->setEscapeSymbol('\\', true);
     }
 
 }

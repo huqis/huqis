@@ -60,6 +60,7 @@ You can unset any variable by assigning ```null``` to it:
 
 Blocks are interpreted at compile time.
 
+- [autoescape](blocks/autoescape.md)
 - [block](blocks/block.md)
 - [break](blocks/break.md)
 - [capture](blocks/capture.md)
@@ -84,6 +85,7 @@ Functions are interpreted at runtime.
 - [escape](functions/escape.md)
 - [format](functions/format.md)
 - [lower](functions/lower.md)
+- [raw](functions/raw.md)
 - [replace](functions/replace.md)
 - [trim](functions/trim.md)
 - [truncate](functions/truncate.md)

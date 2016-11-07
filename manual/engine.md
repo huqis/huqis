@@ -49,10 +49,12 @@ It's less performant but errors are easier to track.
 It will also make the cache check modification times of all included resources.
 This way when you edit a template, the engine will pick it up and recompile.
 
-Now the engine is initiliazed, we can render a template.
+Now the engine is initialized, we can render a template.
 
 ```php
-echo $engine->render('my-template.tpl', ['title' => 'My dynamic title']);
+echo $engine->render('my-template.tpl', [
+    'title' => 'My dynamic title',
+]);
 ```
 
 ## Resource Handlers
@@ -125,7 +127,33 @@ If it has a cached version of the template, it will use it.
 
 To make the cache check modification times of all included resources, so it will pick up modifications, turn on debug modus on the engine.
 
-Out of the box there is one cache implemented.
+Clear the cache by calling the ```flush``` method.
+
+```php
+$cache->flush();
+```
+
+The cache can be enabled or disabled at runtime by setting it to the engine.
+
+```php
+$engine->setCache($cache);
+$engine->setCache(null);
+```
+
+Out of the box there 2 cache implementations.
+
+### ArrayTemplateCache
+
+This cache keeps a compiled template in memory to use again in the same request.
+The cache is never persisted so it's starts empty for every request.
+
+```php
+<?php
+
+use frame\library\cache\ArrayTemplateCache;
+
+$cache = new ArrayTemplateCache();
+```
 
 ### DirectoryTemplateCache
 
@@ -137,21 +165,15 @@ This cache keeps a file for each compiled template in the provided cache directo
 use frame\library\cache\DirectoryTemplateCache;
 
 $cache = new DirectoryTemplateCache(__DIR__ . '/cache');
-
-$engine->setCache($cache);
-
-$cache->flush();
 ```
 
 ## Context
 
 The context is the scope of a running block and keeps all available variables, functions, blocks ...
 It's passed on during the compile and runtime of a template to maintain scope.
-Child contexts are created to perform certain logic before going back to the original context, changing the available functions, operators, ... along the way. 
+Child contexts are created to perform certain logic before going back to the original context, changing the available functions, operators, ... along the way.
 
-### DefaultTemplateContext
-
-This context holds the default template syntax.
+You can use a generic ```TemplateContext``` for an empty context or the ```DefaultTemplateContext``` which holds the default template syntax as documented in these manual pages.
 
 ```php
 <?php
@@ -164,6 +186,24 @@ $context->setAllowPhpFunctions(false);
 $context->setAutoEscape(true);
 ```
 
+### Output Filters
+
+By default, auto escaping is enabled. 
+This is actually a shortcut to the output filters.
+
+An output filter is a defined template function where your output is passed through.
+
+Add as many output filters to the context as you want.
+
+```
+$context->setOutputFilter("auto-escape", "escape");
+$context->setOutputFilter("my-filter", "truncate", [200, ""]);
+``` 
+
+You can use [autoescape](blocks/autoescape.md) and [raw](functions/raw.md) to influence the output filters while inside a template.
+
+### Extend Your Context
+
 You can add your own functions, operators and blocks to [extend your context](extend.md).
 
 ```php
@@ -173,9 +213,12 @@ $context->setFunction('truncate', new TruncateTemplateFunction());
 $context->setBlock('literal', new LiteralTemplateBlock());
 ```
 
-You can also use it to set global or variables for every template.
+Use the initial context to set global or variables for every template.
 
 ```php
 $context->setVariable('engine', 'frame');
-$context->setVariables(['variable1' => true, 'variable2' => 10]);
+$context->setVariables([
+    'variable1' => true, 
+    'variable2' => 10,
+]);
 ```

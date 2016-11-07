@@ -55,53 +55,56 @@ class TemplateOutputBuffer {
      * Contents of the current buffer
      * @var string
      */
-    protected $buffer = '';
+    private $buffer = '';
 
     /**
      * Extendable block buffers being processed
      * @var array
      */
-    protected $buffers = array();
+    private $buffers = array();
 
     /**
      * Name of the defined blocks
      * @var array
      */
-    protected $blocks = [];
+    private $blocks = [];
 
     /**
      * Stack of the block elements
      * @var array
      */
-    protected $blockStack = [];
+    private $blockStack = [];
 
     /**
      * Flag to see if output is allowed
      * @var boolean
      */
-    protected $allowOutput = true;
+    private $allowOutput = true;
 
     /**
      * Stack for the history of the $allowOutput flag
      * @var array
      */
-    protected $allowOutputStack = [];
+    private $allowOutputStack = [];
+
+    /**
+     * Indentation level
+     * @var integer
+     */
+    private $indentLevel = 0;
+
+    /**
+     * Indentation string
+     * @var string
+     */
+    private $indentString = '    ';
 
     /**
      * Gets the string representation of this buffer
      * @return string
      */
     public function __toString() {
-        $buffer = $this->buffer;
-
-        foreach ($this->blocks as $name => $null) {
-            $buffer = str_replace(str_replace('%name%', $name, self::BLOCK_START), '', $buffer);
-            $buffer = str_replace(str_replace('%name%', $name, self::BLOCK_END), '', $buffer);
-        }
-        $buffer = str_replace(self::EXTENDS_START, '', $buffer);
-        $buffer = str_replace(self::EXTENDS_END, '', $buffer);
-
-        return $buffer;
+        return $this->buffer;
     }
 
     /**
@@ -162,6 +165,36 @@ class TemplateOutputBuffer {
     }
 
     /**
+     * Sets the indentation level
+     * @param integer $indent
+     * @return null
+     */
+    public function setIndent($indent) {
+        $this->indentLevel = $indent;
+    }
+
+    /**
+     * Gets the indentation string for the current indentation level
+     * @return string
+     */
+    private function getIndentation() {
+        $indentation = '';
+        for ($i = 0; $i < $this->indentLevel; $i++) {
+            $indentation .= $this->indentString;
+        }
+
+        return $indentation;
+    }
+
+    /**
+     * Appends the current level of indentation to the buffer
+     * @return null
+     */
+    private function appendIndentation() {
+        $this->buffer .= $this->getIndentation();
+    }
+
+    /**
      * Appends plain unprocessable text to the buffer
      * @param string $text Text to append
      * @return null
@@ -172,21 +205,45 @@ class TemplateOutputBuffer {
             throw new CompileTemplateException('Output is not allowed in block ' . end($this->blockStack));
         }
 
-        $this->buffer .= 'echo "' . addcslashes($text, '"$\\') . '";';
+        if ($text == '') {
+            return;
+        }
+
+        $this->appendIndentation();
+        $this->buffer .= 'echo "' . str_replace("\n", '\\n', addcslashes($text, '"$\\')) . '";' . "\n";
     }
 
     /**
-     * Appends a piece of PHP code which needs interpretation to the buffer
+     * Appends a line of PHP code which needs interpretation
      * @param string $code Code to append
      * @return null
      * @see appendText
      */
     public function appendCode($code) {
-        if (!$this->allowOutput && substr($code, 0, 5) == 'echo ') {
+        if (trim($code) == '') {
+            return;
+        }
+
+        $isOutput = substr($code, 0, 5) == 'echo ';
+        if (!$this->allowOutput && $isOutput) {
             throw new CompileTemplateException('Output is not allowed in block ' . end($this->blockStack));
         }
 
+        $firstChar = substr($code, 0, 1);
+        $lastChar = substr($code, -1);
+        $last2Chars = substr($code, -2);
+
+        if ($lastChar === '}' || ($lastChar == '{' && $firstChar == '}') || $last2Chars === '};' || $last2Chars === '];' || ($firstChar === ']' && $last2Chars == ');' && substr($code, 0, 4) !== 'echo')) {
+            $this->indentLevel--;
+        }
+
+        $this->appendIndentation();
         $this->buffer .= $code;
+        $this->buffer .= "\n";
+
+        if (($lastChar === '{') || $lastChar === '[') {
+            $this->indentLevel++;
+        }
     }
 
     /**
@@ -195,7 +252,8 @@ class TemplateOutputBuffer {
      * @see endCodeBlock
      */
     public function startCodeBlock() {
-        $this->appendCode('{ $context = $context->createChild();');
+        // $this->appendCode('{');
+        $this->appendCode('$context = $context->createChild();');
     }
 
     /**
@@ -206,7 +264,8 @@ class TemplateOutputBuffer {
      * @see startCodeBlock
      */
     public function endCodeBlock($keepVariables = false) {
-        $this->appendCode('$context = $context->getParent(' . var_export($keepVariables, true) . '); }');
+        $this->appendCode('$context = $context->getParent(' . var_export($keepVariables, true) . ');');
+        // $this->appendCode('}');
     }
 
     /**
@@ -256,6 +315,7 @@ class TemplateOutputBuffer {
      */
     public function endExtends() {
         $this->appendCode(self::EXTENDS_END);
+
         $this->clearAllowOutput();
     }
 
@@ -317,18 +377,18 @@ class TemplateOutputBuffer {
             // block already exists
             if ($strategy == self::STRATEGY_APPEND) {
                 // process to append to the parent block
-                $start = $positionOpen + strlen($commentOpen);
+                $start = $positionOpen + strlen($commentOpen . "\n");
                 $parentBlock = substr($this->buffer, $start, $positionClose - $start);
                 $block = $parentBlock . $block;
             } elseif ($strategy == self::STRATEGY_PREPEND) {
                 // process to prepend to the parent block
-                $start = $positionOpen + strlen($commentOpen);
+                $start = $positionOpen + strlen($commentOpen . "\n");
                 $parentBlock = substr($this->buffer, $start, $positionClose - $start);
                 $block .= $parentBlock;
             }
 
             // replace the existing block with the new block content
-            $this->buffer = substr($this->buffer, 0, $positionOpen) . $commentOpen . $block . substr($this->buffer, $positionClose);
+            $this->buffer = substr($this->buffer, 0, $positionOpen) . $commentOpen . "\n" . $block . $this->getIndentation() . substr($this->buffer, $positionClose);
         } else {
             // new block
 
@@ -337,8 +397,14 @@ class TemplateOutputBuffer {
                 throw new CompileTemplateException('Cannot extend block ' . $name . ': not defined in extended template');
             }
 
+            if (substr($block, -1) == "\n") {
+                $block = substr($block, 0, -1);
+            }
+
             // we're cool,
-            $this->appendCode($commentOpen . $block . $commentClose);
+            $this->appendCode($commentOpen);
+            $this->appendCode($block);
+            $this->appendCode($commentClose);
         }
     }
 

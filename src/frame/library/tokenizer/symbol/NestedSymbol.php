@@ -93,133 +93,6 @@ class NestedSymbol extends AbstractSymbol {
     }
 
     /**
-     * Sets the escape symbol
-     * @param string $escape
-     * @return null
-     */
-    public function setEscapeSymbol($escape, $remove = true) {
-        $this->symbolEscape = $escape;
-        $this->symbolEscapeLength = strlen($escape);
-        $this->removeSymbolEscape = $remove;
-    }
-
-    /**
-     * Checks for this symbol in the string which is being tokenized
-     * @param string $process Current part of the string which is being
-     * tokenized
-     * @param string $toProcess Remaining part of the string which has not yet
-     * been tokenized
-     * @return null|array Null when the symbol was not found, an array with the
-     * processed tokens if the symbol was found.
-     */
-    public function tokenize(&$process, $toProcess) {
-        $processLength = strlen($process);
-        if ($processLength < $this->symbolOpenLength || substr($process, $this->symbolOpenOffset) != $this->symbolOpen) {
-            return null;
-        }
-
-        $positionOpen = $processLength - $this->symbolOpenLength;
-        $positionClose = $this->getClosePosition($toProcess, $positionOpen);
-        if ($positionClose === false) {
-            return null;
-        }
-
-        $lengthProcess = strlen($process) + $positionOpen;
-
-        $before = substr($process, 0, $positionOpen);
-        if (!$this->allowsSymbolsBeforeOpen && trim($before)) {
-            return null;
-        }
-
-        $between = substr($toProcess, $positionOpen + $this->symbolOpenLength, $positionOpen + $positionClose - $lengthProcess);
-
-        $process .= $between . $this->symbolClose;
-
-        if ($between !== '' && $this->tokenizer !== null) {
-            $between = $this->tokenizer->tokenize($between);
-        }
-
-        $result = [];
-        if ($before !== '') {
-            $result[] = $before;
-        }
-        if ($this->willIncludeSymbols) {
-            $result[] = $this->symbolOpen;
-            if ($between !== '') {
-                $result[] = $between;
-            }
-            $result[] = $this->symbolClose;
-        } elseif ($between !== '') {
-            $result[] = $between;
-        }
-
-        return $result;
-    }
-
-    /**
-     * Process the tokens after the tokenizer has done it's work
-     * @param array $tokens Resulting tokens
-     * @return array Processed tokens
-     */
-    public function postTokenize(array $tokens) {
-        if (!$this->symbolEscape || !$this->removeSymbolEscape) {
-            return $tokens;
-        }
-
-        return $this->postProcessEscape($tokens);
-    }
-
-    private function postProcessEscape(array $tokens) {
-        foreach ($tokens as $index => $token) {
-            if (is_array($token)) {
-                $tokens[$index] = $this->postProcessEscape($token);
-            } else {
-                $tokens[$index] = str_replace($this->symbolEscape . $this->symbolClose, $this->symbolClose, $token);
-            }
-        }
-
-        return $tokens;
-    }
-
-    /**
-     * Gets the position of the close symbol in a string
-     * @param string $string String to look in
-     * @param integer $initialOpenPosition The position of the open symbol for
-     * which to find the close symbol
-     * @return integer The position of the close symbol
-     * @throws \ride\library\tokenizer\exception\TokenizeException when the symbol is opened but not closed
-     */
-    protected function getClosePosition($string, $initialOpenPosition) {
-        $initialOpenPosition++;
-
-        // look for first close
-        $closePosition = strpos($string, $this->symbolClose, $initialOpenPosition);
-        if ($closePosition === false) {
-            if ($this->isStrict) {
-                throw new TokenizeTemplateException($this->symbolOpen . ' opened (at ' . $initialOpenPosition . ') but not closed for ' . $string);
-            } else {
-                return false;
-            }
-        }
-
-        // // close symbol is escaped
-        if ($this->symbolEscape && $closePosition > $this->symbolEscapeLength && substr($string, $closePosition - $this->symbolEscapeLength, $this->symbolEscapeLength) == $this->symbolEscape) {
-            // escaped, continue
-            return $this->getClosePosition($string, $closePosition);
-        }
-
-        // look for another open between initial open and close
-        $openPosition = strpos($string, $this->symbolOpen, $initialOpenPosition);
-        if ($openPosition === false || $openPosition > $closePosition || $this->symbolClose == $this->symbolOpen) {
-            return $closePosition;
-        }
-
-        $openClosePosition = $this->getClosePosition($string, $openPosition);
-
-        return $this->getClosePosition($string, $openClosePosition);
-    }
-
-    /**
      * Sets the open symbol
      * @param string $symbol
      * @return null
@@ -253,6 +126,17 @@ class NestedSymbol extends AbstractSymbol {
     }
 
     /**
+     * Sets the escape symbol
+     * @param string $escape
+     * @return null
+     */
+    public function setEscapeSymbol($escape, $remove = true) {
+        $this->symbolEscape = $escape;
+        $this->symbolEscapeLength = strlen($escape);
+        $this->removeSymbolEscape = $remove;
+    }
+
+    /**
      * Sets whether to allow symbols before the open symbol
      * @param boolean $flag
      * @return null
@@ -267,6 +151,133 @@ class NestedSymbol extends AbstractSymbol {
      */
     public function allowsSymbolsBeforeOpen() {
         return $this->allowsSymbolsBeforeOpen;
+    }
+
+    /**
+     * Checks for this symbol in the string which is being tokenized
+     * @param string $process Current part of the string which is being
+     * tokenized
+     * @param string $toProcess Remaining part of the string which has not yet
+     * been tokenized
+     * @return null|array Null when the symbol was not found, an array with the
+     * processed tokens if the symbol was found.
+     */
+    public function tokenize(&$process, $toProcess) {
+        $processLength = strlen($process);
+        if ($processLength < $this->symbolOpenLength || substr($process, $this->symbolOpenOffset) != $this->symbolOpen) {
+            return null;
+        } elseif ($this->symbolEscape && substr($process, $this->symbolOpenOffset - $this->symbolEscapeLength, $this->symbolEscapeLength) == $this->symbolEscape) {
+            return null;
+        }
+
+        $positionOpen = $processLength - $this->symbolOpenLength;
+        $positionClose = $this->getClosePosition($toProcess, $positionOpen);
+        if ($positionClose === false) {
+            return null;
+        }
+
+        $lengthProcess = strlen($process) + $positionOpen;
+
+        $before = substr($process, 0, $positionOpen);
+        if (!$this->allowsSymbolsBeforeOpen && trim($before)) {
+            return null;
+        }
+
+        $between = substr($toProcess, $positionOpen + $this->symbolOpenLength, $positionOpen + $positionClose - $lengthProcess);
+
+        $process .= $between . $this->symbolClose;
+
+        if ($between !== '' && $this->tokenizer !== null) {
+            $between = $this->tokenizer->tokenize($between);
+        }
+
+        $result = [];
+
+        if ($before !== '') {
+            $result[] = $before;
+        }
+
+        if ($this->willIncludeSymbols) {
+            $result[] = $this->symbolOpen;
+            if ($between !== '') {
+                $result[] = $between;
+            }
+            $result[] = $this->symbolClose;
+        } elseif ($between !== '') {
+            $result[] = $between;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Gets the position of the close symbol in a string
+     * @param string $string String to look in
+     * @param integer $initialOpenPosition The position of the open symbol for
+     * which to find the close symbol
+     * @return integer The position of the close symbol
+     * @throws \ride\library\tokenizer\exception\TokenizeException when the symbol is opened but not closed
+     */
+    protected function getClosePosition($string, $initialOpenPosition) {
+        $initialOpenPosition++;
+
+        // look for first close
+        $closePosition = strpos($string, $this->symbolClose, $initialOpenPosition);
+        if ($closePosition === false) {
+            if ($this->isStrict) {
+                throw new TokenizeTemplateException($this->symbolOpen . ' opened (at ' . $initialOpenPosition . ') but not closed for ' . $string);
+            } else {
+                return false;
+            }
+        }
+
+        // look if close symbol is escaped
+        if ($this->symbolEscape && $closePosition > $this->symbolEscapeLength && substr($string, $closePosition - $this->symbolEscapeLength, $this->symbolEscapeLength) == $this->symbolEscape) {
+            // escaped, continue
+            return $this->getClosePosition($string, $closePosition);
+        }
+
+        // look for another open between initial open and close
+        $openPosition = strpos($string, $this->symbolOpen, $initialOpenPosition);
+        if ($openPosition === false || $openPosition > $closePosition || $this->symbolClose == $this->symbolOpen) {
+            // no nested open
+            return $closePosition;
+        } elseif ($this->symbolEscape && substr($string, $openPosition - $this->symbolEscapeLength, $this->symbolEscapeLength) == $this->symbolEscape) {
+            // open is escaped
+            return $closePosition;
+        }
+
+        $openClosePosition = $this->getClosePosition($string, $openPosition);
+
+        return $this->getClosePosition($string, $openClosePosition);
+    }
+
+    /**
+     * Process the tokens after the tokenizer has done it's work
+     * @param array $tokens Resulting tokens
+     * @return array Processed tokens
+     */
+    public function postTokenize(array $tokens) {
+        if (!$this->symbolEscape || !$this->removeSymbolEscape) {
+            return $tokens;
+        }
+
+        return $this->postProcessEscape($tokens);
+    }
+
+    private function postProcessEscape(array $tokens) {
+        foreach ($tokens as $index => $token) {
+            if (is_array($token)) {
+                $tokens[$index] = $this->postProcessEscape($token);
+            } else {
+                $token = str_replace($this->symbolEscape . $this->symbolOpen, $this->symbolOpen, $token);
+                $token = str_replace($this->symbolEscape . $this->symbolClose, $this->symbolClose, $token);
+
+                $tokens[$index] = $token;
+            }
+        }
+
+        return $tokens;
     }
 
 }

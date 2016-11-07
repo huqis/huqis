@@ -32,3 +32,8 @@ When the value is an array, a query string is generated using PHP's [http_build_
 {$result = $url|escape("url")}
 {$result = $title|escape("slug")}
 ```
+
+## See Also
+
+- [autoescape](../blocks/autoescape.md)
+- [raw](raw.md)

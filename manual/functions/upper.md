@@ -19,3 +19,8 @@ Transform a string to upper case characters.
 
 {$result = $string|upper}
 ```
+
+## See Also
+
+- [capitalize](capitalize.md)
+- [lower](lower.md)

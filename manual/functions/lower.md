@@ -19,3 +19,8 @@ Transform a string to lower case characters.
 
 {$result = $string|lower}
 ```
+
+## See Also
+
+- [capitalize](capitalize.md)
+- [upper](upper.md)

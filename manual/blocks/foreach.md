@@ -40,13 +40,13 @@ The ```$loop``` variable is an array with the following keys:
 
 {foreach $values loop $loop}
     {if $loop.last}
-        {$loop.index]<br>
+        {$loop.index}<br>
     {/if}
 {/foreach}
 
 {foreach $values as $value key $key loop $loop}
     {if $loop.first}
-        {$loop.index]<br>
+        {$loop.index}<br>
     {/if}
 {/foreach}
 

@@ -144,51 +144,13 @@ class TemplateEngine {
      * @throws \frame\library\exception\TemplateException when a compile or
      * runtime error occured
      */
-    public function render($resource, array $variables, TemplateContext $context = null, $extends = null) {
-        // initialize context
-        if (!$context) {
-            $context = $this->context->createChild();
-        }
+    public function render($resource, array $variables = null, TemplateContext $context = null, $extends = null) {
+        $code = $this->compile($resource, $context, $runtimeId, $extends);
 
         if ($variables) {
             $context->setVariables($variables, false);
         }
 
-        $runtimeId = $this->generateRuntimeId($resource);
-
-        // retrieve and compile the template
-        try {
-            $code = $this->getResource($context, $resource, $runtimeId, $extends);
-        } catch (CompileTemplateException $exception) {
-            $resource = $exception->getResource() ? $exception->getResource() : $resource;
-
-            $suffix = null;
-            $lineNumber = null;
-            if ($exception instanceof CompileTemplateException && $exception->getLineNumber()) {
-                $lineNumber = $exception->getLineNumber();
-                if ($lineNumber) {
-                    $suffix = ': syntax error on line ' . $lineNumber;
-                }
-            }
-
-            $previous = $exception;
-            do {
-                $lastPrevious = $previous;
-                $previous = $previous->getPrevious();
-            } while ($previous instanceof CompileTemplateException);
-
-            if ($previous === null) {
-                $previous = $lastPrevious;
-            }
-
-            $exception = new CompileTemplateException('Could not compile ' . $resource . $suffix, 0, $previous);
-            $exception->setResource($resource);
-            $exception->setLineNumber($lineNumber);
-
-            throw $exception;
-        }
-
-        // execute the compiled template with the initialized context
         try {
             $output = $this->execute($context, $code, $runtimeId);
         } catch (Exception $exception) {
@@ -203,14 +165,23 @@ class TemplateEngine {
 
     /**
      * Gets the compiled template for the provided resource
-     * @param TemplateContext $context Runtime context of the template
      * @param string $resource Name of the template resource
+     * @param TemplateContext $context Runtime context of the template
      * @param string $runtimeId Id for the compiled template function
      * @param string $extends Template code to append to the resource, used by a
      * dynamic extends block
      * @return string Compiled template
      */
-    private function getResource(TemplateContext $context, $resource, &$runtimeId, $extends = null) {
+    public function compile($resource, TemplateContext &$context = null, &$runtimeId = null, $extends = null) {
+        // initialize context
+        if (!$context) {
+            $context = $this->context->createChild();
+        }
+
+        if ($runtimeId === null) {
+            $runtimeId = $this->generateRuntimeId($resource);
+        }
+
         $resourceHandler = $template = $context->getResourceHandler();
 
         if ($this->cache) {
@@ -248,7 +219,42 @@ class TemplateEngine {
         // not cached, compile the template
         $template = $resourceHandler->getResource($resource);
 
-        $code = $this->compile($context, $template, $runtimeId, $extends);
+        try {
+            $code = $this->compileTemplate($context, $template, $runtimeId, $extends);
+        } catch (CompileTemplateException $exception) {
+            $originalResource = $resource;
+            $resource = null;
+            $message = null;
+            $lineNumber = null;
+
+            $previous = $exception;
+            do {
+                $lastPrevious = $previous;
+
+                if ($previous instanceof CompileTemplateException) {
+                    if ($previous->getResource()) {
+                        $resource = $previous->getResource();
+                        $lineNumber = $previous->getLineNumber();
+                    } elseif (!$lineNumber) {
+                        $lineNumber = $previous->getLineNumber();
+                    }
+                }
+
+                $message = $previous->getMessage();
+
+                $previous = $previous->getPrevious();
+            } while ($previous instanceof CompileTemplateException);
+
+            if (!$resource) {
+                $resource = $originalResource;
+            }
+
+            $exception = new CompileTemplateException('Could not compile ' . $resource . ': ' . $message . ' on line ' . $lineNumber, 0);
+            $exception->setResource($resource);
+            $exception->setLineNumber($lineNumber);
+
+            throw $exception;
+        }
 
         $requestedResources = $resourceHandler->getRequestedResources();
 
@@ -273,7 +279,7 @@ class TemplateEngine {
      * @param string $extends Template code from a dynamic extends block
      * @return string Compiled template
      */
-    private function compile(TemplateContext $context, $template, $runtimeId, $extends = null) {
+    private function compileTemplate(TemplateContext $context, $template, $runtimeId, $extends = null) {
         $context->preCompile();
 
         $this->compiler->setContext($context);
@@ -282,8 +288,12 @@ class TemplateEngine {
         $code .= "\n";
         $code .= 'use frame\\library\\TemplateContext;';
         $code .= "\n\n";
-        $code .= 'function frameTemplate' . $runtimeId .'(TemplateContext $context) {' . "\n";
-        $code .= $this->compiler->compile($template, $extends);
+        $code .= 'class frameTemplate' . $runtimeId .' {' . "\n";
+        $code .= "\n";
+        $code .= '    public function render(TemplateContext $context) {' . "\n";
+        $code .= $this->compiler->compile($template, $extends, 2);
+        $code .= '    }' . "\n";
+        $code .= "\n";
         $code .= '}';
 
         return $code;

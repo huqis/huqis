@@ -49,7 +49,9 @@ abstract class AbstractTemplateExecutor implements TemplateExecutor {
      */
     protected function executeTemplateFunction(TemplateContext $context, $runtimeId) {
         $template = 'frameTemplate' . $runtimeId;
-        $template($context);
+
+        $template = new $template();
+        $template->render($context);
     }
 
 }

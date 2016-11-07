@@ -2,6 +2,7 @@
 
 namespace frame\library\tokenizer;
 
+use frame\library\tokenizer\symbol\SimpleSymbol;
 use frame\library\tokenizer\symbol\SyntaxSymbol;
 
 /**
@@ -14,7 +15,8 @@ class SyntaxTokenizer extends Tokenizer {
      * @return null
      */
     public function __construct() {
-        $this->addSymbol(new SyntaxSymbol($this));
+        $this->addSymbol(new SyntaxSymbol());
+        $this->addSymbol(new SimpleSymbol("\n"));
 
         parent::setWillTrimTokens(false);
     }

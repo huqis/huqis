@@ -48,8 +48,7 @@ class CycleTemplateBlock implements TemplateBlock {
         $buffer->appendCode('if (!$context->hasFunction(\'' . $name . '\')) {');
         $buffer->appendCode('$' . $name . ' = new \frame\library\func\CycleTemplateFunction();');
         $buffer->appendCode('$context->setFunction(\'' . $name . '\', $' . $name . ');');
-        $buffer->appendCode(' }');
-
+        $buffer->appendCode('}');
         $buffer->appendCode('echo $context->call(\'' . $name . '\', ' . $arguments . ');');
     }
 
