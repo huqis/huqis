@@ -1,9 +1,9 @@
 <?php
 
-namespace huqis\library\func;
+namespace huqis\func;
 
-use huqis\library\exception\RuntimeTemplateException;
-use huqis\library\TemplateContext;
+use huqis\exception\RuntimeTemplateException;
+use huqis\TemplateContext;
 
 /**
  * Simple search and replace function
