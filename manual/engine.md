@@ -15,10 +15,10 @@ The following code sample shows how to setup your engine.
 ```php
 <?php
 
-use frame\library\cache\DirectoryTemplateCache;
-use frame\library\resource\DirectoryTemplateResourceHandler;
-use frame\library\DefaultTemplateContext;
-use frame\library\TemplateEngine;
+use huqis\cache\DirectoryTemplateCache;
+use huqis\resource\DirectoryTemplateResourceHandler;
+use huqis\DefaultTemplateContext;
+use huqis\TemplateEngine;
 
 $resourceHandler = new DirectoryTemplateResourceHandler('/path/to/templates');
 $context = new DefaultTemplateContext($resourceHandler);
@@ -73,7 +73,7 @@ This resource handler is used to create a template backend on the fly in the mem
 ```php
 <?php
 
-use frame\library\resource\ArrayTemplateResourceHandler;
+use huqis\resource\ArrayTemplateResourceHandler;
 
 $arrayResourceHandler = new ArrayTemplateResourceHandler();
 $arrayResourceHandler->setResource('hello', 'Hello {$name}!');
@@ -87,7 +87,7 @@ All files in a set template directory can be requested using their relative path
 ```php
 <?php
 
-use frame\library\resource\DirectoryTemplateResourceHandler;
+use huqis\resource\DirectoryTemplateResourceHandler;
 
 $directoryResourceHandler = new DirectoryTemplateResourceHandler(__DIR__ . '/templates');
 ```
@@ -99,7 +99,7 @@ Use the chain resource handler if you need multiple backends at once.
 ```php
 <?php
 
-use frame\library\resource\ChainTemplateResourceHandler;
+use huqis\resource\ChainTemplateResourceHandler;
 
 $chainResourceHandler = new ChainTemplateResourceHandler();
 $chainResourceHandler->setResourceHandler('array', $arrayResourceHandler);
@@ -150,7 +150,7 @@ The cache is never persisted so it's starts empty for every request.
 ```php
 <?php
 
-use frame\library\cache\ArrayTemplateCache;
+use huqis\cache\ArrayTemplateCache;
 
 $cache = new ArrayTemplateCache();
 ```
@@ -162,7 +162,7 @@ This cache keeps a file for each compiled template in the provided cache directo
 ```php
 <?php
 
-use frame\library\cache\DirectoryTemplateCache;
+use huqis\cache\DirectoryTemplateCache;
 
 $cache = new DirectoryTemplateCache(__DIR__ . '/cache');
 ```
@@ -178,7 +178,7 @@ You can use a generic ```TemplateContext``` for an empty context or the ```Defau
 ```php
 <?php
 
-use frame\library\DefaultTemplateContext;
+use huqis\DefaultTemplateContext;
 
 $context = new DefaultTemplateContext($chainResourceHandler);
 
@@ -216,7 +216,7 @@ $context->setBlock('literal', new LiteralTemplateBlock());
 Use the initial context to set global or variables for every template.
 
 ```php
-$context->setVariable('engine', 'frame');
+$context->setVariable('engine', 'huqis');
 $context->setVariables([
     'variable1' => true, 
     'variable2' => 10,
