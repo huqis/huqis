@@ -1,10 +1,10 @@
-# Frame: PHP Template Engine
+# Huqis: PHP Template Engine
 
-Frame is a PHP template engine with _&lt;insert great features talk&gt;_.
+Huqis is a PHP template engine with _&lt;insert great features talk&gt;_.
 
 ## Getting Started
 
-A template in Frame looks like this:
+A template in Huqis looks like this:
 
 ```html
 <html>
@@ -30,10 +30,10 @@ The following code sample should get your template engine up and runnig in PHP:
 ```php
 <?php
 
-use frame\library\cache\DirectoryTemplateCache;
-use frame\library\resource\DirectoryTemplateResourceHandler;
-use frame\library\DefaultTemplateContext;
-use frame\library\TemplateEngine;
+use huqis\cache\DirectoryTemplateCache;
+use huqis\resource\DirectoryTemplateResourceHandler;
+use huqis\DefaultTemplateContext;
+use huqis\TemplateEngine;
 
 $cache = new DirectoryTemplateCache(__DIR__ . '/cache');
 $resourceHandler = new DirectoryTemplateResourceHandler(__DIR__ . '/templates');
@@ -56,5 +56,5 @@ To know more about the engine, read the [developer manual pages](manual/engine.m
 You can use [Composer](http://getcomposer.org) to install this template engine.
 
 ```
-composer require frame/frame
+composer require huqis/huqis
 ```

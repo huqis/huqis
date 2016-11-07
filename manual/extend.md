@@ -5,11 +5,11 @@ You can extend the engine by adding new blocks, functions and operators to your 
 ```php
 <?php
 
-use frame\library\block\LiteralTemplateBlock;
-use frame\library\func\TruncateTemplateFunction;
-use frame\library\operator\expression\RegexExpressionOperator;
-use frame\library\operator\logical\GenericLogicalOperator;
-use frame\library\DefaultTemplateContext;
+use huqis\block\LiteralTemplateBlock;
+use huqis\func\TruncateTemplateFunction;
+use huqis\operator\expression\RegexExpressionOperator;
+use huqis\operator\logical\GenericLogicalOperator;
+use huqis\DefaultTemplateContext;
 
 $context = new DefaultTemplateContext($chainResourceHandler);
 $context->setLogicalOperator(' xor ', new GenericLogicalOperator('xor'));

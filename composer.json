@@ -1,6 +1,6 @@
 {
-    "name": "frame/frame",
-    "description": "Frame template engine",
+    "name": "huqis/huqis",
+    "description": "Huqis template engine",
     "type": "library",
     "keywords": "templating",
     "license": "MIT",
@@ -12,12 +12,12 @@
     ],
     "autoload": {
         "psr-0": {
-            "frame\\library\\": ["src/"]
+            "huqis\\": ["src/"]
         }
     },
     "autoload-dev": {
         "psr-0": {
-            "frame\\library\\": ["test/src/"]
+            "huqis\\": ["test/src/"]
         }
     }
 }

@@ -1,0 +1,28 @@
+<?php
+
+namespace huqis\tokenizer;
+
+use huqis\tokenizer\symbol\NestedSymbol;
+use huqis\tokenizer\symbol\SimpleSymbol;
+use huqis\tokenizer\symbol\StringSymbol;
+use huqis\tokenizer\symbol\SyntaxSymbol;
+
+/**
+ * Tokenizer for a function signature
+ */
+class FunctionTokenizer extends Tokenizer {
+
+    /**
+     * Constructs a new function tokenizer
+     * @return null
+     */
+    public function __construct() {
+        $this->addSymbol(new StringSymbol());
+        $this->addSymbol(new SimpleSymbol(SyntaxSymbol::FUNCTION_ARGUMENT));
+        $this->addSymbol(new NestedSymbol(SyntaxSymbol::NESTED_OPEN, SyntaxSymbol::NESTED_CLOSE, $this, true));
+        $this->addSymbol(new NestedSymbol(SyntaxSymbol::ARRAY_OPEN, SyntaxSymbol::ARRAY_CLOSE, null, true));
+
+        parent::setWillTrimTokens(false);
+    }
+
+}
