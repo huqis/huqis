@@ -2,7 +2,7 @@
     "name": "huqis/huqis",
     "description": "Huqis template engine",
     "type": "library",
-    "keywords": "templating",
+    "keywords": ["templating"],
     "license": "MIT",
     "authors": [
         {
