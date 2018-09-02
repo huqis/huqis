@@ -39,7 +39,7 @@ class ExpressionTokenizer extends Tokenizer {
         $this->operators[$syntax] = true;
 
         // keep one tokenizer with all symbols with the same length
-        $syntaxLength = strlen($syntax);
+        $syntaxLength = mb_strlen($syntax);
 
         if (isset($this->tokenizers[$syntaxLength])) {
             $tokenizer = $this->tokenizers[$syntaxLength];

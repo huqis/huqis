@@ -23,9 +23,9 @@ class TemplateCompilerTest extends TestCase {
             // variables
             array('plain text', 'echo "plain text";'),
             array('{"test"}', 'echo "test";'),
-            array('{"te\\"st"}', 'echo "te\\"st";'),
+            array('{"te\"st"}', 'echo "te\\"st";'),
             array("{'test'}", "echo 'test';"),
-            array("{'te\\'st'}", "echo 'te\\'st';"),
+            array("{'te\'st'}", "echo 'te\\'st';"),
             array('{15.987}', 'echo 15.987;'),
             array('usage of a plain {$variable} in the middle', 'echo "usage of a plain ";' . "\n" . 'echo $context->getVariable(\'variable\', false);' . "\n" . 'echo " in the middle";'),
             array('{$variable} to begin', 'echo $context->getVariable(\'variable\', false);' . "\n" . 'echo " to begin";'),

@@ -36,4 +36,5 @@ This is an escaped &lt;variable&gt;, while this is <not>.
 ## See Also
 
 - [escape](../functions/escape.md)
+- [filter](filter.md)
 - [raw](../functions/raw.md)

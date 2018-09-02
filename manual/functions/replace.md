@@ -21,3 +21,7 @@ Simple search and replace function, equivalent of PHP's [str_replace](http://php
 
 {$result = $string|replace("search", "replace")}
 ```
+
+## See Also
+
+- [filter](../blocks/filter.md)

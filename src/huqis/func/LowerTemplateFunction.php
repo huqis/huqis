@@ -26,7 +26,7 @@ class LowerTemplateFunction implements TemplateFunction {
             throw new RuntimeTemplateException('Could not call lower: invalid argument count');
         }
 
-        return strtolower($arguments[0]);
+        return mb_strtolower($arguments[0]);
     }
 
 }

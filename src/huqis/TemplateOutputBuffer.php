@@ -224,16 +224,16 @@ class TemplateOutputBuffer {
             return;
         }
 
-        $isOutput = substr($code, 0, 5) == 'echo ';
+        $isOutput = mb_substr($code, 0, 5) == 'echo ';
         if (!$this->allowOutput && $isOutput) {
             throw new CompileTemplateException('Output is not allowed in block ' . end($this->blockStack));
         }
 
-        $firstChar = substr($code, 0, 1);
-        $lastChar = substr($code, -1);
-        $last2Chars = substr($code, -2);
+        $firstChar = mb_substr($code, 0, 1);
+        $lastChar = mb_substr($code, -1);
+        $last2Chars = mb_substr($code, -2);
 
-        if ($lastChar === '}' || ($lastChar == '{' && $firstChar == '}') || $last2Chars === '};' || $last2Chars === '];' || ($firstChar === ']' && $last2Chars == ');' && substr($code, 0, 4) !== 'echo')) {
+        if ($lastChar === '}' || ($lastChar == '{' && $firstChar == '}') || $last2Chars === '};' || $last2Chars === '];' || ($firstChar === ']' && $last2Chars == ');' && mb_substr($code, 0, 4) !== 'echo')) {
             $this->indentLevel--;
         }
 
@@ -377,18 +377,18 @@ class TemplateOutputBuffer {
             // block already exists
             if ($strategy == self::STRATEGY_APPEND) {
                 // process to append to the parent block
-                $start = $positionOpen + strlen($commentOpen . "\n");
-                $parentBlock = substr($this->buffer, $start, $positionClose - $start);
+                $start = $positionOpen + mb_strlen($commentOpen . "\n");
+                $parentBlock = mb_substr($this->buffer, $start, $positionClose - $start);
                 $block = $parentBlock . $block;
             } elseif ($strategy == self::STRATEGY_PREPEND) {
                 // process to prepend to the parent block
-                $start = $positionOpen + strlen($commentOpen . "\n");
-                $parentBlock = substr($this->buffer, $start, $positionClose - $start);
+                $start = $positionOpen + mb_strlen($commentOpen . "\n");
+                $parentBlock = mb_substr($this->buffer, $start, $positionClose - $start);
                 $block .= $parentBlock;
             }
 
             // replace the existing block with the new block content
-            $this->buffer = substr($this->buffer, 0, $positionOpen) . $commentOpen . "\n" . $block . $this->getIndentation() . substr($this->buffer, $positionClose);
+            $this->buffer = mb_substr($this->buffer, 0, $positionOpen) . $commentOpen . "\n" . $block . $this->getIndentation() . mb_substr($this->buffer, $positionClose);
         } else {
             // new block
 
@@ -397,8 +397,8 @@ class TemplateOutputBuffer {
                 throw new CompileTemplateException('Cannot extend block ' . $name . ': not defined in extended template');
             }
 
-            if (substr($block, -1) == "\n") {
-                $block = substr($block, 0, -1);
+            if (mb_substr($block, -1) == "\n") {
+                $block = mb_substr($block, 0, -1);
             }
 
             // we're cool,
@@ -424,9 +424,9 @@ class TemplateOutputBuffer {
             return $startPosition;
         }
 
-        $startEndPosition = $this->getExtendsPosition(substr($string, 0, $endPosition));
+        $startEndPosition = $this->getExtendsPosition(mb_substr($string, 0, $endPosition));
 
-        return $this->getExtendsPosition(substr($string, 0, $startEndPosition));
+        return $this->getExtendsPosition(mb_substr($string, 0, $startEndPosition));
     }
 
 }

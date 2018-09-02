@@ -22,3 +22,8 @@ Strips whitespace characters or whatever you provide, equivalent of PHP's [trim]
 {$result = $string|trim}
 {$result = $string|trim("-")}
 ```
+
+# See Also
+
+- [filter](../blocks/filter.md)
+- [spaceless](spaceless.md)

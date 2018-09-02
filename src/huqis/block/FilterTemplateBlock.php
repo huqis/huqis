@@ -63,7 +63,7 @@ class FilterTemplateBlock implements TemplateBlock {
         $buffer->endBufferBlock();
         $buffer->appendCode('};');
 
-        $code = $compiler->compileFilters('$filter' . $this->counter . '($context)', $signature);
+        $code = $compiler->compileFilters('$filter' . $this->counter . '($context)', $signature, true);
 
         // call the closure and assign the result to the variable
         $buffer->appendCode('echo ' . $code . ';');

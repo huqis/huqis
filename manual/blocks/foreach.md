@@ -11,7 +11,7 @@ The sequence of the keywords do not matter.
 
 The ```$loop``` variable is an array with the following keys:
 
-- ```index```: Index of the current iteration
+- ```index```: Index of the current iteration, starts with 0
 - ```revindex```: Reversed index counting from the end of the loop
 - ```first```: Boolean to see if it's the first iteration
 - ```last```: Boolean to see if it's the last iteration

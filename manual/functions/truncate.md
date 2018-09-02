@@ -24,3 +24,7 @@ This function truncates a value to a specified length.
 {$result = $string|truncate}
 {$result = $string|truncate(50, "...")}
 ```
+
+## See Also
+
+- [filter](../blocks/filter.md)

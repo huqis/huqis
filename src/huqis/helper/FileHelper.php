@@ -31,7 +31,7 @@ class FileHelper {
      * file could not be created
      */
     public static function write($file, $contents) {
-        $directory = substr($file, 0, strrpos($file, '/'));
+        $directory = mb_substr($file, 0, strrpos($file, '/'));
 
         if (!file_exists($directory) || !is_dir($directory)) {
             $result = @mkdir($directory, 0755, true);

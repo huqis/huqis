@@ -189,8 +189,8 @@ class ChainTemplateResourceHandler extends AbstractTemplateResourceHandler {
         if ($positionSeparator === false) {
             $shackle = $this->defaultResourceHandler;
         } else {
-            $shackle = substr($name, 0, $positionSeparator);
-            $name = substr($name, $positionSeparator + 1);
+            $shackle = mb_substr($name, 0, $positionSeparator);
+            $name = mb_substr($name, $positionSeparator + 1);
         }
 
         return [$shackle, $name];

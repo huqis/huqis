@@ -6,14 +6,14 @@ use huqis\exception\RuntimeTemplateException;
 use huqis\TemplateContext;
 
 /**
- * Transform a string to upper case characters.
+ * Removes whitespace between HTML tags.
  *
- * Syntax: upper(<string>)
+ * Syntax: spaceless(<string>)
  *
- * {$result = upper($string)}
- * {$result = $string|upper}
+ * {$result = spaceless($string)}
+ * {$result = $string|spaceless}
  */
-class UpperTemplateFunction implements TemplateFunction {
+class SpacelessTemplateFunction implements TemplateFunction {
 
     /**
      * Calls the function with the provided context and arguments
@@ -23,10 +23,10 @@ class UpperTemplateFunction implements TemplateFunction {
      */
     public function call(TemplateContext $context, array $arguments) {
         if (count($arguments) !== 1) {
-            throw new RuntimeTemplateException('Could not call lower: invalid argument count');
+            throw new RuntimeTemplateException('Could not call spaceless: invalid argument count');
         }
 
-        return mb_strtoupper($arguments[0]);
+        return trim(preg_replace('/>\s+</', '><', $arguments[0]));
     }
 
 }

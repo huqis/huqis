@@ -22,7 +22,7 @@ class StringHelper {
      */
     public static function escapeQuotes($string) {
         $result = '';
-        for ($index = 0, $count = strlen($string); $index < $count; $index++) {
+        for ($index = 0, $count = mb_strlen($string); $index < $count; $index++) {
             if ($string[$index] == '"') {
                 $result .= '\\';
             }
@@ -46,15 +46,15 @@ class StringHelper {
         }
 
         if ($isCaseInsensitive) {
-            $string = strtoupper($string);
+            $string = mb_strtoupper($string);
         }
 
         foreach ($start as $token) {
             if ($isCaseInsensitive) {
-                $token = strtoupper($token);
+                $token = mb_strtoupper($token);
             }
 
-            $startLength = strlen($token);
+            $startLength = mb_strlen($token);
             if (strncmp($string, $token, $startLength) == 0) {
                 return true;
             }
@@ -81,7 +81,7 @@ class StringHelper {
             throw new Exception('Could not truncate the string: provided length is not a positive integer');
         }
 
-        if (strlen($string) < $length) {
+        if (mb_strlen($string) < $length) {
             return $string;
         }
 
@@ -89,12 +89,12 @@ class StringHelper {
             throw new Exception('Could not truncate the string: provided etc is not a string');
         }
 
-        $length -= strlen($etc);
+        $length -= mb_strlen($etc);
         if (!$breakWords) {
-            $string = preg_replace('/\s+?(\S+)?$/', '', substr($string, 0, $length + 1));
+            $string = preg_replace('/\s+?(\S+)?$/', '', mb_substr($string, 0, $length + 1));
         }
 
-        return substr($string, 0, $length) . $etc;
+        return mb_substr($string, 0, $length) . $etc;
     }
 
     /**
@@ -102,7 +102,7 @@ class StringHelper {
      * @param string $string String to get the safe string of
      * @param string $replacement Replacement string for all non alpha numeric
      * characters
-     * @param boolean $lower Set to false to skip strtolower
+     * @param boolean $lower Set to false to skip mb_strtolower
      * @return string Safe string for file names and URLs
      */
     public static function safeString($string, $replacement = '-', $lower = true) {
@@ -119,7 +119,7 @@ class StringHelper {
         $string = preg_replace("/[^A-Za-z0-9._-]/", '', $string);
 
         if ($lower) {
-            $string = strtolower($string);
+            $string = mb_strtolower($string);
         }
 
         return $string;
@@ -149,7 +149,7 @@ class StringHelper {
             throw new Exception('Could not generate a random string: empty or invalid haystack provided');
         }
 
-        $haystackLength = strlen($haystack);
+        $haystackLength = mb_strlen($haystack);
         if ($length > $haystackLength) {
             throw new Exception('Length cannot be greater than the length of the haystack. Length is ' . $length . ' and the length of the haystack is ' . $haystackLength);
         }

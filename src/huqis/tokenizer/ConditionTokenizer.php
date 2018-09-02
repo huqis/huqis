@@ -82,9 +82,9 @@ class ConditionTokenizer extends Tokenizer {
 
                     $result[] = $token;
                     $expression = '';
-                } elseif (substr($expression, -1) === SyntaxSymbol::NESTED_OPEN && $this->endsWithOperator($expression, $operators, -1)) {
+                } elseif (mb_substr($expression, -1) === SyntaxSymbol::NESTED_OPEN && $this->endsWithOperator($expression, $operators, -1)) {
                     // running expression ends with an open symbol prefixed with an operator
-                    $this->addExpressionToResult($result, substr($expression, 0, -1));
+                    $this->addExpressionToResult($result, mb_substr($expression, 0, -1));
                     $result[] = $token;
                     $expression = '';
                 } elseif ($expression === SyntaxSymbol::NESTED_OPEN) {
@@ -151,16 +151,16 @@ class ConditionTokenizer extends Tokenizer {
 
     private function endsWithOperator($expression, array $operators, $offset = 0) {
         if ($offset) {
-            $expression = substr($expression, 0, $offset);
+            $expression = mb_substr($expression, 0, $offset);
         }
 
         $expression = trim($expression);
 
         foreach ($operators as $syntax => $operatorSymbol) {
             $syntax = trim($syntax);
-            $syntaxLength = strlen($syntax);
+            $syntaxLength = mb_strlen($syntax);
 
-            if (substr($expression, $syntaxLength * -1) == $syntax) {
+            if (mb_substr($expression, $syntaxLength * -1) == $syntax) {
                 return true;
             }
         }

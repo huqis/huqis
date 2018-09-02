@@ -38,11 +38,11 @@ class BlockTemplateBlock implements TemplateBlock {
         $buffer = $compiler->getOutputBuffer();
         $context = $compiler->getContext();
 
-        if (substr($signature, -7) === ' append') {
-            $name = substr($signature, 0, -7);
+        if (mb_substr($signature, -7) === ' append') {
+            $name = mb_substr($signature, 0, -7);
             $strategy = TemplateOutputBuffer::STRATEGY_APPEND;
-        } elseif (substr($signature, -8) === ' prepend') {
-            $name = substr($signature, 0, -8);
+        } elseif (mb_substr($signature, -8) === ' prepend') {
+            $name = mb_substr($signature, 0, -8);
             $strategy = TemplateOutputBuffer::STRATEGY_PREPEND;
         } else {
             $name = $signature;

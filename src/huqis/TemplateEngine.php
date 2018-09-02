@@ -332,7 +332,7 @@ class TemplateEngine {
      * @return string
      */
     private function generateResourceId(TemplateContext $context, $resource, $extends = null) {
-        return substr(crc32($resource . $this->compileId . '#' . $extends), 0, 10) . '-' . str_replace('/', '-', $resource);
+        return mb_substr(crc32($resource . $this->compileId . '#' . $extends), 0, 10) . '-' . str_replace('/', '-', $resource);
     }
 
     /**

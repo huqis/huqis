@@ -49,9 +49,8 @@ class ExtendsTemplateBlock extends IncludeTemplateBlock {
         }
 
         if ($isStaticTemplate) {
-            $resource = substr($resource, 1, -1);
+            $resource = mb_substr($resource, 1, -1);
             $code = $compiler->getContext()->getResourceHandler()->getResource($resource);
-
         } else {
             $body = str_replace('$', '\\$', $body);
             $body = StringHelper::escapeQuotes($body);

@@ -103,11 +103,14 @@ class TemplateContext {
      * @param \huqis\helper\ReflectionHelper $reflectionHelper
      * @param \huqis\TemplateContext $parent Parent context when
      * creating a child context
-     * @return null
      * @throws \huqis\exception\RuntimeTemplateException when no
      * resource handler is provided, nor directly, nor through the parent
      */
-    public function __construct(TemplateResourceHandler $resourceHandler = null, ReflectionHelper $reflectionHelper = null, TemplateContext $parent = null) {
+    public function __construct(
+        TemplateResourceHandler $resourceHandler = null, 
+        ReflectionHelper $reflectionHelper = null, 
+        TemplateContext $parent = null
+    ) {
         $this->logicalOperators = [];
         $this->expressionOperators = [];
         $this->variables = [];
@@ -169,11 +172,10 @@ class TemplateContext {
     }
 
     /**
-     * Sets whether native PHP functions are included in the function list. This
-     * creates a fallback for functions which don't exist in the context.
+     * Sets whether native PHP functions are included in the function list. 
+     * This creates a fallback for functions which don't exist in the context.
      * @param boolean $allowPhpFunctions True to include the PHP functions,
      * false otherwise
-     * @return null
      */
     public function setAllowPhpFunctions($allowPhpFunctions) {
         $this->allowPhpFunctions = $allowPhpFunctions;
@@ -193,7 +195,6 @@ class TemplateContext {
      * Sets the auto escape flag
      * @param string|boolean Name of the escape format, true for the default
      * HTML format and false to disable
-     * @return null
      */
     public function setAutoEscape($format) {
         if ($format === false) {
@@ -220,7 +221,6 @@ class TemplateContext {
      * Sets the template engine. This is invoked by the engine itself and should
      * not be called manually.
      * @param \huqis\TemplateEngine $engine Instance of the engine
-     * @return null
      */
     public function setEngine(TemplateEngine $engine) {
         $this->engine = $engine;
@@ -236,7 +236,6 @@ class TemplateContext {
 
     /**
      * Hook invoked before compiling
-     * @return null
      */
     public function preCompile() {
 
@@ -285,7 +284,6 @@ class TemplateContext {
      * value
      * @param boolean $process Set to false to work without tokenizing the
      * variable name
-     * @return null
      * @see setVariable
      */
     public function setVariables(array $variables, $process = true) {
@@ -409,7 +407,8 @@ class TemplateContext {
      * @param boolean $process Set to false to work without tokenizing the
      * variable name
      * @param mixed $default Default value for when the variable is not set
-     * @return null
+     * @return mixed Value of the variable or the provided default value when 
+     * the variable is not set.
      */
     public function getVariable($name, $process = false, $default = null) {
         if (strpos($name, '.') === false) {
@@ -451,7 +450,6 @@ class TemplateContext {
 
     /**
      * Removes all variables from this context
-     * @return null
      */
     public function resetVariables() {
         $this->variables = [];
@@ -520,7 +518,6 @@ class TemplateContext {
      * @param \huqis\block\TemplateBlock $block Instance of the block
      * @param boolean $isPrivate Set to true to keep this block in this context,
      * no copies are made to child contexts
-     * @return null
      */
     public function setBlock($name, TemplateBlock $block, $isPrivate = false) {
         if ($isPrivate) {
@@ -534,7 +531,6 @@ class TemplateContext {
      * Sets multiple blocks to this context at once
      * @param array $blocks Array with the name of the block as key and a block
      * instance as value
-     * @return null
      * @see \huqis\block\TemplateBlock
      */
     public function setBlocks(array $blocks) {
@@ -596,7 +592,6 @@ class TemplateContext {
      * @param string $name Name of the function as used in the templates
      * @param \huqis\func\TemplateFunction $function Instance of the
      * function
-     * @return null
      */
     public function setFunction($name, TemplateFunction $function) {
         $this->functions[$name] = $function;
@@ -606,7 +601,6 @@ class TemplateContext {
      * Sets multiple functions to this context at once
      * @param array $functions Array with the name of the function as key and a
      * function instance as value
-     * @return null
      * @see \huqis\func\TemplateFunction
      */
     public function setFunctions(array $functions) {
@@ -743,7 +737,6 @@ class TemplateContext {
      * @param string $syntax Syntax of the operator
      * @param \huqis\operator\logical\LogicalOperator $logicalOperator
      * Instance of the logical operator
-     * @return null
      */
     public function setLogicalOperator($syntax, LogicalOperator $logicalOperator) {
         $this->logicalOperators[$syntax] = $logicalOperator;
@@ -807,7 +800,6 @@ class TemplateContext {
      * @param string $syntax Syntax of the operator
      * @param \huqis\operator\expression\ExpressionOperator $expressionOperator
      * Instance of the expression operator
-     * @return null
      */
     public function setExpressionOperator($syntax, ExpressionOperator $expressionOperator) {
         $this->expressionOperators[$syntax] = $expressionOperator;

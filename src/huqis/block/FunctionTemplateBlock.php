@@ -139,8 +139,8 @@ class FunctionTemplateBlock implements TemplateBlock {
 
         $positionAssignment = strpos($value, SyntaxSymbol::ASSIGNMENT);
         if ($positionAssignment) {
-            $default = substr($value, $positionAssignment + 1);
-            $argument = substr($value, 0, $positionAssignment);
+            $default = mb_substr($value, $positionAssignment + 1);
+            $argument = mb_substr($value, 0, $positionAssignment);
         } else {
             $argument = $value;
         }

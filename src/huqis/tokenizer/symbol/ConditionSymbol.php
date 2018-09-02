@@ -24,21 +24,21 @@ class ConditionSymbol extends NestedSymbol {
      * @return null|array Null when the symbol was not found, an array with the processed tokens if the symbol was found.
      */
     public function tokenize(&$process, $toProcess) {
-        $processLength = strlen($process);
-        if ($processLength < $this->symbolOpenLength || substr($process, $this->symbolOpenOffset) != $this->symbolOpen) {
+        $processLength = mb_strlen($process);
+        if ($processLength < $this->symbolOpenLength || mb_substr($process, $this->symbolOpenOffset) != $this->symbolOpen) {
             return null;
         }
 
         $positionOpen = $processLength - $this->symbolOpenLength;
         $positionClose = $this->getClosePosition($toProcess, $positionOpen);
-        $lengthProcess = strlen($process) + $positionOpen;
+        $lengthProcess = mb_strlen($process) + $positionOpen;
 
-        $before = substr($process, 0, $positionOpen);
+        $before = mb_substr($process, 0, $positionOpen);
         if (trim($before) || !$this->isNestedCondition($toProcess, $positionClose)) {
             return null;
         }
 
-        $between = substr($toProcess, $positionOpen + $this->symbolOpenLength, $positionOpen + $positionClose - $lengthProcess);
+        $between = mb_substr($toProcess, $positionOpen + $this->symbolOpenLength, $positionOpen + $positionClose - $lengthProcess);
         if ($between === '') {
             return null;
         }
@@ -59,17 +59,17 @@ class ConditionSymbol extends NestedSymbol {
     private function isNestedCondition($toProcess, $positionClose) {
         $positionAfter = $positionClose + 1;
 
-        $toProcess = trim(substr($toProcess, $positionAfter));
+        $toProcess = trim(mb_substr($toProcess, $positionAfter));
 
         if (!$toProcess) {
             return true;
         }
 
-        $toProcessLength = strlen($toProcess);
-        if ($toProcessLength > 2 && substr($toProcess, 0, 2) == trim(SyntaxSymbol::OPERATOR_OR)) {
+        $toProcessLength = mb_strlen($toProcess);
+        if ($toProcessLength > 2 && mb_substr($toProcess, 0, 2) == trim(SyntaxSymbol::OPERATOR_OR)) {
             return true;
         }
-        if ($toProcessLength > 3 && substr($toProcess, 0, 3) == trim(SyntaxSymbol::OPERATOR_AND)) {
+        if ($toProcessLength > 3 && mb_substr($toProcess, 0, 3) == trim(SyntaxSymbol::OPERATOR_AND)) {
             return true;
         }
 

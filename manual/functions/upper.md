@@ -23,4 +23,5 @@ Transform a string to upper case characters.
 ## See Also
 
 - [capitalize](capitalize.md)
+- [filter](../blocks/filter.md)
 - [lower](lower.md)

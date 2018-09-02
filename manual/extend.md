@@ -34,6 +34,7 @@ Implementations out of the box:
 - ```ElseIfTemplateBlock```
 - ```ElseTemplateBlock```
 - ```ExtendsTemplateBlock```
+- ```FilterTemplateBlock```
 - ```ForeachTemplateBlock```
 - ```FunctionTemplateBlock```
 - ```IfTemplateBlock```
@@ -56,6 +57,7 @@ Implementations out of the box:
 - ```FormatTemplateFunction```
 - ```LowerTemplateFunction```
 - ```ReplaceTemplateFunction```
+- ```SpacelessTemplateFunction```
 - ```TrimTemplateFunction```
 - ```TruncateTemplateFunction```
 - ```UpperTemplateFunction```

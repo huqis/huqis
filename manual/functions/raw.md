@@ -25,4 +25,5 @@ __Note: This is special syntax filter and can not actually be used as a function
 ## See Also
 
 - [autoescape](../blocks/autoescape.md)
+- [filter](../blocks/filter.md)
 - [escape](escape.md)

@@ -105,7 +105,7 @@ class NestedSymbol extends AbstractSymbol {
         }
 
         $this->symbolOpen = $symbol;
-        $this->symbolOpenLength = strlen($symbol);
+        $this->symbolOpenLength = mb_strlen($symbol);
         $this->symbolOpenOffset = $this->symbolOpenLength * -1;
     }
 
@@ -122,7 +122,7 @@ class NestedSymbol extends AbstractSymbol {
         }
 
         $this->symbolClose = $symbol;
-        $this->symbolCloseLength = strlen($symbol);
+        $this->symbolCloseLength = mb_strlen($symbol);
     }
 
     /**
@@ -132,7 +132,7 @@ class NestedSymbol extends AbstractSymbol {
      */
     public function setEscapeSymbol($escape, $remove = true) {
         $this->symbolEscape = $escape;
-        $this->symbolEscapeLength = strlen($escape);
+        $this->symbolEscapeLength = mb_strlen($escape);
         $this->removeSymbolEscape = $remove;
     }
 
@@ -163,10 +163,10 @@ class NestedSymbol extends AbstractSymbol {
      * processed tokens if the symbol was found.
      */
     public function tokenize(&$process, $toProcess) {
-        $processLength = strlen($process);
-        if ($processLength < $this->symbolOpenLength || substr($process, $this->symbolOpenOffset) != $this->symbolOpen) {
+        $processLength = mb_strlen($process);
+        if ($processLength < $this->symbolOpenLength || mb_substr($process, $this->symbolOpenOffset) != $this->symbolOpen) {
             return null;
-        } elseif ($this->symbolEscape && substr($process, $this->symbolOpenOffset - $this->symbolEscapeLength, $this->symbolEscapeLength) == $this->symbolEscape) {
+        } elseif ($this->symbolEscape && mb_substr($process, $this->symbolOpenOffset - $this->symbolEscapeLength, $this->symbolEscapeLength) == $this->symbolEscape) {
             return null;
         }
 
@@ -176,14 +176,14 @@ class NestedSymbol extends AbstractSymbol {
             return null;
         }
 
-        $lengthProcess = strlen($process) + $positionOpen;
+        $lengthProcess = mb_strlen($process) + $positionOpen;
 
-        $before = substr($process, 0, $positionOpen);
+        $before = mb_substr($process, 0, $positionOpen);
         if (!$this->allowsSymbolsBeforeOpen && trim($before)) {
             return null;
         }
 
-        $between = substr($toProcess, $positionOpen + $this->symbolOpenLength, $positionOpen + $positionClose - $lengthProcess);
+        $between = mb_substr($toProcess, $positionOpen + $this->symbolOpenLength, $positionOpen + $positionClose - $lengthProcess);
 
         $process .= $between . $this->symbolClose;
 
@@ -232,7 +232,7 @@ class NestedSymbol extends AbstractSymbol {
         }
 
         // look if close symbol is escaped
-        if ($this->symbolEscape && $closePosition > $this->symbolEscapeLength && substr($string, $closePosition - $this->symbolEscapeLength, $this->symbolEscapeLength) == $this->symbolEscape) {
+        if ($this->symbolEscape && $closePosition > $this->symbolEscapeLength && mb_substr($string, $closePosition - $this->symbolEscapeLength, $this->symbolEscapeLength) == $this->symbolEscape) {
             // escaped, continue
             return $this->getClosePosition($string, $closePosition);
         }
@@ -242,7 +242,7 @@ class NestedSymbol extends AbstractSymbol {
         if ($openPosition === false || $openPosition > $closePosition || $this->symbolClose == $this->symbolOpen) {
             // no nested open
             return $closePosition;
-        } elseif ($this->symbolEscape && substr($string, $openPosition - $this->symbolEscapeLength, $this->symbolEscapeLength) == $this->symbolEscape) {
+        } elseif ($this->symbolEscape && mb_substr($string, $openPosition - $this->symbolEscapeLength, $this->symbolEscapeLength) == $this->symbolEscape) {
             // open is escaped
             return $closePosition;
         }

@@ -34,7 +34,7 @@ class SimpleSymbol extends AbstractSymbol {
      */
     public function __construct($symbol, $willIncludeSymbols = true) {
         $this->symbol = $symbol;
-        $this->symbolLength = strlen($symbol);
+        $this->symbolLength = mb_strlen($symbol);
         $this->symbolOffset = $this->symbolLength * -1;
         $this->setWillIncludeSymbols($willIncludeSymbols);
     }
@@ -49,15 +49,15 @@ class SimpleSymbol extends AbstractSymbol {
      * processed tokens if the symbol was found.
      */
     public function tokenize(&$process, $toProcess) {
-        $processLength = strlen($process);
-        if ($processLength < $this->symbolLength || substr($process, $this->symbolOffset) != $this->symbol) {
+        $processLength = mb_strlen($process);
+        if ($processLength < $this->symbolLength || mb_substr($process, $this->symbolOffset) != $this->symbol) {
             return null;
         }
 
         $tokens = [];
 
         if ($processLength != $this->symbolLength) {
-            $tokens[] = substr($process, 0, $this->symbolOffset);
+            $tokens[] = mb_substr($process, 0, $this->symbolOffset);
         }
 
         if ($this->willIncludeSymbols) {

@@ -36,4 +36,5 @@ When the value is an array, a query string is generated using PHP's [http_build_
 ## See Also
 
 - [autoescape](../blocks/autoescape.md)
+- [filter](../blocks/filter.md)
 - [raw](raw.md)

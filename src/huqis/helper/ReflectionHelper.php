@@ -182,11 +182,11 @@ class ReflectionHelper {
             throw new ReflectionTemplateException('Array ' . $token . ' opened but not closed in ' . $name);
         }
 
-        if ($positionClose != (strlen($token) - 1)) {
+        if ($positionClose != (mb_strlen($token) - 1)) {
             throw new ReflectionTemplateException('Array not closed before the end of the token in ' . $name);
         }
 
-        return substr($token, 0, -1);
+        return mb_substr($token, 0, -1);
     }
 
 }

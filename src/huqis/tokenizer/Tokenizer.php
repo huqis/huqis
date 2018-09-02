@@ -60,15 +60,15 @@ class Tokenizer {
             return [];
         }
 
-        $stringLength = strlen($string);
+        $stringLength = mb_strlen($string);
         $tokens = [];
 
         $toProcess = $string;
-        $countToProcess = strlen($toProcess);
+        $countToProcess = mb_strlen($toProcess);
         $process = '';
 
-        while ($countToProcess != 0 && strlen($process) < $countToProcess) {
-            $process .= $toProcess[strlen($process)];
+        while ($countToProcess != 0 && mb_strlen($process) < $countToProcess) {
+            $process .= $toProcess[mb_strlen($process)];
 
             foreach ($this->symbols as $symbol) {
                 $previousProcess = $process;
@@ -79,7 +79,7 @@ class Tokenizer {
                         $tokens[] = $symbolToken;
                     }
 
-                    $toProcess = substr($toProcess, strlen($process));
+                    $toProcess = mb_substr($toProcess, mb_strlen($process));
                     $process = '';
 
                     break;
@@ -88,7 +88,7 @@ class Tokenizer {
                 }
             }
 
-            $countToProcess = strlen($toProcess);
+            $countToProcess = mb_strlen($toProcess);
         }
 
         if (!empty($toProcess)) {

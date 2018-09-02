@@ -184,7 +184,7 @@ class TemplateCompiler {
             $token = $tokens[$tokenIndex];
 
             if ($token === SyntaxSymbol::SYNTAX_OPEN) {
-                if (!$isComment && isset($tokens[$tokenIndex + 1]) && substr($tokens[$tokenIndex + 1], 0, 1) === SyntaxSymbol::COMMENT) {
+                if (!$isComment && isset($tokens[$tokenIndex + 1]) && mb_substr($tokens[$tokenIndex + 1], 0, 1) === SyntaxSymbol::COMMENT) {
                     // open comment
                     $isComment = true;
                     $tokenIndex++;
@@ -194,7 +194,7 @@ class TemplateCompiler {
                     // open the syntax, only when there is no space after the symbol
                     $nextTokenIndex = $tokenIndex + 1;
                     if ($nextTokenIndex != $numTokens) {
-                        $firstChar = substr($tokens[$nextTokenIndex], 0, 1);
+                        $firstChar = mb_substr($tokens[$nextTokenIndex], 0, 1);
                         if ($firstChar !== ' ' && $firstChar !== "\n" && $firstChar !== SyntaxSymbol::SYNTAX_CLOSE) {
                             // valid syntax opening
                             $isSyntax = true;
@@ -211,7 +211,7 @@ class TemplateCompiler {
                     }
                 }
             } elseif ($token === SyntaxSymbol::SYNTAX_CLOSE) {
-                if ($isComment && isset($tokens[$tokenIndex - 1]) && substr($tokens[$tokenIndex - 1], -1) === SyntaxSymbol::COMMENT) {
+                if ($isComment && isset($tokens[$tokenIndex - 1]) && mb_substr($tokens[$tokenIndex - 1], -1) === SyntaxSymbol::COMMENT) {
                     // close comment
                     $isComment = false;
                     $tokenIndex++;
@@ -253,7 +253,7 @@ class TemplateCompiler {
                     $lineNumber = 1;
 
                     for ($i = 0; $i < $tokenIndex; $i++) {
-                        $lineNumber += substr_count($tokens[$i], "\n");
+                        $lineNumber += mb_substr_count($tokens[$i], "\n");
                     }
 
                     if ($exception instanceof CompileTemplateException && !$exception->getResource()) {
@@ -274,7 +274,7 @@ class TemplateCompiler {
                 $hasSyntax = true;
 
                 if ($code !== '') {
-                    if (substr($code, 0, 4) === 'echo') {
+                    if (mb_substr($code, 0, 4) === 'echo') {
                         $line .= $code;
                     }
 
@@ -302,12 +302,12 @@ class TemplateCompiler {
         if ($positionSpace === false) {
             $firstToken = $token;
         } else {
-            $firstToken = substr($token, 0, $positionSpace);
+            $firstToken = mb_substr($token, 0, $positionSpace);
         }
 
-        $firstChar = substr($token, 0, 1);
+        $firstChar = mb_substr($token, 0, 1);
         if ($firstChar !== '$' && !is_numeric($firstChar)) {
-            $block = $this->compileBlock($firstToken, ltrim(substr($token, strlen($firstToken))), $tokens, $tokenIndex);
+            $block = $this->compileBlock($firstToken, ltrim(mb_substr($token, mb_strlen($firstToken))), $tokens, $tokenIndex);
             if ($block !== false) {
                 return $block;
             }
@@ -359,14 +359,14 @@ class TemplateCompiler {
         $endTokenIndex = null;
 
         if ($block->needsClose()) {
-            $nameLength = strlen($name);
+            $nameLength = mb_strlen($name);
             $recursive = 0;
 
             for ($i = $tokenIndex + 2; $i < $numTokens; $i++) {
                 $token = $tokens[$i];
-                $tokenLength = strlen($token);
+                $tokenLength = mb_strlen($token);
 
-                if (substr($token, 0, $nameLength) === $name) {
+                if (mb_substr($token, 0, $nameLength) === $name) {
                     // opening block
                     $recursive++;
                 } elseif ($tokenLength === $nameLength + 1 && $token === '/' . $name) {
@@ -374,7 +374,7 @@ class TemplateCompiler {
                     if ($recursive) {
                         $recursive--;
                     } else {
-                        $body = substr($body, 0, -1);
+                        $body = mb_substr($body, 0, -1);
                         $endTokenIndex = $i + 1;
 
                         break;
@@ -393,8 +393,8 @@ class TemplateCompiler {
             $endTokenIndex = $tokenIndex + 1;
         }
 
-        if (substr($body, 0, 1) == "\n") {
-            $body = substr($body, 1);
+        if (mb_substr($body, 0, 1) == "\n") {
+            $body = mb_substr($body, 1);
         }
 
         $result = $block->compile($this, trim($signature), $body);
@@ -427,18 +427,18 @@ class TemplateCompiler {
         $isNot = false;
 
         // check for array value
-        $firstChar = substr($expression, 0, 1);
-        $lastChar = substr($expression, -1);
+        $firstChar = mb_substr($expression, 0, 1);
+        $lastChar = mb_substr($expression, -1);
         if ($firstChar === SyntaxSymbol::ARRAY_OPEN && $lastChar === SyntaxSymbol::ARRAY_CLOSE) {
             $isLogic = true;
 
-            return $this->compileArray(substr($expression, 1, -1));
+            return $this->compileArray(mb_substr($expression, 1, -1));
         }
 
         // check for not (!) symbol
-        if (substr($expression, 0, 1) === SyntaxSymbol::OPERATOR_NOT) {
+        if (mb_substr($expression, 0, 1) === SyntaxSymbol::OPERATOR_NOT) {
             $isNot = true;
-            $expression = substr($expression, 1);
+            $expression = mb_substr($expression, 1);
         }
 
         // tokenize on operators
@@ -517,7 +517,7 @@ class TemplateCompiler {
                     // already a nested left expression
                     $left[] = ['operator' => $token, 'left' => $value];
                 } else {
-                    // already a nested left expression, nest it
+                    // already a left expression, nest it
                     $left = [
                         ['operator' => $operator, 'left' => $left],
                         ['operator' => $token, 'left' => $value],
@@ -643,21 +643,21 @@ class TemplateCompiler {
             return $value;
         }
 
-        $firstChar = substr($value, 0, 1);
+        $firstChar = mb_substr($value, 0, 1);
 
         // check for variable ($) symbol
         if ($firstChar == '$') {
             return $this->compileVariable($value, $isLogic);
         }
 
-        $lastChar = substr($value, -1);
+        $lastChar = mb_substr($value, -1);
 
         // check for nested value
         $isNested = false;
         if ($firstChar === SyntaxSymbol::NESTED_OPEN && $lastChar === SyntaxSymbol::NESTED_CLOSE) {
             $isNested = true;
 
-            $value = substr($value, 1, -1);
+            $value = mb_substr($value, 1, -1);
         }
 
         $tokens = $this->valueTokenizer->tokenize($value);
@@ -698,7 +698,7 @@ class TemplateCompiler {
                     $result = $this->compileScalarValue($var);
                     $useOutputFilters = false;
                 } catch (Exception $exception) {
-                    if (strpos($value, SyntaxSymbol::NESTED_OPEN) !== strlen($var)) {
+                    if (strpos($value, SyntaxSymbol::NESTED_OPEN) !== mb_strlen($var)) {
                         // not a function
                         throw $exception;
                     }
@@ -739,7 +739,7 @@ class TemplateCompiler {
                     } elseif ($functionName === 'isset') {
                         $result = 'isset(' . $this->compileFunction($tokens[$tokenIndex]) . ')';
                     } else {
-                        $functionSignature = substr($value, strlen($functionName) + 1, -1);
+                        $functionSignature = mb_substr($value, mb_strlen($functionName) + 1, -1);
 
                         $result = '$context->call(\'' . $functionName . '\', [' . $this->compileFunction($tokens[$tokenIndex]) . '])';
                     }
@@ -864,7 +864,7 @@ class TemplateCompiler {
                     if ($result) {
                         // double function call
                         // eg $object.method(...).method2(...)
-                        if (substr($value, 0, 1) !== SyntaxSymbol::VARIABLE_SEPARATOR) {
+                        if (mb_substr($value, 0, 1) !== SyntaxSymbol::VARIABLE_SEPARATOR) {
                             throw new CompileTemplateException('Cannot call a method here');
                         }
 
@@ -881,8 +881,8 @@ class TemplateCompiler {
 
                         $expression = str_replace($value . '(' . $nested . ')', '', $expression);
 
-                        $result = '$context->ensureObject(' . $result . ', \'Could not call ' . substr($variable, strlen($expression) + 1) . ': ' . $expression . ' is not an object\')';
-                        $result .= '->' . substr($value, 1) . '(' . $arguments . ')';
+                        $result = '$context->ensureObject(' . $result . ', \'Could not call ' . mb_substr($variable, mb_strlen($expression) + 1) . ': ' . $expression . ' is not an object\')';
+                        $result .= '->' . mb_substr($value, 1) . '(' . $arguments . ')';
                     } else {
                         $name = $this->parseName($value);
                         $nameTokens = explode(SyntaxSymbol::VARIABLE_SEPARATOR, $name);
@@ -896,7 +896,7 @@ class TemplateCompiler {
                             $method = array_pop($nameTokens);
                             $name = implode(SyntaxSymbol::VARIABLE_SEPARATOR, $nameTokens);
 
-                            $result = '$context->ensureObject(' . $this->compileGetVariable($name) . ', \'Could not call ' . substr($variable, strlen($name) + 2) . ': $' . $name . ' is not an object\')';
+                            $result = '$context->ensureObject(' . $this->compileGetVariable($name) . ', \'Could not call ' . mb_substr($variable, mb_strlen($name) + 2) . ': $' . $name . ' is not an object\')';
                             $result .= '->' . $method . '(' . $this->compileFunction($nested) . ')';
                         }
                     }
@@ -1170,14 +1170,14 @@ class TemplateCompiler {
             return $value;
         }
 
-        $firstChar = substr($value, 0, 1);
-        $lastChar = substr($value, -1);
+        $firstChar = mb_substr($value, 0, 1);
+        $lastChar = mb_substr($value, -1);
 
         // escape scalar string
         if ($firstChar === StringSymbol::SYMBOL && $lastChar === StringSymbol::SYMBOL) {
-            return '"' . addcslashes(substr(str_replace('\\"', '"', $value), 1, -1), '"$\\') . '"';
+            return '"' . addcslashes(mb_substr(str_replace('\\"', '"', $value), 1, -1), '"$\\') . '"';
         } elseif ($firstChar === String2Symbol::SYMBOL && $lastChar === String2Symbol::SYMBOL) {
-            return "'" . addcslashes(substr(str_replace("\\'", "'", $value), 1, -1), "'$\\") . "'";
+            return "'" . addcslashes(mb_substr(str_replace("\\'", "'", $value), 1, -1), "'$\\") . "'";
         }
 
         throw new CompileTemplateException('Invalid syntax ' . $value);
@@ -1222,18 +1222,18 @@ class TemplateCompiler {
      * provided name is not a valid variable or function name
      */
     public function parseName($name, $isVariable = true) {
-        $firstChar = substr($name, 0, 1);
+        $firstChar = mb_substr($name, 0, 1);
         if (($isVariable && $firstChar !== '$') || (!$isVariable && $firstChar === '$')) {
             throw new CompileTemplateException('Invalid syntax ' . $name);
         }
 
         if ($isVariable) {
-            $name = substr($name, 1);
+            $name = mb_substr($name, 1);
         }
 
-        $nameLength = strlen($name);
+        $nameLength = mb_strlen($name);
         for ($i = 0; $i < $nameLength; $i++) {
-            $char = ord(substr($name, $i, 1));
+            $char = ord(mb_substr($name, $i, 1));
             if (($char >= 48 && $char <= 58) || ($char >= 65 && $char <= 91) || ($char >= 97 && $char <= 123) || $char == 95) { // 0-9 || A-Z || a-z || _
                 continue;
             } elseif ($isVariable && $char == 46) { // .
@@ -1251,7 +1251,7 @@ class TemplateCompiler {
     }
 
     /**
-     * Parses nested tokens back into a string
+     * Parses nested syntax tokens back into a string
      * @param array $nested Result of a nested tokenizer
      * @return string
      */

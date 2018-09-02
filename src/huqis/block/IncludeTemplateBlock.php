@@ -90,7 +90,7 @@ class IncludeTemplateBlock implements TemplateBlock {
 
             $code = '{_include(' . $resource  . $arguments . ')}';
         } else {
-            $resource = substr($resource, 1, -1);
+            $resource = mb_substr($resource, 1, -1);
 
             if ($arguments) {
                 $arguments = $compiler->compileExpression($arguments);

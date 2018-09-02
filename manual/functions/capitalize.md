@@ -28,6 +28,7 @@ Capitalizes the provided string.
 
 ## See Also
 
+- [filter](../blocks/filter.md)
 - [lower](lower.md)
 - [upper](upper.md)
 

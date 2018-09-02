@@ -23,6 +23,7 @@ use huqis\func\FormatTemplateFunction;
 use huqis\func\IncludeTemplateFunction;
 use huqis\func\LowerTemplateFunction;
 use huqis\func\ReplaceTemplateFunction;
+use huqis\func\SpacelessTemplateFunction;
 use huqis\func\TrimTemplateFunction;
 use huqis\func\TruncateTemplateFunction;
 use huqis\func\UpperTemplateFunction;
@@ -44,11 +45,14 @@ class DefaultTemplateContext extends TemplateContext {
      * @param \huqis\ReflectionHelper $reflectionHelper
      * @param \huqis\TemplateContext $parent Parent context when
      * creating a child context
-     * @return null
      * @throws \huqis\exception\RuntimeTemplateException when no
      * resource handler is provided, nor directly, nor through the parent
      */
-    public function __construct(TemplateResourceHandler $resourceHandler = null, ReflectionHelper $reflectionHelper = null, TemplateContext $parent = null) {
+    public function __construct(
+        TemplateResourceHandler $resourceHandler = null, 
+        ReflectionHelper $reflectionHelper = null, 
+        TemplateContext $parent = null
+    ) {
         parent::__construct($resourceHandler, $reflectionHelper, $parent);
 
         if ($parent !== null) {
@@ -61,18 +65,17 @@ class DefaultTemplateContext extends TemplateContext {
 
     /**
      * Hook invoked before compiling
-     * @return null
      */
     public function preCompile() {
         $this->ensureExpressions();
     }
 
     /**
-     * Ensure all expressions exist
-     * @return null
+     * Ensure all expressions exist in this container
      */
     protected function ensureExpressions() {
         if ($this->hasLogicalOperator(' and ')) {
+            // expressions are already registered
             return;
         }
 
@@ -101,7 +104,8 @@ class DefaultTemplateContext extends TemplateContext {
     }
 
     /**
-     * Checks if the provided function is registered
+     * Checks if the provided function is available
+     * @param string $name Name of the function
      * @return boolean
      */
     public function hasFunction($name) {
@@ -109,71 +113,75 @@ class DefaultTemplateContext extends TemplateContext {
             return true;
         }
 
-        $this->ensureFunction($name);
-
-        return parent::hasFunction($name);
+        return $this->ensureFunction($name);
     }
 
     /**
-     * Ensures the function exists
-     * @param $name Name of a default function
-     * @return null
+     * Ensures the function exists by loading it
+     * @param $name Name of the function
+     * @return boolean True when the function is loaded, false otherwise
      */
     protected function ensureFunction($name) {
         switch ($name) {
             case 'capitalize':
                 $this->setFunction('capitalize', new CapitalizeTemplateFunction());
 
-                break;
+                return true;
             case 'concat':
                 $this->setFunction('concat', new ConcatTemplateFunction());
 
-                break;
+                return true;
             case 'default':
                 $this->setFunction('default', new DefaultTemplateFunction());
 
-                break;
+                return true;
             case 'escape':
                 $this->setFunction('escape', new EscapeTemplateFunction());
 
-                break;
+                return true;
             case '_extends':
                 $this->setFunction('_extends', new ExtendTemplateFunction());
 
-                break;
+                return true;
             case 'format':
                 $this->setFunction('format', new FormatTemplateFunction());
 
-                break;
+                return true;
             case '_include':
                 $this->setFunction('_include', new IncludeTemplateFunction());
 
-                break;
+                return true;
             case 'lower':
                 $this->setFunction('lower', new LowerTemplateFunction());
 
-                break;
+                return true;
             case 'replace':
                 $this->setFunction('replace', new ReplaceTemplateFunction());
 
-                break;
+                return true;
+            case 'spaceless':
+                $this->setFunction('spaceless', new SpacelessTemplateFunction());
+
+                return true;
             case 'trim':
                 $this->setFunction('trim', new TrimTemplateFunction());
 
-                break;
+                return true;
             case 'truncate':
                 $this->setFunction('truncate', new TruncateTemplateFunction());
 
-                break;
+                return true;
             case 'upper':
                 $this->setFunction('upper', new UpperTemplateFunction());
 
-                break;
+                return true;
         }
+
+        return false;
     }
 
     /**
-     * Checks if the provided block is registered
+     * Checks if the provided block is available
      * @return boolean
      */
     public function hasBlock($name) {
@@ -181,67 +189,67 @@ class DefaultTemplateContext extends TemplateContext {
             return true;
         }
 
-        $this->ensureBlock($name);
-
-        return parent::hasBlock($name);
+        return $this->ensureBlock($name);
     }
 
     /**
-     * Ensures the block exists
-     * @param $name Name of a default block
-     * @return null
+     * Ensures the block exists by loading it
+     * @param $name Name of a block
+     * @return boolean True when the block is loaded, false otherwise
      */
     protected function ensureBlock($name) {
         switch ($name) {
             case 'autoescape':
                 $this->setBlock('autoescape', new AutoEscapeTemplateBlock());
 
-                break;
+                return true;
             case 'block':
                 $this->setBlock('block', new BlockTemplateBlock());
 
-                break;
+                return true;
             case 'capture':
                 $this->setBlock('capture', new CaptureTemplateBlock());
 
-                break;
+                return true;
             case 'cycle':
                 $this->setBlock('cycle', new CycleTemplateBlock());
 
-                break;
+                return true;
             case 'extends':
                 $this->setBlock('extends', new ExtendsTemplateBlock());
 
-                break;
+                return true;
             case 'filter':
                 $this->setBlock('filter', new FilterTemplateBlock());
 
-                break;
+                return true;
             case 'foreach':
                 $this->setBlock('foreach', new ForeachTemplateBlock());
 
-                break;
+                return true;
             case 'function':
                 $this->setBlock('function', new FunctionTemplateBlock());
 
-                break;
+                return true;
             case 'if':
                 $this->setBlock('if', new IfTemplateBlock());
 
-                break;
+                return true;
             case 'include':
                 $this->setBlock('include', new IncludeTemplateBlock());
 
-                break;
+                return true;
             case 'literal':
                 $this->setBlock('literal', new LiteralTemplateBlock());
 
-                break;
+                return true;
             case 'macro':
                 $this->setBlock('macro', new MacroTemplateBlock());
 
-                break;
+                return true;
         }
+
+        return false;
     }
 
 }
