@@ -22,7 +22,7 @@ Check the sources of the existing blocks, functions and operators to get you on 
 
 ## TemplateBlock
 
-The ```TemplateBlock``` interface is used to implement custom template blocks.
+The ```huqis\block\TemplateBlock``` interface is used to implement custom template blocks.
 
 Implementations out of the box:
 
@@ -45,7 +45,7 @@ Implementations out of the box:
 
 ## TemplateFunction
 
-The ```TemplateFunction``` interface is used to implement custom template functions.
+The ```huqis\func\TemplateFunction``` interface is used to implement custom template functions.
 Template functions can also be used as a filter.
 
 Implementations out of the box:
@@ -64,7 +64,7 @@ Implementations out of the box:
 
 ## ExpressionOperator
 
-The ```ExpressionOperator``` interface is used to implement template expression operators like +, -, <, ==, ...
+The ```huqis\operator\expression\ExpressionOperator``` interface is used to implement template expression operators like +, -, <, ==, ...
 
 Implementations out of the box:
 
@@ -74,7 +74,7 @@ Implementations out of the box:
 
 ## LogicalOperator
 
-The ```LogicalOperator``` interface is used to implement template logical operators like and, &&, or, ...
+The ```huqis\operator\logical\LogicalOperator``` interface is used to implement template logical operators like and, &&, or, ...
 
 Implementations out of the box:
 

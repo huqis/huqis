@@ -1,7 +1,7 @@
 # Blocks: filter
 
 Applies the filters to the output of this block. 
-The filters have the same syntax like the ```|``` syntax you would use on variables.
+The filters have the same syntax like the pipe ```|``` [syntax](../syntax.md) you would use on variables.
 
 ## Syntax
 

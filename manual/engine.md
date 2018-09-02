@@ -33,11 +33,13 @@ Template caching is enabled using the file system to improve performance.
 You can disable auto escaping or enable the PHP functions on your context.
 
 ```php
-$context->setAllowPhpFunctions(true); 
-$context->setAutoEscape(false);
+$context->setAllowPhpFunctions(true); // off by default
+$context->setAutoEscape(false); // on by default
 ``` 
 
-If you are developing or debugging some templates, it can be useful to turn on debug mode.
+### Debug Mode
+
+If you are developing or debugging some templates, it is useful to turn on debug mode.
 
 ```
 $engine->setIsDebug(true);
@@ -108,7 +110,8 @@ $chainResourceHandler->setResourceHandler('directory2', new DirectoryTemplateRes
 $chainResourceHandler->setDefaultResourceHandler('directory');
 ```
 
-With the chain, you can select the different resource handlers in your resource name by prefixing it with the name of the resource handler followed by a ```:```.
+Chained resource handlers will be polled in the order they are registered.
+You can specify the resource handler in your resource name by prefixing it with the name of the resource handler followed by a colon ```:```.
 
 ```php
 $engine->render('template1.tpl');

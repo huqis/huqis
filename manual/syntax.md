@@ -58,7 +58,10 @@ You can unset any variable by assigning ```null``` to it:
 
 ## Blocks
 
-Blocks are interpreted or parsed at compile time.
+Blocks provide the logical syntax of the template language.
+They are interpreted at compile time.
+
+The following blocks are available out of the box:
 
 - [autoescape](blocks/autoescape.md)
 - [block](blocks/block.md)
@@ -76,9 +79,14 @@ Blocks are interpreted or parsed at compile time.
 - [macro](blocks/macro.md)
 - [return](blocks/return.md)
 
+A block can only be defined in the engine by [adding it to the context](extend.md).
+
 ## Functions
 
-Functions are interpreted at runtime.
+Functions provide the extendability of the template language.
+They are interpreted at runtime.
+
+The following functions are available out of the box:
 
 - [capitalize](functions/capitalize.md)
 - [concat](functions/concat.md)
@@ -93,7 +101,11 @@ Functions are interpreted at runtime.
 - [truncate](functions/truncate.md)
 - [upper](functions/upper.md)
 
-A function can be called directly but it can also be used as a filter by using ```|``` after an expression.
+A function can be defined in a template using the [function block](blocks/function.md) or in the engine by [adding it to the context](extend.md).
+
+### Filters
+
+A function can be called directly but it can also be used as a filter by using the pipe ```|``` after an expression.
 The first argument for the function will be the result of the expression.
 
 Knowing this, both of the following expressions have the same result:
@@ -103,11 +115,13 @@ Knowing this, both of the following expressions have the same result:
 {$string|capitalize("first")}
 ```
 
-Filters can be chained after each other:
+Filters are interesting because they can be chained after each other:
 
 ```
 {$string|lower|capitalize("all")}
 ```
+
+You can use the [filter block](blocks/filter.md) to apply this on whole blocks of code.
 
 ## Operators
 

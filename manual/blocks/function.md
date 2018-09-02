@@ -7,6 +7,8 @@ A default argument value can only be a scalar value like null, a boolean, a numb
 
 The function cannot access variables outside it's block.
 
+A function can be used as a [filter](filter.md) once it's defined.
+
 Use the [```return```](return.md) block if you want the function to return something when called.
 
 ## Syntax
@@ -35,6 +37,7 @@ Use the [```return```](return.md) block if you want the function to return somet
 {renderTitle("my title")}
 {$sum}
 {calculateSum($value1, $value2)}
+{$value1|calculateSum($value2)}
 ```
 
 will output:
@@ -42,6 +45,7 @@ will output:
 ```
 My Title
 19
+10
 10
 ```
 
