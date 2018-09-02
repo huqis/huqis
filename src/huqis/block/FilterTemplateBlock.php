@@ -47,6 +47,8 @@ class FilterTemplateBlock implements TemplateBlock {
 
         $this->counter++;
 
+        $counter = $this->counter;
+
         $context = $context->createChild();
         if (strpos($signature, SyntaxSymbol::FILTER . SyntaxSymbol::OUTPUT_RAW) !== false) {
             $context->setAutoEscape(false);
@@ -55,7 +57,7 @@ class FilterTemplateBlock implements TemplateBlock {
         $compiler->setContext($context);
 
         // create a closure from the body block
-        $buffer->appendCode('$filter' . $this->counter . ' = function(TemplateContext $context) {');
+        $buffer->appendCode('$filter' . $counter . ' = function(TemplateContext $context) {');
         $buffer->startBufferBlock();
 
         $compiler->subcompile($body);
@@ -63,11 +65,11 @@ class FilterTemplateBlock implements TemplateBlock {
         $buffer->endBufferBlock();
         $buffer->appendCode('};');
 
-        $code = $compiler->compileFilters('$filter' . $this->counter . '($context)', $signature, true);
+        $code = $compiler->compileFilters('$filter' . $counter . '($context)', $signature, true);
 
         // call the closure and assign the result to the variable
         $buffer->appendCode('echo ' . $code . ';');
-        $buffer->appendCode('unset($filter' . $this->counter . ');');
+        $buffer->appendCode('unset($filter' . $counter . ');');
 
         $compiler->setContext($context->getParent());
     }
