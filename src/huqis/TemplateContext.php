@@ -79,7 +79,7 @@ class TemplateContext {
 
     /**
      * Array with the name of the output filter as key and an array with as
-     * first value the name of the modifier. All remaining values are the
+     * first value the name of the filter. All remaining values are the
      * arguments.
      * @var array
      */
@@ -458,17 +458,17 @@ class TemplateContext {
     }
 
     /**
-     * Applies the provided modifiers on the provided value
-     * @param mixed $value Value to apply the modifiers to
-     * @param array $modifiers Array with modifier arrays as value. A modifier
-     * array is an array with the name of the template function as first value
-     * and the extra arguments for that function as the remaining values.
-     * @return mixed Value with the modifiers applied
+     * Applies the provided filters on the provided value
+     * @param mixed $value Value to apply the filters to
+     * @param array $filters Array with filter arrays as value. A filter array
+     * is an array with the name of the template function as first value and the
+     * extra arguments for that function as the remaining values.
+     * @return mixed Value with the filters applied
      * @see \huqis\func\TemplateFunction
      * @see call()
      */
-    public function applyModifiers($value, array $modifiers) {
-        foreach ($modifiers as $arguments) {
+    public function applyFilters($value, array $filters) {
+        foreach ($filters as $arguments) {
             $name = array_shift($arguments);
             array_unshift($arguments, $value);
 
@@ -710,9 +710,9 @@ class TemplateContext {
     /**
      * Gets the output filters
      * @return array Array with the name of the output filter as key and an
-     * array with as first value the name of the modifier. All remaining values
+     * array with as first value the name of the filter. All remaining values
      * are the arguments.
-     * @see applyModifiers
+     * @see applyFilters
      */
     public function getOutputFilters() {
         return $this->outputFilters;

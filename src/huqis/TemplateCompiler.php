@@ -4,6 +4,7 @@ namespace huqis;
 
 use huqis\exception\CompileTemplateException;
 use huqis\tokenizer\symbol\StringSymbol;
+use huqis\tokenizer\symbol\String2Symbol;
 use huqis\tokenizer\symbol\SyntaxSymbol;
 use huqis\tokenizer\ArrayTokenizer;
 use huqis\tokenizer\ComparisonTokenizer;
@@ -469,15 +470,17 @@ class TemplateCompiler {
                 $isLogic = true;
             }
 
-            if ($token === StringSymbol::SYMBOL) {
-                // string symbol
-                if ($inString) {
-                    $inString = false;
-                    $value .= StringSymbol::SYMBOL . $string . StringSymbol::SYMBOL;
-                    $string = '';
-                } else {
-                    $inString = true;
-                }
+            if ($inString && $token === $inString) {
+                // close string symbol
+                $value .= $inString . $string . $inString;
+                $inString = false;
+                $string = '';
+            } elseif (!$inString && $token === StringSymbol::SYMBOL) {
+                // string symbol "
+                $inString = StringSymbol::SYMBOL;
+            } elseif (!$inString && $token === String2Symbol::SYMBOL) {
+                // string symbol '
+                $inString = String2Symbol::SYMBOL;
             } elseif ($inString) {
                 // token inside a string
                 $string .= $token;
@@ -668,12 +671,20 @@ class TemplateCompiler {
             // string token
             $var = '"' . $tokens[1] . '"';
             $tokenIndex = 3;
+        } elseif ($numTokens >= 2 && $tokens[0] == String2Symbol::SYMBOL && $tokens[1] == String2Symbol::SYMBOL) {
+            // empty string token
+            $var = '""';
+            $tokenIndex = 2;
+        } elseif ($numTokens >= 3 && $tokens[0] == String2Symbol::SYMBOL && $tokens[2] == String2Symbol::SYMBOL) {
+            // string token
+            $var = "'" . $tokens[1] . "'";
+            $tokenIndex = 3;
         } else {
             $var = $tokens[0];
             $tokenIndex = 1;
         }
 
-        $modifiers = [];
+        $filters = [];
         $useOutputFilters = true;
         $result = null;
         $expectsFunction = false;
@@ -739,7 +750,7 @@ class TemplateCompiler {
                     continue;
                 } elseif ($expectsFunction) {
                     throw new CompileTemplateException('Function signature expected');
-                } elseif ($tokens[$tokenIndex] !== SyntaxSymbol::MODIFIER) {
+                } elseif ($tokens[$tokenIndex] !== SyntaxSymbol::FILTER) {
                     throw new CompileTemplateException('Modifier expected, got ' . $tokens[$tokenIndex]);
                 }
 
@@ -747,14 +758,14 @@ class TemplateCompiler {
                     $result = $this->compileScalarValue($var);
                 }
 
-                $modifier = $this->compileModifier($tokens, $tokenIndex, $useOutputFilters);
-                if ($modifier) {
-                    $modifiers[] = $modifier;
+                $filter = $this->parseFilter($tokens, $tokenIndex, $useOutputFilters);
+                if ($filter) {
+                    $filters[] = $filter;
                 }
             } while (isset($tokens[$tokenIndex]));
         }
 
-        $result = $this->applyModifiers($result, $modifiers, $isLogic, $useOutputFilters);
+        $result = $this->applyFilters($result, $filters, $isLogic, $useOutputFilters);
 
         if ($isNested) {
             $result = '(' . $result . ')';
@@ -777,20 +788,20 @@ class TemplateCompiler {
      * @return string Compiled value
      */
     private function compileVariable($variable, $isLogic) {
-        $modifiers = [];
+        $filters = [];
         $useOutputFilters = true;
 
         try {
             $name = $this->parseName($variable);
 
-            return $this->applyModifiers($this->compileGetVariable($name), $modifiers, $isLogic, $useOutputFilters);
+            return $this->applyFilters($this->compileGetVariable($name), $filters, $isLogic, $useOutputFilters);
         } catch (CompileTemplateException $exception) {
             // no simple variable, further code will compile
         }
 
         $tokens = $this->variableTokenizer->tokenize($variable);
 
-        // parse modifiers and advanced assignments
+        // parse filters and advanced assignments
         $result = null;
         $nested = '';
         $nestedLevel = 0;
@@ -902,10 +913,10 @@ class TemplateCompiler {
                 $tokenIndex++;
 
                 continue;
-            } elseif ($token === SyntaxSymbol::MODIFIER) {
-                $modifier = $this->compileModifier($tokens, $tokenIndex, $useOutputFilters);
-                if ($modifier) {
-                    $modifiers[] = $modifier;
+            } elseif ($token === SyntaxSymbol::FILTER) {
+                $filter = $this->parseFilter($tokens, $tokenIndex, $useOutputFilters);
+                if ($filter) {
+                    $filters[] = $filter;
                 }
 
                 continue;
@@ -916,30 +927,56 @@ class TemplateCompiler {
             $tokenIndex++;
         }
 
-        // apply modifiers and output
+        // apply filters and output
         if ($result === null) {
             $result = $this->compileGetVariable($this->parseName($value));
         }
 
-        $result = $this->applyModifiers($result, $modifiers, $isLogic, $useOutputFilters);
+        $result = $this->applyFilters($result, $filters, $isLogic, $useOutputFilters);
 
         return $result;
     }
 
+
+    public function compileFilters($expression, $filterExpression, $isLogic = false) {
+        $filters = [];
+
+        $filterExpression = SyntaxSymbol::FILTER . $filterExpression;
+        $useOutputFilters = !$isLogic;
+
+        $tokens = $this->variableTokenizer->tokenize($filterExpression);
+        $tokenIndex = 0;
+
+        do {
+            if ($tokens[$tokenIndex] === SyntaxSymbol::FILTER) {
+                $filter = $this->parseFilter($tokens, $tokenIndex, $useOutputFilters);
+                if ($filter) {
+                    $filters[] = $filter;
+                }
+
+                continue;
+            } else {
+                throw new CompileTemplateException('Invalid syntax: ' . $filterExpression);
+            }
+        } while (isset($tokens[$tokenIndex]));
+
+        return $this->applyFilters($expression, $filters, $isLogic, $useOutputFilters);
+    }
+
     /**
-     * Compiles the modifier tokens
+     * Compiles the filter tokens
      * @param array $tokens Tokens of the variable or value tokenizer
-     * @param integer $tokenIndex Current token index
-     * @return string Compiled arguments for the applyModifiers context function
+     * @param integer $tokenIndex Current token index, pipe symbol
+     * @return string Compiled arguments for the applyFilters context function
      * @see TemplateContext
      */
-    private function compileModifier(array $tokens, &$tokenIndex, &$useOutputFilters) {
+    private function parseFilter(array $tokens, &$tokenIndex, &$useOutputFilters) {
         $tokenIndex++;
         if ($tokenIndex == count($tokens)) {
-            throw new CompileTemplateException(implode('', $tokens) . ' could not be parsed: name of a modifier expected after ' . SyntaxSymbol::MODIFIER);
+            throw new CompileTemplateException(implode('', $tokens) . ' could not be parsed: name of a filter expected after ' . SyntaxSymbol::FILTER);
         }
 
-        $modifier = '';
+        $filter = '';
         $arguments = '';
         $value = '';
         $nested = 0;
@@ -949,12 +986,12 @@ class TemplateCompiler {
 
             if (is_array($token)) {
                 $value .= $this->parseNested($token);
-            } elseif ($token == SyntaxSymbol::NESTED_OPEN && !$modifier) {
+            } elseif ($token == SyntaxSymbol::NESTED_OPEN && !$filter) {
                 if (!$value) {
-                    throw new CompileTemplateException(implode('', $tokens) . ' could not be parsed: name of a modifier expexted after ' . SyntaxSymbol::MODIFIER);
+                    throw new CompileTemplateException(implode('', $tokens) . ' could not be parsed: name of a filter expexted after ' . SyntaxSymbol::FILTER);
                 }
 
-                $modifier = $value;
+                $filter = $value;
                 $value = '';
             } elseif ($token == SyntaxSymbol::NESTED_OPEN) {
                 $nested++;
@@ -964,28 +1001,28 @@ class TemplateCompiler {
                 $arguments = $value;
                 $value = '';
             } elseif ($arguments) {
-                throw new CompileTemplateException(implode('', $tokens) . ' could not be parsed: ' . SyntaxSymbol::MODIFIER . ' expected');
+                throw new CompileTemplateException(implode('', $tokens) . ' could not be parsed: ' . SyntaxSymbol::FILTER . ' expected');
             } else {
                 $value .= $token;
             }
 
             $tokenIndex++;
-        } while (isset($tokens[$tokenIndex]) && ($tokens[$tokenIndex] !== SyntaxSymbol::MODIFIER && $tokens[$tokenIndex] !== ' '));
+        } while (isset($tokens[$tokenIndex]) && ($tokens[$tokenIndex] !== SyntaxSymbol::FILTER && $tokens[$tokenIndex] !== ' '));
 
-        if ($value && !$modifier) {
-            $modifier = $value;
+        if ($value && !$filter) {
+            $filter = $value;
         } elseif ($value) {
             throw new CompileTemplateException(implode('', $tokens) . ' could not be parsed: ' . SyntaxSymbol::NESTED_CLOSE . ' expected');
         }
 
-        if ($modifier == SyntaxSymbol::OUTPUT_RAW) {
+        if ($filter == SyntaxSymbol::OUTPUT_RAW) {
             $useOutputFilters = false;
 
             return false;
         }
 
         $result = '[';
-        $result .= var_export($modifier, true);
+        $result .= var_export($filter, true);
 
         $arguments = $this->compileFunction($arguments);
         if ($arguments) {
@@ -997,14 +1034,14 @@ class TemplateCompiler {
         return $result;
     }
 
-    private function applyModifiers($expression, $modifiers, $isLogic, $useOutputFilters = true) {
+    private function applyFilters($expression, $filters, $isLogic, $useOutputFilters = true) {
         $outputFilters = $this->context->getOutputFilters();
-        if ((!$outputFilters || !$useOutputFilters || $isLogic) && !$modifiers) {
+        if ((!$outputFilters || !$useOutputFilters || $isLogic) && !$filters) {
             // nothing to be done here
             return $expression;
-        } elseif ((!$outputFilters || $isLogic || !$useOutputFilters) && $modifiers) {
+        } elseif ((!$outputFilters || $isLogic || !$useOutputFilters) && $filters) {
             // no output filter or we are inside logic
-            return '$context->applyModifiers(' . $expression . ', [' . implode(', ', $modifiers) . '])';
+            return '$context->applyFilters(' . $expression . ', [' . implode(', ', $filters) . '])';
         }
 
         // parse output filters
@@ -1023,14 +1060,14 @@ class TemplateCompiler {
             }
             $outputFilter .= ']';
 
-            if (!in_array($outputFilter, $modifiers)) {
+            if (!in_array($outputFilter, $filters)) {
                 $outputFilters[$name] = $outputFilter;
             } else {
                 unset($outputFilters[$name]);
             }
         }
 
-        return '$context->applyModifiers(' . $expression . ', [' . implode(', ', $modifiers + $outputFilters) . '])';
+        return '$context->applyFilters(' . $expression . ', [' . implode(', ', $filters + $outputFilters) . '])';
     }
 
     /**
@@ -1133,8 +1170,14 @@ class TemplateCompiler {
             return $value;
         }
 
-        if (substr($value, 0, 1) === StringSymbol::SYMBOL && substr($value, -1) === StringSymbol::SYMBOL) {
+        $firstChar = substr($value, 0, 1);
+        $lastChar = substr($value, -1);
+
+        // escape scalar string
+        if ($firstChar === StringSymbol::SYMBOL && $lastChar === StringSymbol::SYMBOL) {
             return '"' . addcslashes(substr(str_replace('\\"', '"', $value), 1, -1), '"$\\') . '"';
+        } elseif ($firstChar === String2Symbol::SYMBOL && $lastChar === String2Symbol::SYMBOL) {
+            return "'" . addcslashes(substr(str_replace("\\'", "'", $value), 1, -1), "'$\\") . "'";
         }
 
         throw new CompileTemplateException('Invalid syntax ' . $value);

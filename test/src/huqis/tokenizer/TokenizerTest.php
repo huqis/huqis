@@ -5,9 +5,9 @@ namespace huqis\tokenizer;
 use huqis\tokenizer\symbol\NestedSymbol;
 use huqis\tokenizer\symbol\SimpleSymbol;
 
-use \PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class TokenizerTest extends PHPUnit_Framework_TestCase {
+class TokenizerTest extends TestCase {
 
 	private $tokenizer;
 

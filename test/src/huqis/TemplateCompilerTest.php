@@ -4,9 +4,9 @@ namespace huqis;
 
 use huqis\resource\ArrayTemplateResourceHandler;
 
-use \PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class TemplateCompilerTest extends PHPUnit_Framework_TestCase {
+class TemplateCompilerTest extends TestCase {
 
     public function providerCompile() {
         return array(
@@ -23,7 +23,9 @@ class TemplateCompilerTest extends PHPUnit_Framework_TestCase {
             // variables
             array('plain text', 'echo "plain text";'),
             array('{"test"}', 'echo "test";'),
-            array('{"te\"st"}', 'echo "te\\"st";'),
+            array('{"te\\"st"}', 'echo "te\\"st";'),
+            array("{'test'}", "echo 'test';"),
+            array("{'te\\'st'}", "echo 'te\\'st';"),
             array('{15.987}', 'echo 15.987;'),
             array('usage of a plain {$variable} in the middle', 'echo "usage of a plain ";' . "\n" . 'echo $context->getVariable(\'variable\', false);' . "\n" . 'echo " in the middle";'),
             array('{$variable} to begin', 'echo $context->getVariable(\'variable\', false);' . "\n" . 'echo " to begin";'),
@@ -55,19 +57,19 @@ class TemplateCompilerTest extends PHPUnit_Framework_TestCase {
             array('{$variable = $value / (15 * 3)}', '$context->setVariable("variable", $context->getVariable(\'value\', false) / (15 * 3), false);'),
             array('{$variable.property}', 'echo $context->getVariable(\'variable.property\');'),
             array('{$variable[$property]}', 'echo $context->getVariable(\'variable\', false)[$context->getVariable(\'property\', false)];'),
-            // expression with modifiers
-            array('{"test"|truncate}', 'echo $context->applyModifiers("test", [[\'truncate\']]);'),
-            array('{true|boolean}', 'echo $context->applyModifiers(true, [[\'boolean\']]);'),
-            array('{$variable|truncate}', 'echo $context->applyModifiers($context->getVariable(\'variable\', false), [[\'truncate\']]);'),
-            array('{$variable|truncate(15)}', 'echo $context->applyModifiers($context->getVariable(\'variable\', false), [[\'truncate\', 15]]);'),
-            array('{$variable|truncate(15, "...")}', 'echo $context->applyModifiers($context->getVariable(\'variable\', false), [[\'truncate\', 15, "..."]]);'),
-            array('{$variable|truncate(15)|boolean}', 'echo $context->applyModifiers($context->getVariable(\'variable\', false), [[\'truncate\', 15], [\'boolean\']]);'),
+            // expression with filters
+            array('{"test"|truncate}', 'echo $context->applyFilters("test", [[\'truncate\']]);'),
+            array('{true|boolean}', 'echo $context->applyFilters(true, [[\'boolean\']]);'),
+            array('{$variable|truncate}', 'echo $context->applyFilters($context->getVariable(\'variable\', false), [[\'truncate\']]);'),
+            array('{$variable|truncate(15)}', 'echo $context->applyFilters($context->getVariable(\'variable\', false), [[\'truncate\', 15]]);'),
+            array('{$variable|truncate(15, "...")}', 'echo $context->applyFilters($context->getVariable(\'variable\', false), [[\'truncate\', 15, "..."]]);'),
+            array('{$variable|truncate(15)|boolean}', 'echo $context->applyFilters($context->getVariable(\'variable\', false), [[\'truncate\', 15], [\'boolean\']]);'),
             array('{truncate($variable, 15, "...")}', 'echo $context->call(\'truncate\', [$context->getVariable(\'variable\', false), 15, "..."]);'),
-            array('{$variable|boolean(true)}', 'echo $context->applyModifiers($context->getVariable(\'variable\', false), [[\'boolean\', true]]);'),
-            array('{$variable.property.subproperty|boolean(false)}', 'echo $context->applyModifiers($context->getVariable(\'variable.property.subproperty\'), [[\'boolean\', false]]);'),
-            array('{$variable|truncate(strlen($default))}', 'echo $context->applyModifiers($context->getVariable(\'variable\', false), [[\'truncate\', $context->call(\'strlen\', [$context->getVariable(\'default\', false)])]]);'),
-            array('{$variable = $otherVariable|truncate(15, "...")}', '$context->setVariable("variable", $context->applyModifiers($context->getVariable(\'otherVariable\', false), [[\'truncate\', 15, "..."]]), false);'),
-            array('{$row.name|replace("[", "")|replace("]", "")}', 'echo $context->applyModifiers($context->getVariable(\'row.name\'), [[\'replace\', "[", ""], [\'replace\', "]", ""]]);'),
+            array('{$variable|boolean(true)}', 'echo $context->applyFilters($context->getVariable(\'variable\', false), [[\'boolean\', true]]);'),
+            array('{$variable.property.subproperty|boolean(false)}', 'echo $context->applyFilters($context->getVariable(\'variable.property.subproperty\'), [[\'boolean\', false]]);'),
+            array('{$variable|truncate(strlen($default))}', 'echo $context->applyFilters($context->getVariable(\'variable\', false), [[\'truncate\', $context->call(\'strlen\', [$context->getVariable(\'default\', false)])]]);'),
+            array('{$variable = $otherVariable|truncate(15, "...")}', '$context->setVariable("variable", $context->applyFilters($context->getVariable(\'otherVariable\', false), [[\'truncate\', 15, "..."]]), false);'),
+            array('{$row.name|replace("[", "")|replace("]", "")}', 'echo $context->applyFilters($context->getVariable(\'row.name\'), [[\'replace\', "[", ""], [\'replace\', "]", ""]]);'),
             // function call
             array('{time()}', 'echo $context->call(\'time\');'),
             array('{count($array)}', 'echo $context->call(\'count\', [$context->getVariable(\'array\', false)]);'),
@@ -83,20 +85,20 @@ class TemplateCompilerTest extends PHPUnit_Framework_TestCase {
             array('{$variable.method($argument.method())}', 'echo $context->ensureObject($context->getVariable(\'variable\', false), \'Could not call method($argument.method()): $variable is not an object\')->method($context->ensureObject($context->getVariable(\'argument\', false), \'Could not call method(): $argument is not an object\')->method());'),
             array('{$variable.method($argument, "string")}', 'echo $context->ensureObject($context->getVariable(\'variable\', false), \'Could not call method($argument, "string"): $variable is not an object\')->method($context->getVariable(\'argument\', false), "string");'),
             array('{$variable[$property].method()}', 'echo $context->ensureObject($context->getVariable(\'variable\', false)[$context->getVariable(\'property\', false)], \'Could not call method(): $variable[$property] is not an object\')->method();'),
-            array('{$variable.method()|truncate}', 'echo $context->applyModifiers($context->ensureObject($context->getVariable(\'variable\', false), \'Could not call method()|truncate: $variable is not an object\')->method(), [[\'truncate\']]);'),
+            array('{$variable.method()|truncate}', 'echo $context->applyFilters($context->ensureObject($context->getVariable(\'variable\', false), \'Could not call method()|truncate: $variable is not an object\')->method(), [[\'truncate\']]);'),
             array('{$functionName($argument)}', 'echo $context->call($context->getVariable(\'functionName\', false), [$context->getVariable(\'argument\', false)]);'),
-            array('{$variable = concat("string", $argument)|replace("-", "_")}', '$context->setVariable("variable", $context->applyModifiers($context->call(\'concat\', ["string", $context->getVariable(\'argument\', false)]), [[\'replace\', "-", "_"]]), false);'),
-            array('{translate("label.date.example", ["example" = time()|date_format($row.format), "format" = $row.format])}', 'echo $context->call(\'translate\', ["label.date.example", ["example" => $context->applyModifiers($context->call(\'time\'), [[\'date_format\', $context->getVariable(\'row.format\')]]), "format" => $context->getVariable(\'row.format\')]]);'),
+            array('{$variable = concat("string", $argument)|replace("-", "_")}', '$context->setVariable("variable", $context->applyFilters($context->call(\'concat\', ["string", $context->getVariable(\'argument\', false)]), [[\'replace\', "-", "_"]]), false);'),
+            array('{translate("label.date.example", ["example" = time()|date_format($row.format), "format" = $row.format])}', 'echo $context->call(\'translate\', ["label.date.example", ["example" => $context->applyFilters($context->call(\'time\'), [[\'date_format\', $context->getVariable(\'row.format\')]]), "format" => $context->getVariable(\'row.format\')]]);'),
             // literal block
             array('{literal}{$variable}{/literal}', 'echo "{\\$variable}";'),
             // if block
             array('{if $boolean}Yes{/if}', 'if ($context->getVariable(\'boolean\', false)) {' . "\n" . '    echo "Yes";' . "\n" . '}'),
             array('{if $variable == 15}Variable equals 15{/if}', 'if ($context->getVariable(\'variable\', false) == 15) {' . "\n" . '    echo "Variable equals 15";' . "\n" . '}'),
-            array('{if $variable1&&$variable2||$variable3|modify}Ok{/if}', 'if ($context->getVariable(\'variable1\', false) and $context->getVariable(\'variable2\', false) or $context->applyModifiers($context->getVariable(\'variable3\', false), [[\'modify\']])) {' . "\n" . '    echo "Ok";' . "\n" . '}'),
+            array('{if $variable1&&$variable2||$variable3|modify}Ok{/if}', 'if ($context->getVariable(\'variable1\', false) and $context->getVariable(\'variable2\', false) or $context->applyFilters($context->getVariable(\'variable3\', false), [[\'modify\']])) {' . "\n" . '    echo "Ok";' . "\n" . '}'),
             array('{if $variable == 15 or $variable == 30}Variable equals 15 or 30{else}{$variable} differs from 15 and 30{/if}', 'if ($context->getVariable(\'variable\', false) == 15 or $context->getVariable(\'variable\', false) == 30) {' . "\n" . '    echo "Variable equals 15 or 30";' . "\n" . '} else {' . "\n" . '    echo $context->getVariable(\'variable\', false);' . "\n" . '    echo " differs from 15 and 30";' . "\n" . '}'),
             array('{if $variable and ($variable == 15 or $variable == 30)}Variable equals 15 or 30{/if}', 'if ($context->getVariable(\'variable\', false) and ($context->getVariable(\'variable\', false) == 15 or $context->getVariable(\'variable\', false) == 30)) {' . "\n" . '    echo "Variable equals 15 or 30";' . "\n" . '}'),
-            array('{if $variable|boolean == true}Variable is true{/if}', 'if ($context->applyModifiers($context->getVariable(\'variable\', false), [[\'boolean\']]) == true) {' . "\n" . '    echo "Variable is true";' . "\n" . '}'),
-            array('{if $variable|truncate(4, "==") == "test=="}Testing{/if}', 'if ($context->applyModifiers($context->getVariable(\'variable\', false), [[\'truncate\', 4, "=="]]) == "test==") {' . "\n" . '    echo "Testing";' . "\n" . '}'),
+            array('{if $variable|boolean == true}Variable is true{/if}', 'if ($context->applyFilters($context->getVariable(\'variable\', false), [[\'boolean\']]) == true) {' . "\n" . '    echo "Variable is true";' . "\n" . '}'),
+            array('{if $variable|truncate(4, "==") == "test=="}Testing{/if}', 'if ($context->applyFilters($context->getVariable(\'variable\', false), [[\'truncate\', 4, "=="]]) == "test==") {' . "\n" . '    echo "Testing";' . "\n" . '}'),
             array('{if $variable.method($argument.method())}Testing{/if}', 'if ($context->ensureObject($context->getVariable(\'variable\', false), \'Could not call method($argument.method()): $variable is not an object\')->method($context->ensureObject($context->getVariable(\'argument\', false), \'Could not call method(): $argument is not an object\')->method())) {' . "\n" . '    echo "Testing";' . "\n" . '}'),
             array('{if $variable.method($argument.method()) and true}Testing{/if}', 'if ($context->ensureObject($context->getVariable(\'variable\', false), \'Could not call method($argument.method()): $variable is not an object\')->method($context->ensureObject($context->getVariable(\'argument\', false), \'Could not call method(): $argument is not an object\')->method()) and true) {' . "\n" . '    echo "Testing";' . "\n" . '}'),
             array('{if $variable.method() or (!$variable.property and $otherVariable.method())}Testing{/if}', 'if ($context->ensureObject($context->getVariable(\'variable\', false), \'Could not call method(): $variable is not an object\')->method() or (!$context->getVariable(\'variable.property\') and $context->ensureObject($context->getVariable(\'otherVariable\', false), \'Could not call method(): $otherVariable is not an object\')->method())) {' . "\n" . '    echo "Testing";' . "\n" . '}'),
@@ -149,6 +151,26 @@ unset($foreach1);'
             array('{block "name"}Hello{/block}', '/*block-"name"-start*/' . "\n" . 'echo "Hello";' . "\n" . '/*block-"name"-end*/'),
             array('{block "name"}Hello {myFirstMacro()}{/block}', '/*block-"name"-start*/' . "\n" . 'echo "Hello ";' . "\n" . 'echo $context->call(\'myFirstMacro\');' . "\n" . '/*block-"name"-end*/'),
             array('{block "name"}{myFirstMacro()} there.{/block}', '/*block-"name"-start*/' . "\n" . 'echo $context->call(\'myFirstMacro\');' . "\n" . 'echo " there.";' . "\n" . '/*block-"name"-end*/'),
+            // filter block
+            array('{filter capitalize|escape}hello my name is {$name}{/filter}',
+'$filter1 = function(TemplateContext $context) {
+    $context = $context->createChild();
+    ob_start();
+    try {
+        echo "hello my name is ";
+        echo $context->getVariable(\'name\', false);
+    } catch (\Exception $exception) {
+        ob_end_clean();
+        throw $exception;
+    }
+    $context = $context->getParent(false);
+    $output = ob_get_contents();
+    ob_end_clean();
+    return $output;
+};
+echo $context->applyFilters($filter1($context), [[\'capitalize\'], [\'escape\']]);
+unset($filter1);'
+            ),
             /*
             */
         );
@@ -188,6 +210,8 @@ unset($foreach1);'
             array('{block file}{/block}'),
             array('{if true}{block "file"}{else}{/block}{/if}'),
             array('{foreach $values key $key}{if true}{/foreach}{/if}'),
+            array('{filter}{/filter}'),
+            array('{filter truncate()test}{/filter}'),
         );
     }
 

@@ -2,9 +2,9 @@
 
 namespace huqis\tokenizer\symbol;
 
-use \PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class NestedSymbolTest extends PHPUnit_Framework_TestCase {
+class NestedSymbolTest extends TestCase {
 
 	/**
      * @dataProvider provideTokenize

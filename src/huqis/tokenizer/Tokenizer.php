@@ -56,7 +56,7 @@ class Tokenizer {
      * @return array Array with the tokens of this string as value
      */
     public function tokenize($string) {
-        if ($string == '') {
+        if ($string === '') {
             return [];
         }
 
@@ -64,7 +64,7 @@ class Tokenizer {
         $tokens = [];
 
         $toProcess = $string;
-        $countToProcess = count($toProcess);
+        $countToProcess = strlen($toProcess);
         $process = '';
 
         while ($countToProcess != 0 && strlen($process) < $countToProcess) {

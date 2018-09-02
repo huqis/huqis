@@ -2,9 +2,9 @@
 
 namespace huqis\tokenizer\symbol;
 
-use \PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class SimpleSymbolTest extends PHPUnit_Framework_TestCase {
+class SimpleSymbolTest extends TestCase {
 
 	/**
      * @dataProvider provideTokenize

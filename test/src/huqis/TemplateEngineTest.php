@@ -4,9 +4,9 @@ namespace huqis;
 
 use huqis\resource\ArrayTemplateResourceHandler;
 
-use \PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class TemplateEngineTest extends PHPUnit_Framework_TestCase {
+class TemplateEngineTest extends TestCase {
 
     public function providerRender() {
         return array(
@@ -181,7 +181,7 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
             ),
             // format tests
             array(
-                '15.99 15.98765 Tue Oct 25 08:26:16 2016 2016-10-25',
+                '15.99 15.98765 Tue Oct 25 06:26:16 2016 2016-10-25',
                 array(
                     'index' => '{$value = 15.987654321}{$value|format("number")} {$value|format("number",5)} {$timestamp = 1477376776}{$timestamp|format("date")} {$timestamp|format("date", "%F")}',
                 ),
@@ -409,6 +409,15 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                     'title' => 'Section',
                 ),
             ),
+            array(
+                'Hello My Name Is John',
+                array(
+                    'index' => '{filter capitalize|escape}hello my name is {$name}{/filter}',
+                ),
+                array(
+                    'name' => 'john',
+                ),
+            ),
 
             // Nope, functions/functions should be defined before a block is first used
             // array(
@@ -485,6 +494,15 @@ class TemplateEngineTest extends PHPUnit_Framework_TestCase {
                 '<test>',
                 array(
                     'index' => '{autoescape false}{$variable = "<test>"}{$variable}{/autoescape}',
+                ),
+            ),
+            array(
+                '<h1>hello <john!</h1>',
+                array(
+                    'index' => '{filter capitalize|raw}<h1>hello {$name}!</h1>{/filter}',
+                ),
+                array(
+                    'name' => '<john',
                 ),
             ),
         );

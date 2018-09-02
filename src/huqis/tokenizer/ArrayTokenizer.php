@@ -5,6 +5,7 @@ namespace huqis\tokenizer;
 use huqis\tokenizer\symbol\NestedSymbol;
 use huqis\tokenizer\symbol\SimpleSymbol;
 use huqis\tokenizer\symbol\StringSymbol;
+use huqis\tokenizer\symbol\String2Symbol;
 use huqis\tokenizer\symbol\SyntaxSymbol;
 
 /**
@@ -18,6 +19,7 @@ class ArrayTokenizer extends Tokenizer {
      */
     public function __construct() {
         $this->addSymbol(new StringSymbol());
+        $this->addSymbol(new String2Symbol());
         $this->addSymbol(new SimpleSymbol(SyntaxSymbol::ASSIGNMENT));
         $this->addSymbol(new SimpleSymbol(SyntaxSymbol::FUNCTION_ARGUMENT));
         $this->addSymbol(new NestedSymbol(SyntaxSymbol::NESTED_OPEN, SyntaxSymbol::NESTED_CLOSE, $this, true));

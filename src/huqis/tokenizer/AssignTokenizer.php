@@ -4,6 +4,7 @@ namespace huqis\tokenizer;
 
 use huqis\tokenizer\symbol\NestedSymbol;
 use huqis\tokenizer\symbol\StringSymbol;
+use huqis\tokenizer\symbol\String2Symbol;
 use huqis\tokenizer\symbol\SyntaxSymbol;
 
 /**
@@ -17,6 +18,7 @@ class AssignTokenizer extends Tokenizer {
      */
     public function __construct() {
         $this->addSymbol(new StringSymbol());
+        $this->addSymbol(new String2Symbol());
         $this->addSymbol(new NestedSymbol(SyntaxSymbol::ARRAY_OPEN, SyntaxSymbol::ARRAY_CLOSE, null, true));
 
         parent::setWillTrimTokens(false);

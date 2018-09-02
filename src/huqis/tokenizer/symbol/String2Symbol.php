@@ -3,15 +3,15 @@
 namespace huqis\tokenizer\symbol;
 
 /**
- * Nested symbol to match the strings by "
+ * Nested symbol to match the strings by '
  */
-class StringSymbol extends NestedSymbol {
+class String2Symbol extends NestedSymbol {
 
     /**
      * Symbol to open a nested token
      * @var string
      */
-    const SYMBOL = '"';
+    const SYMBOL = "'";
 
     /**
      * Constructs a new nested symbol

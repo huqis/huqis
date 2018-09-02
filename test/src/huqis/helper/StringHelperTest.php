@@ -2,10 +2,11 @@
 
 namespace huqis\helper;
 
-use \Exception;
-use \PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class StringHelperTest extends PHPUnit_Framework_TestCase {
+use \Exception;
+
+class StringHelperTest extends TestCase {
 
     public function testGenerate() {
         $string = StringHelper::generate();
@@ -15,34 +16,25 @@ class StringHelperTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue(strlen($string) == 8);
     }
 
+    /**
+     * @expectedException Exception
+     */
     public function testGenerateThrowsExceptionWhenLengthOfHaystackIsLessThenRequestedLength() {
-        try {
-            StringHelper::generate(155);
-        } catch (Exception $e) {
-            return;
-        }
-
-        $this->fail();
+        StringHelper::generate(155);
     }
 
+    /**
+     * @expectedException Exception
+     */
     public function testGenerateThrowsExceptionWhenInvalidLengthProvided() {
-        try {
-            StringHelper::generate('test');
-        } catch (Exception $e) {
-            return;
-        }
-
-        $this->fail();
+        StringHelper::generate('test');
     }
 
+    /**
+     * @expectedException Exception
+     */
     public function testGenerateThrowsExceptionWhenInvalidHaystackProvided() {
-        try {
-            StringHelper::generate(8, $this);
-        } catch (Exception $e) {
-            return;
-        }
-
-        $this->fail();
+        StringHelper::generate(8, $this);
     }
 
     /**
@@ -85,17 +77,12 @@ class StringHelperTest extends PHPUnit_Framework_TestCase {
 
     /**
      * @dataProvider providerTruncateThrowsExceptionWhenInvalidArgumentProvided
+     * @expectedException Exception
      */
     public function testTruncateThrowsExceptionWhenInvalidArgumentProvided($length, $etc) {
         $string = 'abcdefghijklmnopqrstuvwxyz';
 
-        try {
-            StringHelper::truncate($string, $length, $etc);
-        } catch (Exception $e) {
-            return;
-        }
-
-        $this->fail();
+        StringHelper::truncate($string, $length, $etc);
     }
 
     public function providerTruncateThrowsExceptionWhenInvalidArgumentProvided() {

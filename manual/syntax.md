@@ -11,7 +11,7 @@ All template syntax expressions are delimited by ```{``` and ```}```.
 {null}
 ```
 
-Strings can only be delimited by ```"```.
+Strings can be delimited by a ```"``` or a ```'```.
 
 Variables are prefixed with a ```$``` and set with the assignment ```=``` operator.
 
@@ -58,7 +58,7 @@ You can unset any variable by assigning ```null``` to it:
 
 ## Blocks
 
-Blocks are interpreted at compile time.
+Blocks are interpreted or parsed at compile time.
 
 - [autoescape](blocks/autoescape.md)
 - [block](blocks/block.md)
@@ -91,7 +91,7 @@ Functions are interpreted at runtime.
 - [truncate](functions/truncate.md)
 - [upper](functions/upper.md)
 
-A function can be called directly but it can also be used as a modifier by using ```|``` after an expression.
+A function can be called directly but it can also be used as a filter by using ```|``` after an expression.
 The first argument for the function will be the result of the expression.
 
 Knowing this, both of the following expressions have the same result:
@@ -101,7 +101,7 @@ Knowing this, both of the following expressions have the same result:
 {$string|capitalize("first")}
 ```
 
-Modifiers can be chained after each other:
+Filters can be chained after each other:
 
 ```
 {$string|lower|capitalize("all")}

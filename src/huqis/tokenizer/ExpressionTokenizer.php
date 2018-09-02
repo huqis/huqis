@@ -5,6 +5,7 @@ namespace huqis\tokenizer;
 use huqis\tokenizer\symbol\NestedSymbol;
 use huqis\tokenizer\symbol\SimpleSymbol;
 use huqis\tokenizer\symbol\StringSymbol;
+use huqis\tokenizer\symbol\String2Symbol;
 use huqis\tokenizer\symbol\SyntaxSymbol;
 
 /**
@@ -19,6 +20,7 @@ class ExpressionTokenizer extends Tokenizer {
     public function __construct() {
         $this->nestedTokenizer = new Tokenizer();
         $this->nestedTokenizer->addSymbol(new StringSymbol());
+        $this->nestedTokenizer->addSymbol(new String2Symbol());
         $this->nestedTokenizer->addSymbol(new NestedSymbol(SyntaxSymbol::NESTED_OPEN, SyntaxSymbol::NESTED_CLOSE, $this, true));
         $this->nestedTokenizer->addSymbol(new NestedSymbol(SyntaxSymbol::ARRAY_OPEN, SyntaxSymbol::ARRAY_CLOSE, null, true));
 

@@ -7,6 +7,7 @@ use huqis\block\BlockTemplateBlock;
 use huqis\block\CaptureTemplateBlock;
 use huqis\block\CycleTemplateBlock;
 use huqis\block\ExtendsTemplateBlock;
+use huqis\block\FilterTemplateBlock;
 use huqis\block\ForeachTemplateBlock;
 use huqis\block\FunctionTemplateBlock;
 use huqis\block\IfTemplateBlock;
@@ -210,6 +211,10 @@ class DefaultTemplateContext extends TemplateContext {
                 break;
             case 'extends':
                 $this->setBlock('extends', new ExtendsTemplateBlock());
+
+                break;
+            case 'filter':
+                $this->setBlock('filter', new FilterTemplateBlock());
 
                 break;
             case 'foreach':

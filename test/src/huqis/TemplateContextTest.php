@@ -4,9 +4,9 @@ namespace huqis;
 
 use huqis\resource\ArrayTemplateResourceHandler;
 
-use \PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class TemplateContextTest extends PHPUnit_Framework_TestCase {
+class TemplateContextTest extends TestCase {
 
     public function providerSetVariable() {
         return array(

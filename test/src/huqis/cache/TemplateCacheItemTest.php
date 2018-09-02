@@ -2,9 +2,9 @@
 
 namespace huqis\cache;
 
-use \PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class TemplateCacheItemTest extends PHPUnit_Framework_TestCase {
+class TemplateCacheItemTest extends TestCase {
 
     public function testKeyAndValue() {
         $key = 'test';

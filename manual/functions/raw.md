@@ -2,7 +2,7 @@
 
 Omits all output filters on an output expression.
 
-__Note: This is special syntax modifier and can not actually be used as a function.__ 
+__Note: This is special syntax filter and can not actually be used as a function.__ 
 
 ## Syntax
 

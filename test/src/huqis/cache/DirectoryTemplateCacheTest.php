@@ -4,8 +4,6 @@ namespace huqis\cache;
 
 use huqis\helper\FileHelper;
 
-use \PHPUnit_Framework_TestCase;
-
 class DirectoryTemplateCacheTest extends AbstractTemplateCacheTest {
 
     private $directory;

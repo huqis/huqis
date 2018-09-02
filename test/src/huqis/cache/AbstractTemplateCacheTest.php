@@ -2,9 +2,9 @@
 
 namespace huqis\cache;
 
-use \PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-abstract class AbstractTemplateCacheTest extends PHPUnit_Framework_TestCase {
+abstract class AbstractTemplateCacheTest extends TestCase {
 
     protected $cache;
 

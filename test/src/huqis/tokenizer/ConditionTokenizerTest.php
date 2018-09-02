@@ -2,9 +2,9 @@
 
 namespace huqis\tokenizer;
 
-use \PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class ConditionTokenizerTest extends PHPUnit_Framework_TestCase {
+class ConditionTokenizerTest extends TestCase {
 
 	private $tokenizer;
 

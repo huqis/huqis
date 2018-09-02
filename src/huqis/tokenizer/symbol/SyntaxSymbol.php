@@ -62,10 +62,10 @@ class SyntaxSymbol extends NestedSymbol {
     const VARIABLE_SEPARATOR = '.';
 
     /**
-     * Symbol of a variable modifier
+     * Symbol of a variable filter
      * @var string
      */
-    const MODIFIER = '|';
+    const FILTER = '|';
 
     /**
      * Symbol to get the value of a foreach
@@ -110,7 +110,7 @@ class SyntaxSymbol extends NestedSymbol {
     const OPERATOR_NOT = '!';
 
     /**
-     * Special modifier to skip the output filters
+     * Special filter to skip the output filters
      * @var string
      */
     const OUTPUT_RAW = 'raw';

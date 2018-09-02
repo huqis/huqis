@@ -45,7 +45,7 @@ Implementations out of the box:
 ## TemplateFunction
 
 The ```TemplateFunction``` interface is used to implement custom template functions.
-Template functions can also be used as a modifier.
+Template functions can also be used as a filter.
 
 Implementations out of the box:
 

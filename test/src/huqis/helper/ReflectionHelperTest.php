@@ -2,9 +2,9 @@
 
 namespace huqis\helper;
 
-use \PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class ReflectionHelperTest extends PHPUnit_Framework_TestCase {
+class ReflectionHelperTest extends TestCase {
 
     /**
      * @var ReflectionHelper
