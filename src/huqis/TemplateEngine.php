@@ -154,13 +154,57 @@ class TemplateEngine {
         try {
             $output = $this->execute($context, $code, $runtimeId);
         } catch (Exception $exception) {
-            $exception = new RuntimeTemplateException('Could not render ' . $resource, 0, $exception);
+            $this->extractResourceFromException($exception, $code, $resource, $lineNumber);
+
+            $exception = new RuntimeTemplateException('Could not render ' . $resource . ' on line ' . $lineNumber . ': ' . $exception->getMessage());
             $exception->setResource($resource);
 
             throw $exception;
         }
 
         return $output;
+    }
+
+    /**
+     * Extracts the resource and line number of the original template from the
+     * provided exception through the /*# pointer comments
+     * @param Exception $exception Occured exception
+     * @param string $code Compiled template code
+     * @param string $resource Name of the resolved resource by reference
+     * @param string $lineNumber Line number in the resolved resource by
+     * reference
+     */
+    private function extractResourceFromException(Exception $exception, $code, &$resource, &$lineNumber) {
+        $trace = $exception->getTrace();
+        $trace = array_shift($trace);
+
+        $lines = explode("\n", $code);
+        $line = $trace['line'] - 1;
+
+        do {
+            if ($lines[$line]) {
+                $resourcePosition = mb_strpos($lines[$line], '/*#');
+            } else {
+                $resourcePosition = false;
+            }
+
+            if ($resourcePosition === false) {
+                $line--;
+
+                continue;
+            }
+
+            $linePosition = mb_strrpos($lines[$line], ':');
+            $endPosition = mb_strrpos($lines[$line], '*/');
+
+            $resource = mb_substr($lines[$line], $resourcePosition + 3, $linePosition - $resourcePosition - 3);
+            $lineNumber = mb_substr($lines[$line], $linePosition + 1, $linePosition - $endPosition + 1);
+
+            return;
+        } while ($line >= 0);
+
+        $resource = 'unknown';
+        $lineNumber = 0;
     }
 
     /**
@@ -220,36 +264,25 @@ class TemplateEngine {
         $template = $resourceHandler->getResource($resource);
 
         try {
-            $code = $this->compileTemplate($context, $template, $runtimeId, $extends);
+            $code = $this->compileTemplate($context, $template, $runtimeId, $extends, $resource);
         } catch (CompileTemplateException $exception) {
-            $originalResource = $resource;
-            $resource = null;
             $message = null;
             $lineNumber = null;
 
             $previous = $exception;
             do {
-                $lastPrevious = $previous;
-
                 if ($previous instanceof CompileTemplateException) {
                     if ($previous->getResource()) {
                         $resource = $previous->getResource();
-                        $lineNumber = $previous->getLineNumber();
-                    } elseif (!$lineNumber) {
                         $lineNumber = $previous->getLineNumber();
                     }
                 }
 
                 $message = $previous->getMessage();
-
                 $previous = $previous->getPrevious();
             } while ($previous instanceof CompileTemplateException);
 
-            if (!$resource) {
-                $resource = $originalResource;
-            }
-
-            $exception = new CompileTemplateException('Could not compile ' . $resource . ': ' . $message . ' on line ' . $lineNumber, 0);
+            $exception = new CompileTemplateException('Could not compile ' . $resource . ' on line ' . $lineNumber . ': ' . $message);
             $exception->setResource($resource);
             $exception->setLineNumber($lineNumber);
 
@@ -277,9 +310,10 @@ class TemplateEngine {
      * @param string $template Template code which needs to be compiled
      * @param string $runtimeId Id for the compiled template function
      * @param string $extends Template code from a dynamic extends block
+     * @param string $resource Name of the template resource
      * @return string Compiled template
      */
-    private function compileTemplate(TemplateContext $context, $template, $runtimeId, $extends = null) {
+    private function compileTemplate(TemplateContext $context, $template, $runtimeId, $extends = null, $resource = null) {
         $context->preCompile();
 
         $this->compiler->setContext($context);
@@ -291,7 +325,7 @@ class TemplateEngine {
         $code .= 'class huqisTemplate' . $runtimeId .' {' . "\n";
         $code .= "\n";
         $code .= '    public function render(TemplateContext $context) {' . "\n";
-        $code .= $this->compiler->compile($template, $extends, 2);
+        $code .= $this->compiler->compile($template, $resource, 2, $extends);
         $code .= '    }' . "\n";
         $code .= "\n";
         $code .= '}';

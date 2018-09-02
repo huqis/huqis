@@ -50,6 +50,7 @@ class FilterTemplateBlock implements TemplateBlock {
         $counter = $this->counter;
 
         $context = $context->createChild();
+        $context->removeBlock('return');
         if (strpos($signature, SyntaxSymbol::FILTER . SyntaxSymbol::OUTPUT_RAW) !== false) {
             $context->setAutoEscape(false);
         }

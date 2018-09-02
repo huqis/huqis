@@ -22,7 +22,6 @@ class ExtendTemplateFunction implements TemplateFunction {
      */
     public function call(TemplateContext $context, array $arguments) {
         $engine = $context->getEngine();
-        $output = '';
 
         $resource = array_shift($arguments);
         $extends = array_shift($arguments);
@@ -32,9 +31,7 @@ class ExtendTemplateFunction implements TemplateFunction {
             throw new RuntimeTemplateException('Could not include template: no resource(s) provided');
         }
 
-        $output .= $engine->render($resource, [], $context, $extends);
-
-        return $output;
+        return $engine->render($resource, [], $context, $extends);
     }
 
 }

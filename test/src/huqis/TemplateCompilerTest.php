@@ -229,7 +229,6 @@ unset($filter1);'
         $compiler->compile($template);
     }
 
-
     /**
      * @dataProvider providerCompileExpression
      */

@@ -61,11 +61,14 @@ class ExtendsTemplateBlock extends IncludeTemplateBlock {
         try {
             $buffer->startExtends();
 
+            $parentResource = $compiler->getCompileResource();
+            $parentLineNumber = $compiler->getCompileLineNumber();
+
             $compiler->setContext($context->createChild());
-            $compiler->subcompile($code);
+            $compiler->subcompile($code, $resource);
 
             if ($isStaticTemplate) {
-                $compiler->compileExtends($body);
+                $compiler->compileExtends($body, $parentResource, $parentLineNumber + 1);
             }
         } catch (CompileTemplateException $exception) {
             $e = new CompileTemplateException('Could not compile ' . $resource . ': syntax error on line ' . $exception->getLineNumber(), 0, $exception);

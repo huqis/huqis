@@ -33,8 +33,8 @@ Template caching is enabled using the file system to improve performance.
 You can disable auto escaping or enable the PHP functions on your context.
 
 ```php
-$context->setAllowPhpFunctions(true); // off by default
 $context->setAutoEscape(false); // on by default
+$context->setAllowPhpFunctions(true); // off by default
 ``` 
 
 ### Debug Mode

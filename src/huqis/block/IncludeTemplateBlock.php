@@ -106,7 +106,7 @@ class IncludeTemplateBlock implements TemplateBlock {
 
         // compile the include
         try {
-            $compiler->subcompile($code);
+            $compiler->subcompile($code, $resource, 1);
         } catch (CompileTemplateException $exception) {
             $e = new CompileTemplateException('Could not compile ' . $resource . ': syntax error on line ' . $exception->getLineNumber(), 0, $exception->getPrevious());
             $e->setResource($resource);

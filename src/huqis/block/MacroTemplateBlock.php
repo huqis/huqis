@@ -96,6 +96,7 @@ class MacroTemplateBlock implements TemplateBlock {
         $buffer->startBufferBlock();
 
         $context = $context->createChild();
+        $context->removeBlock('return');
 
         $compiler->setContext($context);
         $compiler->subcompile($body);

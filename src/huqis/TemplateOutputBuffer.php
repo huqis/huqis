@@ -34,6 +34,12 @@ class TemplateOutputBuffer {
     const BLOCK_END = '/*block-%name%-end*/';
 
     /**
+     * Comment to mark the original resource location of the compiled code
+     * @var string
+     */
+    const POSITION = '/*#%resource%:%line%*/';
+
+    /**
      * Append strategy for extendable blocks
      * @var string
      */
@@ -188,16 +194,30 @@ class TemplateOutputBuffer {
 
     /**
      * Appends the current level of indentation to the buffer
-     * @return null
      */
     private function appendIndentation() {
         $this->buffer .= $this->getIndentation();
     }
 
     /**
+     * Appends the resource location to the buffer
+     */
+    public function appendPosition($resource, $lineNumber) {
+        if (!$resource) {
+            return;
+        }
+
+        $position = self::POSITION;
+        $position = str_replace('%resource%', $resource, $position);
+        $position = str_replace('%line%', $lineNumber, $position);
+
+        $this->appendIndentation();
+        $this->buffer .= $position . "\n";
+    }
+
+    /**
      * Appends plain unprocessable text to the buffer
      * @param string $text Text to append
-     * @return null
      * @see appendCode
      */
     public function appendText($text) {

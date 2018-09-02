@@ -48,6 +48,18 @@ class TemplateCompiler {
     private $buffer;
 
     /**
+     * Name of the current resource
+     * @var string
+     */
+    private $resource;
+
+    /**
+     * Line number in the current resource
+     * @var integer
+     */
+    private $lineNumber;
+
+    /**
      * Constructs a new template compiler
      * @param TemplateContext $context Initial context for a template
      * @return null
@@ -86,6 +98,24 @@ class TemplateCompiler {
     }
 
     /**
+     * Gets the name in the template resource which is being compiled
+     * @return string Name of the current template resource
+     * @see getCompileLineNumber()
+     */
+    public function getCompileResource() {
+        return $this->resource;
+    }
+
+    /**
+     * Gets the location of the compiler in the current template
+     * @return integer Line number in the current template resource
+     * @see getCompileResource()
+     */
+    public function getCompileLineNumber() {
+        return $this->lineNumber;
+    }
+
+    /**
      * Initializes the compiler the first time it's used
      * @return null
      */
@@ -118,26 +148,29 @@ class TemplateCompiler {
     /**
      * Compiles the provided template
      * @param string $template Template code to compile
+     * @param string $resource Name of the template resource for debugging
+     * purposes
+     * @param integer $indent Level of indentation
      * @param string $extends Template code from a dynamic extends block where
      * $template is the template code of the extended template
-     * @param integer $indent Level of indentation
      * @return string PHP code of the compiled template
      * @throws \huqis\exception\CompileTemplateException when this
      * method is called while already compiling or when the template syntax is
      * invalid
      */
-    public function compile($template, $extends = null, $indent = 0) {
+    public function compile($template, $resource = null, $indent = 0, $extends = null) {
         if ($this->isCompiling) {
-            throw new CompileTemplateException('Could not compile the provided template: already compiling');
+            throw new CompileTemplateException('Could not compile ' . ($resource ? $resource : 'template') . ': already compiling, use subcompile() to compile code to the current buffer');
         }
 
         $this->initialize();
 
         $this->isCompiling = true;
+        $this->lineNumber = 1;
         $this->buffer = new TemplateOutputBuffer();
         $this->buffer->setIndent($indent);
 
-        $this->subcompile($template);
+        $this->subcompile($template, $resource, $this->lineNumber);
 
         if ($extends) {
             $this->compileExtends($extends);
@@ -147,6 +180,8 @@ class TemplateCompiler {
 
         $this->buffer = null;
         $this->isCompiling = false;
+        $this->resource = null;
+        $this->lineNumber = null;
 
         return $result;
     }
@@ -154,15 +189,32 @@ class TemplateCompiler {
     /**
      * Compiles a part of a template and appends it to the compile buffer
      * @param string $template Template code to compile
+     * @param string $resource Name of the current template resource for
+     * debugging purposes
+     * @param integer $lineNumber Line number in the current template resource
      * @param boolean $isLogic Flag to see if the result is parsed for output.
      * Set to false to display the result, true is considered template logic.
-     * @return null
      * @throws CompileTemplateException when this method is called outside of
      * a compile call or when the template syntax is invalid
      */
-    public function subcompile($template, $isLogic = false) {
+    public function subcompile($template, $resource = null, $lineNumber = null, $isLogic = false) {
         if (!$this->isCompiling) {
-            throw new CompileTemplateException('Could not subcompile the provided template: no main compile process running');
+            throw new CompileTemplateException('Could not subcompile ' . ($resource ? $resource : 'template') . ': not compiling at the moment, use compile() first');
+        }
+
+        // resolve resource and starting line number
+        if (!$lineNumber) {
+            $lineNumber = $this->lineNumber;
+
+            if (!$resource && mb_strpos($template, "\n")) {
+                $lineNumber++;
+            }
+        }
+
+        if ($resource) {
+            $this->resource = $resource;
+        } else {
+            $resource = $this->resource;
         }
 
         // tokenize on syntax tokens {}
@@ -184,6 +236,8 @@ class TemplateCompiler {
             $token = $tokens[$tokenIndex];
 
             if ($token === SyntaxSymbol::SYNTAX_OPEN) {
+                $this->buffer->appendPosition($resource, $lineNumber);
+
                 if (!$isComment && isset($tokens[$tokenIndex + 1]) && mb_substr($tokens[$tokenIndex + 1], 0, 1) === SyntaxSymbol::COMMENT) {
                     // open comment
                     $isComment = true;
@@ -230,6 +284,7 @@ class TemplateCompiler {
                     $process .= "\n";
                 }
 
+                $lineNumber++;
                 $line = '';
                 $hasSyntax = false;
                 $tokenIndex++;
@@ -248,24 +303,28 @@ class TemplateCompiler {
             } else {
                 // syntax, compile
                 try {
+                    // store current position in template
+                    $previousTokenIndex = $tokenIndex;
+
+                    $this->resource = $resource;
+                    $this->lineNumber = $lineNumber;
+
+                    // compile the syntax
                     $code = $this->compileSyntax($token, $tokens, $tokenIndex, $isLogic);
-                } catch (Exception $exception) {
-                    $lineNumber = 1;
 
-                    for ($i = 0; $i < $tokenIndex; $i++) {
-                        $lineNumber += mb_substr_count($tokens[$i], "\n");
-                    }
-
-                    if ($exception instanceof CompileTemplateException && !$exception->getResource()) {
-                        $previous = $exception->getPrevious();
-
-                        $lineNumber += $exception->getLineNumber();
-                        if ($previous instanceof CompileTemplateException) {
-                            $lineNumber--;
+                    // add processed number of lines to current line number
+                    for ($i = $previousTokenIndex; $i <= $tokenIndex; $i++) {
+                        if ($tokens[$i] === "\n") {
+                            $lineNumber++;
                         }
                     }
 
-                    $exception = new CompileTemplateException('Could not compile template on line ' . $lineNumber, 0, $exception);
+                    // store new current position
+                    $this->resource = $resource;
+                    $this->lineNumber = $lineNumber;
+                } catch (Exception $exception) {
+                    $exception = new CompileTemplateException('Could not compile ' . $resource . ' on line ' . $lineNumber, 0, $exception);
+                    $exception->setResource($resource);
                     $exception->setLineNumber($lineNumber);
 
                     throw $exception;
@@ -323,14 +382,15 @@ class TemplateCompiler {
     /**
      * Compiles an extends block and ends the block
      * @param string $extends Template code from an extends block
-     * @return null
+     * @param string $resource Name of the template resource for debugging
+     * @param integer $lineNumber Line number in the template resource
      * @see \huqis\block\ExtendsTemplateBlock
      * @see \huqis\func\ExtendsTemplateFunction
      */
-    public function compileExtends($extends) {
+    public function compileExtends($extends, $resource = null, $lineNumber = null) {
         $this->buffer->setAllowOutput(false);
 
-        $this->subcompile($extends);
+        $this->subcompile($extends, $resource, $lineNumber);
 
         $this->buffer->endExtends();
         $this->context = $this->context->getParent();
@@ -751,7 +811,7 @@ class TemplateCompiler {
                 } elseif ($expectsFunction) {
                     throw new CompileTemplateException('Function signature expected');
                 } elseif ($tokens[$tokenIndex] !== SyntaxSymbol::FILTER) {
-                    throw new CompileTemplateException('Modifier expected, got ' . $tokens[$tokenIndex]);
+                    throw new CompileTemplateException('Filter expected, got ' . $tokens[$tokenIndex]);
                 }
 
                 if ($result === null) {
