@@ -1217,11 +1217,12 @@ class TemplateCompiler {
     /**
      * Parses and validates a scalar value being a number, boolean or string
      * @param string $value Value to parse
+     * @param boolean $returnValue Set to true to trim string quotes
      * @return mixed Parsed value
      * @throws \huqis\exception\CompileTemplateException when the
      * provided value is not considered a scalar value
      */
-    public function compileScalarValue($value) {
+    public function compileScalarValue($value, $returnValue = false) {
         if (is_numeric($value)) {
             return (double) $value;
         }
@@ -1235,9 +1236,17 @@ class TemplateCompiler {
 
         // escape scalar string
         if ($firstChar === StringSymbol::SYMBOL && $lastChar === StringSymbol::SYMBOL) {
-            return '"' . addcslashes(mb_substr(str_replace('\\"', '"', $value), 1, -1), '"$\\') . '"';
+            if ($returnValue) {
+                return mb_substr($value, 1, -1);
+            } else {
+                return '"' . addcslashes(mb_substr(str_replace('\\"', '"', $value), 1, -1), '"$\\') . '"';
+            }
         } elseif ($firstChar === String2Symbol::SYMBOL && $lastChar === String2Symbol::SYMBOL) {
-            return "'" . addcslashes(mb_substr(str_replace("\\'", "'", $value), 1, -1), "'$\\") . "'";
+            if ($returnValue) {
+                return mb_substr($value, 1, -1);
+            } else {
+                return "'" . addcslashes(mb_substr(str_replace("\\'", "'", $value), 1, -1), "'$\\") . "'";
+            }
         }
 
         throw new CompileTemplateException('Invalid syntax ' . $value);

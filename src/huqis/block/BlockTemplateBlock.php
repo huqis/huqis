@@ -2,6 +2,7 @@
 
 namespace huqis\block;
 
+use huqis\block\ParentTemplateBlock;
 use huqis\TemplateCompiler;
 use huqis\TemplateOutputBuffer;
 
@@ -49,12 +50,13 @@ class BlockTemplateBlock implements TemplateBlock {
             $strategy = TemplateOutputBuffer::STRATEGY_REPLACE;
         }
 
-        $name = $compiler->compileScalarValue($name);
+        $name = $compiler->compileScalarValue($name, true);
 
         $buffer->startExtendableBlock($name);
         $buffer->setAllowOutput(true);
 
         $context = $context->createChild();
+        $context->setBlock('parent', new ParentTemplateBlock());
 
         $compiler->setContext($context);
         $compiler->subcompile($body);

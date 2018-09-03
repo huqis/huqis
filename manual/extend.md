@@ -41,6 +41,7 @@ Implementations out of the box:
 - ```IncludeTemplateBlock```
 - ```LiteralTemplateBlock```
 - ```MacroTemplateBlock```
+- ```ParentTemplateBlock```
 - ```ReturnTemplateBlock```
 
 ## TemplateFunction

@@ -34,6 +34,12 @@ class TemplateOutputBuffer {
     const BLOCK_END = '/*block-%name%-end*/';
 
     /**
+     * Comment to mark the inclusion of a parent block
+     * @var string
+     */
+    const BLOCK_PARENT= '/*parent*/';
+
+    /**
      * Comment to mark the original resource location of the compiled code
      * @var string
      */
@@ -125,8 +131,7 @@ class TemplateOutputBuffer {
 
     /**
      * Pushes a block to the block stack
-     * $param string $name Name of the block
-     * @return null
+     * @param string $name Name of the block
      */
     public function pushToBlockStack($name) {
         $this->blockStack[] = $name;
@@ -143,7 +148,6 @@ class TemplateOutputBuffer {
     /**
      * Sets whether output is allowed
      * @param boolean $allowOutput
-     * @return null
      * @see allowOutput
      */
     public function setAllowOutput($allowOutput) {
@@ -153,7 +157,6 @@ class TemplateOutputBuffer {
 
     /**
      * Clears the last set allow output
-     * @return null
      */
     public function clearAllowOutput() {
         $this->allowOutput = array_pop($this->allowOutputStack);
@@ -173,7 +176,6 @@ class TemplateOutputBuffer {
     /**
      * Sets the indentation level
      * @param integer $indent
-     * @return null
      */
     public function setIndent($indent) {
         $this->indentLevel = $indent;
@@ -236,7 +238,6 @@ class TemplateOutputBuffer {
     /**
      * Appends a line of PHP code which needs interpretation
      * @param string $code Code to append
-     * @return null
      * @see appendText
      */
     public function appendCode($code) {
@@ -268,7 +269,6 @@ class TemplateOutputBuffer {
 
     /**
      * Starts a code block with a new child context
-     * @return null
      * @see endCodeBlock
      */
     public function startCodeBlock() {
@@ -280,7 +280,6 @@ class TemplateOutputBuffer {
      * Stops the current code block and returns to the parent context
      * @param boolean $keepVariables Set to true to keep the variables from the
      * child context
-     * @return null
      * @see startCodeBlock
      */
     public function endCodeBlock($keepVariables = false) {
@@ -290,7 +289,6 @@ class TemplateOutputBuffer {
 
     /**
      * Starts a sub output buffer to catch a subcompile result into a closure
-     * @return null
      * @see endBufferBlock
      * @see \huqis\block\AssignTemplateBlock
      * @see \huqis\block\CallTemplateBlock
@@ -305,7 +303,6 @@ class TemplateOutputBuffer {
     /**
      * Stops the current sub output buffer
      * @var string $variable Name of the output variable
-     * @return null
      * @see startBufferBlock
      */
     public function endBufferBlock() {
@@ -323,7 +320,6 @@ class TemplateOutputBuffer {
 
     /**
      * Starts an extends block
-     * @return null
      */
     public function startExtends() {
         $this->appendCode(self::EXTENDS_START);
@@ -331,7 +327,6 @@ class TemplateOutputBuffer {
 
     /**
      * Ends an extends block
-     * @return null
      */
     public function endExtends() {
         $this->appendCode(self::EXTENDS_END);
@@ -342,7 +337,6 @@ class TemplateOutputBuffer {
     /**
      * Starts an extendable block
      * @param string $name Name of the extendable block
-     * @return null
      * @throws \huqis\exception\CompileTemplateException when the name
      * of the block is already used by a parent block
      */
@@ -357,6 +351,13 @@ class TemplateOutputBuffer {
     }
 
     /**
+     * Marks the current position to include the parent block
+     */
+    public function appendParent() {
+        $this->appendCode(self::BLOCK_PARENT);
+    }
+
+    /**
      * Ends an extendable block
      * @param string $name Name of the parent block
      * @param string $strategy Strategy to handle the block, can be replace, append
@@ -365,6 +366,7 @@ class TemplateOutputBuffer {
      * is not opened or an invalid strategy provided
      */
     public function endExtendableBlock($name, $strategy = self::STRATEGY_REPLACE) {
+        // validate input
         if (!isset($this->buffers[$name])) {
             throw new CompileTemplateException('Cannot end block ' . $name . ': block is not opened');
         } elseif ($strategy != self::STRATEGY_APPEND && $strategy != self::STRATEGY_PREPEND && $strategy != self::STRATEGY_REPLACE) {
@@ -395,15 +397,17 @@ class TemplateOutputBuffer {
 
         if ($positionOpen !== false && $positionClose !== false) {
             // block already exists
+
+            // resolve parent block
+            $start = $positionOpen + mb_strlen($commentOpen . "\n");
+            $parentBlock = mb_substr($this->buffer, $start, $positionClose - $start);
+
+            // parse {parent} blocks
+            $block = str_replace(self::BLOCK_PARENT, $parentBlock, $block);
+
             if ($strategy == self::STRATEGY_APPEND) {
-                // process to append to the parent block
-                $start = $positionOpen + mb_strlen($commentOpen . "\n");
-                $parentBlock = mb_substr($this->buffer, $start, $positionClose - $start);
                 $block = $parentBlock . $block;
             } elseif ($strategy == self::STRATEGY_PREPEND) {
-                // process to prepend to the parent block
-                $start = $positionOpen + mb_strlen($commentOpen . "\n");
-                $parentBlock = mb_substr($this->buffer, $start, $positionClose - $start);
                 $block .= $parentBlock;
             }
 

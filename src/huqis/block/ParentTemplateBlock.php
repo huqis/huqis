@@ -5,17 +5,17 @@ namespace huqis\block;
 use huqis\TemplateCompiler;
 
 /**
- * Return block element, used in a function block
- * @see FunctionTemplateBlock
+ * Parent block element, used to include the parent block
+ * @see BlockTemplateBlock
  */
-class ReturnTemplateBlock implements TemplateBlock {
+class ParentTemplateBlock implements TemplateBlock {
 
     /**
      * Gets whether this block has a signature
      * @return boolean
      */
     public function hasSignature() {
-        return true;
+        return false;
     }
 
     /**
@@ -35,7 +35,7 @@ class ReturnTemplateBlock implements TemplateBlock {
      */
     public function compile(TemplateCompiler $compiler, $signature, $body) {
         $buffer = $compiler->getOutputBuffer();
-        $buffer->appendCode('return ' . $compiler->compileExpression($signature) . ';');
+        $buffer->appendParent();
     }
 
 }

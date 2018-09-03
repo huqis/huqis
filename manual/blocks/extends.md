@@ -20,13 +20,13 @@ You can nest this block, meaning an ```extends``` inside an ```extends```,  but 
 
 ```
 {extends "head.tpl"}
-    {block name="title" prepend}Page | {/block}
+    {block "title" prepend}Page | {/block}
 {/extends}
 
-{block name="body"}{/block}
+{block "body"}{/block}
 
 {extends "footer.tpl"}
-    {block name="body"}
+    {block "body"}
         This is my footer
     {/block}
 {/extends}
@@ -35,5 +35,6 @@ You can nest this block, meaning an ```extends``` inside an ```extends```,  but 
 ## See Also
 
 - [block](block.md)
-- [include](include.md)
 - [function](function.md)
+- [include](include.md)
+- [parent](parent.md)

@@ -147,10 +147,10 @@ unset($foreach1);'
             array('{function myMacro($input, $input2)}loop {$input}{/function}', '$function1 = function(TemplateContext $context) {' . "\n" . '    echo "loop ";' . "\n" . '    echo $context->getVariable(\'input\', false);' . "\n" . '};' . "\n" . '$context->setFunction(\'myMacro\', new \huqis\func\FunctionTemplateFunction("myMacro", $function1, [\'input\', \'input2\'], []));'),
             array('{function sum($input, $input2 = 2)}{return $input + $input2}{/function}', '$function1 = function(TemplateContext $context) {' . "\n" . '    return $context->getVariable(\'input\', false) + $context->getVariable(\'input2\', false);' . "\n" . '};' . "\n" . '$context->setFunction(\'sum\', new \huqis\func\FunctionTemplateFunction("sum", $function1, [\'input\', \'input2\'], [1 => 2]));'),
             // extendable block
-            array('{block "name"}{/block}', '/*block-"name"-start*/' . "\n" . '/*block-"name"-end*/'),
-            array('{block "name"}Hello{/block}', '/*block-"name"-start*/' . "\n" . 'echo "Hello";' . "\n" . '/*block-"name"-end*/'),
-            array('{block "name"}Hello {myFirstMacro()}{/block}', '/*block-"name"-start*/' . "\n" . 'echo "Hello ";' . "\n" . 'echo $context->call(\'myFirstMacro\');' . "\n" . '/*block-"name"-end*/'),
-            array('{block "name"}{myFirstMacro()} there.{/block}', '/*block-"name"-start*/' . "\n" . 'echo $context->call(\'myFirstMacro\');' . "\n" . 'echo " there.";' . "\n" . '/*block-"name"-end*/'),
+            array('{block "name"}{/block}', '/*block-name-start*/' . "\n" . '/*block-name-end*/'),
+            array('{block "name"}Hello{/block}', '/*block-name-start*/' . "\n" . 'echo "Hello";' . "\n" . '/*block-name-end*/'),
+            array('{block "name"}Hello {myFirstMacro()}{/block}', '/*block-name-start*/' . "\n" . 'echo "Hello ";' . "\n" . 'echo $context->call(\'myFirstMacro\');' . "\n" . '/*block-name-end*/'),
+            array('{block "name"}{myFirstMacro()} there.{/block}', '/*block-name-start*/' . "\n" . 'echo $context->call(\'myFirstMacro\');' . "\n" . 'echo " there.";' . "\n" . '/*block-name-end*/'),
             // filter block
             array('{filter capitalize|escape}hello my name is {$name}{/filter}',
 '$filter1 = function(TemplateContext $context) {

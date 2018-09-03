@@ -77,6 +77,7 @@ The following blocks are available out of the box:
 - [include](blocks/include.md)
 - [literal](blocks/literal.md)
 - [macro](blocks/macro.md)
+- [parent](blocks/parent.md)
 - [return](blocks/return.md)
 
 A block can only be defined in the engine by [adding it to the context](extend.md).

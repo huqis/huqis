@@ -85,7 +85,6 @@ class ForeachTemplateBlock implements TemplateBlock {
 
         $parts[$part] = $compiler->parseName($expression);
 
-
         if (!isset($parts[SyntaxSymbol::FOREACH_AS]) && !isset($parts[SyntaxSymbol::FOREACH_KEY]) && !isset($parts[SyntaxSymbol::FOREACH_LOOP]) && !isset($parts[SyntaxSymbol::FOREACH_VALUE])) {
             throw new CompileTemplateException('Could not compile foreach statement: use at least one of value, key or loop');
         } elseif (!isset($parts[SyntaxSymbol::FOREACH_VALUE]) && isset($parts[SyntaxSymbol::FOREACH_AS])) {
@@ -132,7 +131,6 @@ class ForeachTemplateBlock implements TemplateBlock {
         $compiler->setContext($context);
         $compiler->subcompile($body);
         $compiler->setContext($context->getParent());
-
 
         $buffer->appendCode('}');
 

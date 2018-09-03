@@ -274,6 +274,16 @@ class TemplateEngineTest extends TestCase {
                     'index' => '{$variable = "<test>"}{autoescape}{$variable}{/autoescape}',
                 ),
             ),
+            // filter tests
+            array(
+                'Hello My Name Is John',
+                array(
+                    'index' => '{filter capitalize|escape}hello my name is {$name}{/filter}',
+                ),
+                array(
+                    'name' => 'john',
+                ),
+            ),
             // capture tests
             array(
                 '<p>Hello, my name is John and in 5 years, I\'m 35 years old.</p> 30',
@@ -410,12 +420,23 @@ class TemplateEngineTest extends TestCase {
                 ),
             ),
             array(
-                'Hello My Name Is John',
+                '<h1>&lquot;Section&rquot;</h1>',
                 array(
-                    'index' => '{filter capitalize|escape}hello my name is {$name}{/filter}',
+                    'index' => '{extends "base"}{block "block1"}&lquot;{parent}&rquot;{/block}{/extends}',
+                    'base' => '<h1>{block "block1"}{$title}{/block}</h1>',
                 ),
                 array(
-                    'name' => 'john',
+                    'title' => 'Section',
+                ),
+            ),
+            array(
+                '&lquot;Section&rquot; Section !== 2Section 2Section !== Section',
+                array(
+                    'index' => '{extends "base"}{block "block1"}&lquot;{parent}&rquot;{/block}{block "block2" append} !== 2{parent}{/block}{block "block3" prepend}2{parent} !== {/block}{/extends}',
+                    'base' => '{block "block1"}{$title}{/block} {block "block2"}{$title}{/block} {block "block3"}{$title}{/block}',
+                ),
+                array(
+                    'title' => 'Section',
                 ),
             ),
 
