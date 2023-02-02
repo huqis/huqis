@@ -377,7 +377,7 @@ class TemplateEngine {
      * @return string
      */
     private function generateRuntimeId($resource) {
-        return StringHelper::generate() . crc32(microtime() . $resource . $this->compileId);
+        return StringHelper::generate() . sprintf('%u', crc32(microtime() . $resource . $this->compileId));
     }
 
 }
