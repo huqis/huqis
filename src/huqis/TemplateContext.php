@@ -10,6 +10,8 @@ use huqis\operator\expression\ExpressionOperator;
 use huqis\operator\logical\LogicalOperator;
 use huqis\resource\TemplateResourceHandler;
 
+use \Exception;
+
 /**
  * Context for the compile and runtime of a template. The context is the scope
  * of a running block and keeps all available variables, functions, blocks ...
@@ -107,8 +109,8 @@ class TemplateContext {
      * resource handler is provided, nor directly, nor through the parent
      */
     public function __construct(
-        TemplateResourceHandler $resourceHandler = null, 
-        ReflectionHelper $reflectionHelper = null, 
+        TemplateResourceHandler $resourceHandler = null,
+        ReflectionHelper $reflectionHelper = null,
         TemplateContext $parent = null
     ) {
         $this->logicalOperators = [];
@@ -172,7 +174,7 @@ class TemplateContext {
     }
 
     /**
-     * Sets whether native PHP functions are included in the function list. 
+     * Sets whether native PHP functions are included in the function list.
      * This creates a fallback for functions which don't exist in the context.
      * @param boolean $allowPhpFunctions True to include the PHP functions,
      * false otherwise
@@ -388,11 +390,14 @@ class TemplateContext {
         $variable = [];
 
         $token = null;
+
+        $var = &$variable;
         foreach ($tokens as $token) {
-            $variable[$token] = [];
+            $var[$token] = [];
+            $var = &$var[$token];
         }
 
-        $variable[$token] = $value;
+        $var = $value;
 
         return $variable;
     }
@@ -404,14 +409,14 @@ class TemplateContext {
      * transparantly using the property name instead of the method.
      * eg person.name could translate to $person->getName(), $person->name or
      * $person['name'] depending on the value of $person
+     * @param mixed $default Default value for when the variable is not set
      * @param boolean $process Set to false to work without tokenizing the
      * variable name
-     * @param mixed $default Default value for when the variable is not set
-     * @return mixed Value of the variable or the provided default value when 
+     * @return mixed Value of the variable or the provided default value when
      * the variable is not set.
      */
-    public function getVariable($name, $process = false, $default = null) {
-        if (strpos($name, '.') === false) {
+    public function getVariable($name, $default = null, $process = true) {
+        if ($process === false || strpos($name, '.') === false) {
             // no dotted name
             if (!isset($this->variables[$name])) {
                 return $default;
@@ -664,10 +669,16 @@ class TemplateContext {
                 return call_user_func_array($name, $arguments);
             }
 
-            throw new RuntimeTemplateException('Could not call function ' . $name . ': function is not registered');
+            throw new RuntimeTemplateException('Could not call function "' . $name . '": function is not registered');
         }
 
-        return $this->getFunction($name)->call($this, $arguments);
+        try {
+            $result = $this->getFunction($name)->call($this, $arguments);
+        } catch (Exception $exception) {
+            throw new RuntimeTemplateException('Could not call function "' . $name . '": ' . $exception->getMessage(), 0, $exception);
+        }
+
+        return $result;
     }
 
     //

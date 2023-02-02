@@ -233,8 +233,12 @@ class NestedSymbol extends AbstractSymbol {
 
         // look if close symbol is escaped
         if ($this->symbolEscape && $closePosition > $this->symbolEscapeLength && mb_substr($string, $closePosition - $this->symbolEscapeLength, $this->symbolEscapeLength) == $this->symbolEscape) {
-            // escaped, continue
-            return $this->getClosePosition($string, $closePosition);
+            // look is escape symbol is escaped
+            $doubleSymbolEscapeLength = $this->symbolEscapeLength * 2;
+            if (!($closePosition > $doubleSymbolEscapeLength && mb_substr($string, $closePosition - ($doubleSymbolEscapeLength), $doubleSymbolEscapeLength) == $this->symbolEscape . $this->symbolEscape)) {
+                // close escaped, continue
+                return $this->getClosePosition($string, $closePosition);
+            }
         }
 
         // look for another open between initial open and close

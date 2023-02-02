@@ -3,6 +3,7 @@
 namespace huqis;
 
 use huqis\exception\CompileTemplateException;
+use huqis\exception\NotFoundTemplateException;
 use huqis\tokenizer\symbol\StringSymbol;
 use huqis\tokenizer\symbol\String2Symbol;
 use huqis\tokenizer\symbol\SyntaxSymbol;
@@ -249,7 +250,7 @@ class TemplateCompiler {
                     $nextTokenIndex = $tokenIndex + 1;
                     if ($nextTokenIndex != $numTokens) {
                         $firstChar = mb_substr($tokens[$nextTokenIndex], 0, 1);
-                        if ($firstChar !== ' ' && $firstChar !== "\n" && $firstChar !== SyntaxSymbol::SYNTAX_CLOSE) {
+                        if ($firstChar !== ' ' && $firstChar !== "\r" && $firstChar !== "\n" && $firstChar !== SyntaxSymbol::SYNTAX_CLOSE) {
                             // valid syntax opening
                             $isSyntax = true;
                             $tokenIndex++;
@@ -323,7 +324,11 @@ class TemplateCompiler {
                     $this->resource = $resource;
                     $this->lineNumber = $lineNumber;
                 } catch (Exception $exception) {
-                    $exception = new CompileTemplateException('Could not compile ' . $resource . ' on line ' . $lineNumber, 0, $exception);
+                    if ($exception instanceof NotFoundTemplateException) {
+                        $exception = new CompileTemplateException('Template "' . $exception->getResource() . '" not found.', 0, $exception);
+                    } else {
+                        $exception = new CompileTemplateException('Could not compile "' . $resource . '" on line ' . $lineNumber, 0, $exception);
+                    }
                     $exception->setResource($resource);
                     $exception->setLineNumber($lineNumber);
 
@@ -332,7 +337,7 @@ class TemplateCompiler {
 
                 $hasSyntax = true;
 
-                if ($code !== '') {
+                if ($code !== '' && $code !== null) {
                     if (mb_substr($code, 0, 4) === 'echo') {
                         $line .= $code;
                     }
@@ -1261,7 +1266,7 @@ class TemplateCompiler {
         $suffix = '';
 
         if (strpos($name, SyntaxSymbol::VARIABLE_SEPARATOR) === false) {
-            $suffix = ', false';
+            $suffix = ', null, false';
         }
 
         return '$context->getVariable(\'' . $name . '\'' . $suffix . ')';

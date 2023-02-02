@@ -156,7 +156,7 @@ class TemplateEngine {
         } catch (Exception $exception) {
             $this->extractResourceFromException($exception, $code, $resource, $lineNumber);
 
-            $exception = new RuntimeTemplateException('Could not render ' . $resource . ' on line ' . $lineNumber . ': ' . $exception->getMessage());
+            $exception = new RuntimeTemplateException('Could not render "' . $resource . '" on line ' . $lineNumber, 0, $exception);
             $exception->setResource($resource);
 
             throw $exception;
@@ -282,7 +282,9 @@ class TemplateEngine {
                 $previous = $previous->getPrevious();
             } while ($previous instanceof CompileTemplateException);
 
-            $exception = new CompileTemplateException('Could not compile ' . $resource . ' on line ' . $lineNumber . ': ' . $message);
+            $exceptionMessage = 'Could not compile "' . $resource . '" on line ' . $lineNumber;
+
+            $exception = new CompileTemplateException($exceptionMessage . ($message && $exceptionMessage !== $message ? ': ' . lcfirst($message) : ''));
             $exception->setResource($resource);
             $exception->setLineNumber($lineNumber);
 
