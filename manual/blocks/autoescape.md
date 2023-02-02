@@ -7,7 +7,7 @@ An ```autoescape``` block can enable (or disable) output filtering on a specific
 ```
 {autoescape[ $format]}
     
-{/capture}
+{/autoescape}
 ```
 
 ## Example
