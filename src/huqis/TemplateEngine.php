@@ -182,7 +182,7 @@ class TemplateEngine {
         $line = $trace['line'] - 1;
 
         do {
-            if ($lines[$line]) {
+            if (isset($lines[$line])) {
                 $resourcePosition = mb_strpos($lines[$line], '/*#');
             } else {
                 $resourcePosition = false;
