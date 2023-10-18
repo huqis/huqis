@@ -250,7 +250,15 @@ class TemplateCompiler {
                     $nextTokenIndex = $tokenIndex + 1;
                     if ($nextTokenIndex != $numTokens) {
                         $firstChar = mb_substr($tokens[$nextTokenIndex], 0, 1);
-                        if ($firstChar !== ' ' && $firstChar !== "\r" && $firstChar !== "\n" && $firstChar !== SyntaxSymbol::SYNTAX_CLOSE) {
+                        if ($firstChar === ' ') {
+                            // first char is a space so not an open syntax
+                            // tokenize inner syntax as it's not tokenized
+                            $subtokens = $this->syntaxTokenizer->tokenize($tokens[$nextTokenIndex]);
+                            if (count($subtokens) > 1) {
+                                array_splice($tokens, $nextTokenIndex, 1, $subtokens);
+                                $numTokens = count($tokens);
+                            }
+                        } elseif ($firstChar !== "\r" && $firstChar !== "\n" && $firstChar !== SyntaxSymbol::SYNTAX_CLOSE) {
                             // valid syntax opening
                             $isSyntax = true;
                             $tokenIndex++;
