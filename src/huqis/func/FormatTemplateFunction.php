@@ -52,10 +52,10 @@ class FormatTemplateFunction implements TemplateFunction {
         switch ($format) {
             case 'date':
                 if ($extra === null) {
-                    $extra = '%c';
+                    $extra = 'c';
                 }
 
-                $result = strftime($extra, $value);
+                $result = date($extra, $value);
 
                 break;
             case 'number':

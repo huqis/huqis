@@ -16,7 +16,7 @@ Formats the provided string or number.
 
 ### Formats
 
-- __date__: Formats a date into the current locale, equivalent of PHP's [strftime](http://php.net/manual/en/function.strftime.php).
+- __date__: Formats a date into the current locale, equivalent of PHP's [date](http://php.net/manual/en/function.date.php).
 The ```extra``` argument is the date format.
 - __number__: Formats a number, equivalent of PHP's [number_format](http://php.net/manual/en/function.number_format.php).
 The ```extra``` argument is the number of decimals.
@@ -32,7 +32,7 @@ No ```extra``` argument allowed for this format.
 
 {$timestamp = 1477376776}
 {$timestamp|format("date")}
-{$timestamp|format("date", "%F")}
+{$timestamp|format("date", "H:i")}
 ```
 
 will output:
@@ -41,6 +41,6 @@ will output:
 15.99
 15.98765
 
-Tue Oct 25 00:45:10 2016
-2016-10-25
+Tue, 25 Oct 2016 00:45:10 +0000
+00:45
 ```
