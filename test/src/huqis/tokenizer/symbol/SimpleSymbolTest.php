@@ -17,7 +17,7 @@ class SimpleSymbolTest extends TestCase {
 		$this->assertEquals($expected, $result);
 	}
 
-	public function provideTokenize() {
+	public static function provideTokenize() {
 	    return array(
 	       array(array('test', 'AND'), 'testAND', 'testANDtest', true),
 	       array(null, 'test', 'testANDtest', true),

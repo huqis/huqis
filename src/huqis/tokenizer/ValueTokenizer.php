@@ -15,11 +15,10 @@ class ValueTokenizer extends Tokenizer {
 
     /**
      * Constructs a new value tokenizer
-     * @return null
      */
     public function __construct() {
-        $this->addSymbol(new StringSymbol());
-        $this->addSymbol(new String2Symbol());
+        $this->addSymbol(new StringSymbol(true));
+        $this->addSymbol(new String2Symbol(true));
         $this->addSymbol(new SimpleSymbol(SyntaxSymbol::FILTER));
         $this->addSymbol(new NestedSymbol(SyntaxSymbol::NESTED_OPEN, SyntaxSymbol::NESTED_CLOSE, $this, true));
 

@@ -8,7 +8,7 @@ class ValueTokenizerTest extends TestCase {
 
 	private $tokenizer;
 
-	protected function setUp() {
+	protected function setUp(): void {
 		$this->tokenizer = new ValueTokenizer();
 	}
 
@@ -21,22 +21,24 @@ class ValueTokenizerTest extends TestCase {
         $this->assertEquals(array_values($result), $expected);
 	}
 
-    public function providerTokenize() {
+    public static function providerTokenize() {
         return array(
             array(
                 '"test"',
                 array(
-                    '"',
-                    'test',
-                    '"'
+                    '"test"'
+                ),
+            ),
+            array(
+                '" "',
+                array(
+                    '" "'
                 ),
             ),
             array(
                 '"te\\"st"',
                 array(
-                    '"',
-                    'te\\"st',
-                    '"'
+                    '"te\\"st"'
                 ),
             ),
             array(

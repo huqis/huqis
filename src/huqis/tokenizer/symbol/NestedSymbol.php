@@ -96,7 +96,7 @@ class NestedSymbol extends AbstractSymbol {
      * Sets the open symbol
      * @param string $symbol
      * @return null
-     * @throws \ride\library\tokenizer\exception\TokenizerException when the provided symbol is empty or not a
+     * @throws huqis\exception\TokenizerException when the provided symbol is empty or not a
      * string
      */
     private function setOpenSymbol($symbol) {
@@ -113,7 +113,7 @@ class NestedSymbol extends AbstractSymbol {
      * Sets the close symbol
      * @param string $symbol
      * @return null
-     * @throws \ride\library\tokenizer\exception\TokenizerException when the provided symbol is empty or not a
+     * @throws huqis\exception\TokenizerException when the provided symbol is empty or not a
      * string
      */
     private function setCloseSymbol($symbol) {

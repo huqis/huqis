@@ -21,7 +21,7 @@ class NestedSymbolTest extends TestCase {
 		$this->assertEquals($expectedProcess, $process);
 	}
 
-	public function provideTokenize() {
+	public static function provideTokenize() {
 	    return array(
 	       array(null, 'test', 'test', 'test and test'),
 	       array(array('yes ', 'test and test'), 'yes (test and test)', 'yes (', 'yes (test and test)'),

@@ -15,7 +15,6 @@ class VariableTokenizer extends Tokenizer {
 
     /**
      * Constructs a new variable tokenizer
-     * @return null
      */
     public function __construct() {
         $this->addSymbol(new SimpleSymbol(SyntaxSymbol::FILTER));
